@@ -6,6 +6,8 @@
 
 **WORK IN PROGRESS, DO NOT USE**
 
+![logo](./assets/logo.svg)
+
 `/ˈin(t)ərˌnet jo͞os/`
 
 noun: **internet juice**
