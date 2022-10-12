@@ -11,4 +11,9 @@ defmodule SEO.Utils do
     end
     |> String.trim()
   end
+
+  def merge_defaults(assigns) do
+    item = struct(assigns[:item], Map.from_struct(assigns[:default]))
+    Phoenix.Component.assign(assigns, :item, item)
+  end
 end

@@ -42,11 +42,24 @@ defmodule SEO.Site do
 
   ## Crawler instructions
 
+  https://www.bing.com/webmasters/help/which-robots-metatags-does-bing-support-5198d240
+
+  https://developers.google.com/search/docs/crawling-indexing/robots-meta-tag
+
+  https://developers.google.com/search/docs/crawling-indexing/special-tags
+
   - robots
-    - https://www.bing.com/webmasters/help/which-robots-metatags-does-bing-support-5198d240
-    - https://developers.google.com/search/docs/crawling-indexing/special-tags
     - `noindex` do not index the page
+    - `noimageindex` do not index images on this page. If you don't specify this value, images on the page may be
+    indexed and shown in search results.
+    - `unavailable_after: [date/time]` do not show this page in search results after the specified date/time. The
+    date/time must be specified in a widely adopted format including ISO 8601.
     - `nofollow` do not follow outlines from the page.
+    - `none` Equivalent to `noindex, nofollow`
+    - `all` There are no restrictions for indexing or serving. This directive is the default value and has no effect if explicitly listed.
+    - `indexifembedded` Google is allowed to index the content of a page if it's embedded in another page through
+    iframes or similar HTML tags, in spite of a noindex directive.
+    - `notranslate` don't offer translation of this page in search results
     - `noarchive` or `nocache` do not store a cached page
     - `noodp` do not use a description from Open Directory Project [http://dmoz.org]
     - `nosnippet` do not show a description nor a preview thumbnail for the page
@@ -77,9 +90,7 @@ defmodule SEO.Site do
     :googlebot,
     :google_site_verification,
     :robots,
-    alternate_languages: [],
-    suffix_with_default_title: false,
-    prefix_with_default_title: false
+    alternate_languages: []
   ]
 
   @type t :: %__MODULE__{
@@ -87,8 +98,6 @@ defmodule SEO.Site do
           title: String.t() | nil,
           title_prefix: String.t() | nil,
           title_suffix: String.t() | nil,
-          suffix_with_default_title: boolean(),
-          prefix_with_default_title: boolean(),
           canonical_url: URI.t() | String.t() | nil,
           rating: String.t() | nil,
           robots: String.t() | list(String.t()) | nil,
@@ -98,63 +107,35 @@ defmodule SEO.Site do
           description: String.t() | nil
         }
 
-  @config Application.compile_env(:seo, SEO.Site, [])
-  def config, do: @config
+  def build(attrs, default \\ %__MODULE__{})
 
-  def build(map) when is_map(map) do
-    struct(%__MODULE__{}, Map.merge(Enum.into(@config, %{}), map))
+  def build(attrs, default) when is_map(attrs) do
+    %__MODULE__{}
+    |> Map.merge(default)
+    |> Map.merge(attrs)
   end
 
-  def build(keyword) when is_list(keyword) do
-    struct(%__MODULE__{}, Keyword.merge(@config, keyword))
+  def build(attrs, default) when is_list(attrs) do
+    build(Enum.into(attrs, %{}), default)
   end
 
-  attr(:site, :any, required: true)
-  attr(:canonical_url, :string)
+  attr(:item, :any, required: true)
+  attr(:page_title, :string, default: nil)
 
-  def head(assigns) do
-    assigns = assigns |> maybe_clear_prefix(assigns[:site]) |> maybe_clear_suffix(assigns[:site])
-
+  def meta(assigns) do
     ~H"""
-    <.live_title prefix={@site.title_prefix} suffix={@site.title_suffix}>
-      <%= assigns[:page_title] || @site.title || @site.default_title %>
-    </.live_title>
-    <%= if @site.canonical_url do %>
-    <link rel="canonical" href={@site.canonical_url} />
+    <.live_title prefix={@item.title_prefix} suffix={@item.title_suffix}><%= @page_title || @item.title || @item.default_title %></.live_title>
+    <link :if={@item.canonical_url} rel="canonical" href={@item.canonical_url} />
+    <link :for={{lang, url} <- @item.alternate_languages} rel="alternate" hreflag={lang} href={"#{url}"} />
+    <meta :if={@item.description} name="description" content={@item.description} />
+    <meta :if={@item.rating} name="rating" content={@item.rating} />
+    <%= if @item.robots && !Enum.empty?(List.wrap(@item.robots)) do %>
+    <meta name="robots" content={Enum.join(List.wrap(@item.robots), ", ")} />
+    <% end %><%= if @item.google && !Enum.empty?(List.wrap(@item.google)) do %>
+    <meta name="google" content={Enum.join(List.wrap(@item.google), ", ")} />
     <% end %>
-    <%= for {lang, url} <- @site.alternate_languages do %>
-    <link rel="alternate" hreflag={lang} href={url} />
-    <% end %>
-    <%= if @site.description do %>
-    <meta name="description" content={@site.description} />
-    <% end %>
-    <%= if @site.rating do %>
-    <meta name="rating" content={@site.rating} />
-    <% end %>
-    <%= if @site.robots && !Enum.empty?(List.wrap(@site.robots))do %>
-    <meta name="robots" content={Enum.join(List.wrap(@site.robots), ", ")} />
-    <% end %>
-    <%= if @site.google && !Enum.empty?(List.wrap(@site.google))do %>
-    <meta name="google" content={Enum.join(List.wrap(@site.google), ", ")} />
-    <% end %>
-    <%= if @site.googlebot do %>
-    <meta name="googlebot" content={@site.googlebot} />
-    <% end %>
-    <%= if @site.google_site_verification do %>
-    <meta name="google-site-verification" content={@site.google_site_verification} />
-    <% end %>
+    <meta :if={@item.googlebot} name="googlebot" content={@item.googlebot} />
+    <meta :if={@item.google_site_verification} name="google-site-verification" content={@item.google_site_verification} />
     """
   end
-
-  def maybe_clear_suffix(assigns, %{title: nil, suffix_with_default_title: false} = site) do
-    assign(assigns, :site, %{site | title_suffix: nil})
-  end
-
-  def maybe_clear_suffix(assigns, _site), do: assigns
-
-  def maybe_clear_prefix(assigns, %{title: nil, prefix_with_default_title: false} = site) do
-    assign(assigns, :site, %{site | title_prefix: nil})
-  end
-
-  def maybe_clear_prefix(assigns, _site), do: assigns
 end

@@ -1,5 +1,9 @@
 <!-- badges -->
 
+[![Hex.pm Version](http://img.shields.io/hexpm/v/seo.svg)](https://hex.pm/packages/seo)
+[![Hex docs](http://img.shields.io/badge/hex.pm-docs-blue.svg?style=flat)](https://hexdocs.pm/seo)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE.md)
+
 <!-- MDOC !-->
 
 # SEO
@@ -33,35 +37,52 @@ end
 
 ```elixir
 defmodule MyAppWeb.SEO do
-  use SEO,
-    json_library: Jason,
-    default_title: "My App",
-    site_name: "My App",
-    title_suffix: " · My App",
-    twitter: %{
+  use SEO, [
+    {SEO.Site, %SEO.Site{
+      default_title: "Default Title",
+      description: "A blog about development",
+      title_suffix: " · My App"
+    }},
+    {SEO.OpenGraph, %SEO.OpenGraph{
+      description: "A blog about development",
+      site_name: "David Bernheisel's Blog",
+      type: "website",
+      locale: "en_US"
+    }},
+    {SEO.Twitter, %SEO.Twitter{
       site: "@bernheisel",
-      creator: "@bernheisel"
-    }
+      site_id: "27704724",
+      creator: "@bernheisel",
+      creator_id: "27704724",
+      card: :summary
+    }},
+    json_library: Jason
+  ]
 end
 ```
 
-2. Implement some functions to build SEO information about your entities
+2. Implement functions to build SEO information about your entities
 
 ```elixir
-defmodule MyAppWeb.SEO do
-  # ...
+defmodule MyApp.Article do
+  # This might be an Ecto schema, or just a plain struct
+  defstruct [:id, :title, :short_description, :reading_time, :category, :author,
+  :published_at, tags: []]
+end
 
+defimpl MyApp.Article, for: SEO.Build do
+  use SEO.Builder
   alias MyAppWeb.Router.Helpers, as: Routes
   @endpoint MyAppWeb.Endpoint
 
-  def site(%MyApp.Article{} = article) do
+  def site(article) do
     MyAppWeb.SEO.Site.build(
       title: article.title,
       description: article.short_description
     )
   end
 
-  def unfurl(%MyApp.Article{} = article) do
+  def unfurl(article) do
     SEO.Unfurl.build(
       label1: "Reading Time",
       data1: "#{article.reading_time} min",
@@ -70,7 +91,7 @@ defmodule MyAppWeb.SEO do
     )
   end
 
-  def twitter(%MyApp.Article{} = article) do
+  def twitter(article) do
     if creator = article.author.twitter_handle do
       SEO.Twitter.build([])
     else
@@ -78,7 +99,7 @@ defmodule MyAppWeb.SEO do
     end
   end
 
-  def open_graph(%MyApp.Article{} = article) do
+  def open_graph(article) do
     SEO.OpenGraph.build(
       title: article.title,
       type_detail: SEO.OpenGraph.Article.build(
@@ -95,7 +116,7 @@ defmodule MyAppWeb.SEO do
     )
   end
 
-  def breadcrumb_list(%MyApp.Article{} = article) do
+  def breadcrumb_list(article) do
     SEO.Breadcrumb.List.build([
       SEO.Breadcrumb.Item.build(
         name: "Posts",
@@ -108,7 +129,7 @@ defmodule MyAppWeb.SEO do
     ])
   end
 
-  defp put_image(%MyApp.Article{} = article) do
+  defp put_image(article) do
     file = "/images/blog/#{article.id}.png"
 
     exists? =
@@ -125,21 +146,10 @@ defmodule MyAppWeb.SEO do
 end
 ```
 
-3. Use your SEO module in your root layout
-
-```heex
-<head>
-  <%# remove the Phoenix-generated <.live_title> function %>
-  <%# and replace with MyApp.SEO.juice %>
-  <MyAppWeb.SEO.juice item={MyAppWeb.SEO.Build.build(assigns[:seo])} />
-</head>
-```
-
-4. Assign `seo: my_entity` to your conns and/or sockets
+3. Assign `seo: my_entity` to your conns and/or sockets
 
 ```elixir
-
-# In a Phoenix Controller
+# In a plain Phoenix Controller
 def show(conn, params) do
   conn
   |> assign(:seo, load_article(params))
@@ -148,7 +158,7 @@ end
 
 def index(conn, params) do
   conn
-  |> assign(:seo, MyAppWeb.SEO.Generic.build(title: "Listing Best Hugs"))
+  |> assign(:seo, %{title: "Listing Best Hugs"})
   |> render("show.html")
 end
 
@@ -159,4 +169,12 @@ def mount(params, _session, socket) do
 end
 ```
 
-5.
+4. Use your SEO module in your root layout
+
+```heex
+<head>
+  <%# remove the Phoenix-generated <.live_title> component %>
+  <%# and replace with MyAppWeb.SEO.juice component %>
+  <MyAppWeb.SEO.juice item={assigns[:seo] || []} page_title={assigns[:page_title]} />
+</head>
+```

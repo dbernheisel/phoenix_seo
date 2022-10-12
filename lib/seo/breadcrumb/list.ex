@@ -25,24 +25,25 @@ defmodule SEO.Breadcrumb.List do
           itemListElement: list(ListItem.t())
         }
 
-  def serialize(%__MODULE__{} = item) do
+  def to_map(%__MODULE__{} = item) do
     %{
       item
       | itemListElement:
           Enum.map(item.itemListElement, fn list_item ->
-            %{ListItem.serialize(list_item) | item: Item.serialize(list_item.item)}
+            %{ListItem.to_map(list_item) | item: Item.to_map(list_item.item)}
           end)
     }
     |> Map.from_struct()
-    |> SEO.json_library().encode!()
   end
 
-  def build(attrs) when is_list(attrs) do
+  def build(attrs, _default \\ nil) when is_list(attrs) do
     %__MODULE__{itemListElement: format_items(attrs)}
   end
 
   defp format_items(items) do
-    Enum.with_index(items, fn item, i ->
+    items
+    |> Enum.with_index()
+    |> Enum.map(fn {item, i} ->
       i = i + 1
 
       case item do

@@ -15,11 +15,11 @@ defmodule SEO.Breadcrumb.ListItem do
           item: SEO.Breadcrumb.Item.t()
         }
 
-  def serialize(%__MODULE__{} = list_item) do
-    list_item |> Map.from_struct() |> SEO.json_library().encode!()
+  def to_map(%__MODULE__{} = list_item) do
+    list_item |> Map.from_struct()
   end
 
-  def build(attrs) when is_map(attrs) or is_list(attrs) do
+  def build(attrs, _default \\ nil) when is_map(attrs) or is_list(attrs) do
     struct(%__MODULE__{}, attrs)
   end
 end

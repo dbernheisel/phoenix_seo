@@ -11,11 +11,11 @@ defmodule SEO.Breadcrumb.Item do
           "@id": String.t()
         }
 
-  def serialize(%__MODULE__{} = item) do
-    item |> Map.from_struct() |> SEO.json_library().encode!()
+  def to_map(%__MODULE__{} = item) do
+    item |> Map.from_struct()
   end
 
-  def build(attrs) when is_map(attrs) or is_list(attrs) do
+  def build(attrs, _default \\ nil) when is_map(attrs) or is_list(attrs) do
     struct(%__MODULE__{}, attrs)
   end
 end

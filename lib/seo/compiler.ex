@@ -2,17 +2,18 @@ defmodule SEO.Compiler do
   @moduledoc false
 
   defmacro __before_compile__(env) do
-    config =
-      Module.get_attribute(env.module, :seo_options)
-      |> Keyword.put(:backend, env.module)
-
-    Module.put_attribute(env.module, :config, config)
-
     poison = if Code.ensure_loaded?(Poison), do: Poison
     jason = if Code.ensure_loaded?(Jason), do: Jason
     phoenix_json = Application.get_env(:phoenix, :json_library)
     seo_json = Application.get_env(:seo, :json_library)
     json_library = seo_json || phoenix_json || jason || poison
+
+    config =
+      Module.get_attribute(env.module, :seo_options, [])
+      |> Enum.into(%{})
+      |> Map.put_new(:json_library, json_library)
+
+    Module.put_attribute(env.module, :config, config)
 
     cond do
       Code.ensure_loaded?(json_library) and function_exported?(json_library, :encode!, 1) ->
@@ -54,12 +55,11 @@ defmodule SEO.Compiler do
     quote location: :keep do
       @doc false
       def config, do: @config
-      @doc false
-      def json_library, do: @json_library
-      @doc false
-      def serialize(thing), do: @json_library.encode!(thing)
 
-      SEO.define_components(@config)
+      @doc false
+      def config(mod), do: config()[mod] || struct(mod, [])
+
+      SEO.define_juice()
     end
   end
 end

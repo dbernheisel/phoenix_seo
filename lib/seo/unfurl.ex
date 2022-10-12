@@ -23,23 +23,28 @@ defmodule SEO.Unfurl do
           data2: nil | String.t()
         }
 
-  def build(attrs) when is_map(attrs) or is_list(attrs) do
-    struct(%__MODULE__{}, attrs)
+  def build(attrs, default \\ nil)
+
+  def build(attrs, default) when is_list(attrs) do
+    struct(%__MODULE__{}, Keyword.merge(default || [], attrs))
+  end
+
+  def build(attrs, default) when is_map(attrs) do
+    struct(%__MODULE__{}, Map.merge(default || %{}, attrs))
   end
 
   use Phoenix.Component
 
-  attr(:unfurl, :any, required: true)
+  attr(:item, :any, required: true)
 
   def meta(assigns) do
     ~H"""
-    <%= if @unfurl.data1 && @unfurl.label1 do %>
-    <meta name="twitter:label1" content={@unfurl.label1} />
-    <meta name="twitter:data1" content={@unfurl.data1} />
-    <% end %>
-    <%= if @unfurl.data2 && @unfurl.label2 do %>
-    <meta name="twitter:label2" content={@unfurl.label2} />
-    <meta name="twitter:data2" content={@unfurl.data2} />
+    <%= if @item.data1 && @item.label1 do %>
+    <meta name="twitter:label1" content={@item.label1} />
+    <meta name="twitter:data1" content={@item.data1} />
+    <% end %><%= if @item.data2 && @item.label2 do %>
+    <meta name="twitter:label2" content={@item.label2} />
+    <meta name="twitter:data2" content={@item.data2} />
     <% end %>
     """
   end

@@ -21,12 +21,12 @@ defmodule SEO.Facebook do
 
   use Phoenix.Component
 
-  attr(:facebook, :any, required: true)
+  attr(:item, :any, required: true)
 
   def meta(assigns) do
     ~H"""
-    <%= if @facebook.app_id do %>
-    <meta name="fb:app_id" content={@facebook.app_id} />
+    <%= if @item.app_id do %>
+    <meta name="fb:app_id" content={@item.app_id} />
     <% end %>
     """
   end

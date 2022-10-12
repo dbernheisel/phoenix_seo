@@ -7,6 +7,7 @@ defmodule SEO.MixProject do
       version: "0.1.0",
       elixir: "~> 1.13",
       start_permanent: Mix.env() == :prod,
+      elixirc_paths: elixirc_paths(Mix.env()),
       deps: deps()
     ]
   end
@@ -17,6 +18,9 @@ defmodule SEO.MixProject do
       extra_applications: [:logger]
     ]
   end
+
+  def elixirc_paths(:test), do: ["lib", "test/support"]
+  def elixirc_paths(_), do: ["lib"]
 
   # Run "mix help deps" to learn about dependencies.
   defp deps do

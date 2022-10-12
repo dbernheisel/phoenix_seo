@@ -4,7 +4,8 @@ defmodule SEO.OpenGraph do
 
   ## Basic Metadata
 
-  To turn your web pages into graph objects, you need to add basic metadata to your page. We've based the initial version of the protocol on RDFa which means that you'll place additional <meta> tags in the <head> of your web page. The four required properties for every page are:
+  To turn your web pages into graph objects, you need to add basic metadata to your page. We've based the initial
+  version of the protocol on RDFa which means that you'll place additional `<meta>` tags in the `<head>` of your web page. The four required properties for every page are:
 
   - `og:title` - The title of your object as it should appear within the graph, e.g., "The Rock".
   - `og:type` - The type of your object, e.g., "article". Depending on the type you specify, other properties may also be required.
@@ -97,19 +98,18 @@ defmodule SEO.OpenGraph do
 
   @type open_graph_type :: :article | :book | :profile | :website
 
-  @config Application.compile_env(:seo, SEO.OpenGraph, [])
-  def config, do: @config
+  def build(attrs, default \\ nil)
 
-  def build(map) when is_map(map) do
+  def build(attrs, default) when is_map(attrs) do
     %SEO.OpenGraph{}
-    |> struct(Map.merge(Enum.into(@config, %{}), map))
-    |> SEO.OpenGraph.build_type_detail(map)
+    |> struct(Map.merge(default || %{}, attrs))
+    |> SEO.OpenGraph.build_type_detail(attrs)
   end
 
-  def build(keyword) when is_list(keyword) do
+  def build(attrs, default) when is_list(attrs) do
     %SEO.OpenGraph{}
-    |> struct(Keyword.merge(@config, keyword))
-    |> SEO.OpenGraph.build_type_detail(keyword)
+    |> struct(Keyword.merge(default || [], attrs))
+    |> SEO.OpenGraph.build_type_detail(attrs)
   end
 
   @doc false
@@ -133,52 +133,31 @@ defmodule SEO.OpenGraph do
 
   use Phoenix.Component
 
-  attr(:og, :any, required: true)
+  attr(:item, __MODULE__, required: true)
 
   def meta(assigns) do
     ~H"""
-    <%= if @og.site_name do %>
-    <meta property="og:site_name" content={@og.site_name} />
-    <% end %>
-    <meta property="og:title" content={@og.title} />
-    <meta property="og:type" content={@og.type} />
-    <.url property="og:url" content={@og.url} />
-    <meta property="og:description" content={@og.description} />
-    <%= if @og.locale do %>
-    <meta property="og:locale" content={@og.locale} />
-    <% end %>
-    <%= for locale <- List.wrap(@og.locale_alternate) do %>
-    <meta property="og:locale:alternate" content={locale} />
-    <% end %>
-    <%= if @og.type == :book do %>
-    <.book content={@og.type_detail} />
-    <% end %>
-    <%= if @og.type == :article do %>
-    <.article content={@og.type_detail} />
-    <% end %>
-    <%= if @og.type == :profile do %>
-    <.profile content={@og.type_detail} />
-    <% end %>
-    <%= for image <- List.wrap(@og.image) do %>
-    <.image content={image} />
-    <% end %>
-    <%= for audio <- List.wrap(@og.audio) do %>
-    <.audio content={audio} />
-    <% end %>
-    <%= for video <- List.wrap(@og.video) do %>
-    <.video content={video} />
-    <% end %>
+    <meta property="og:title" content={@item.title} :if={@item.title} />
+    <meta property="og:description" content={@item.description} :if={@item.description} />
+    <meta property="og:type" content={@item.type} />
+    <.url property="og:url" content={@item.url} :if={@item.url} />
+    <meta property="og:site_name" content={@item.site_name} :if={@item.site_name} />
+    <meta property="og:locale" content={@item.locale} :if={@item.locale} />
+    <meta :for={locale <- List.wrap(@item.locale_alternate)} :if={List.wrap(@item.locale_alternate) != []} property="og:locale:alternate" content={locale} />
+    <.book :if={@item.type == :book} content={@item.type_detail} />
+    <.article :if={@item.type == :article} content={@item.type_detail} />
+    <.profile :if={@item.type == :profile} content={@item.type_detail} />
+    <.image :for={image <- List.wrap(@item.image)} content={image} />
+    <.audio :for={audio <- List.wrap(@item.audio)} content={audio} />
+    <.video :for={video <- List.wrap(@item.video)} content={video} />
     """
   end
 
   attr(:property, :string, required: true)
-  attr(:content, :any, required: true)
+  attr(:content, :any, required: true, doc: "Either a string representing a URI, or a URI")
 
   def url(assigns) do
     case assigns[:content] do
-      nil ->
-        ~H""
-
       %URI{} ->
         ~H"""
         <meta property={@property} content={"#{@content}"} />
@@ -191,90 +170,54 @@ defmodule SEO.OpenGraph do
     end
   end
 
-  attr(:content, :any, required: true)
+  attr(:content, SEO.OpenGraph.Article, required: true)
 
   def article(assigns) do
     ~H"""
-    <%= if @content.published_time do %>
-    <meta property="article:published_time" content={to_iso8601(@content.published_time)} />
-    <% end %>
-    <%= if @content.modified_time do %>
-    <meta property="article:modified_time" content={to_iso8601(@content.modified_time)} />
-    <% end %>
-    <%= if @content.expiration_time do %>
-    <meta property="article:expiration_time" content={to_iso8601(@content.expiration_time)} />
-    <% end %>
-    <%= if @content.section do %>
-    <meta property="article:section" content={@content.section} />
-    <% end %>
-    <%= for author <- List.wrap(@content.author) do %>
-    <meta property="article:author" content={author} />
-    <% end %>
-    <%= for tag <- List.wrap(@content.tag) do %>
-    <meta property="article:tag" content={tag} />
-    <% end %>
+    <meta :if={@content.published_time} property="article:published_time" content={to_iso8601(@content.published_time)} />
+    <meta :if={@content.modified_time} property="article:modified_time" content={to_iso8601(@content.modified_time)} />
+    <meta :if={@content.expiration_time} property="article:expiration_time" content={to_iso8601(@content.expiration_time)} />
+    <meta :if={@content.section} property="article:section" content={@content.section} />
+    <meta :for={author <- List.wrap(@content.author)} :if={List.wrap(@content.author) != []} property="article:author" content={author} />
+    <meta :for={tag <- List.wrap(@content.tag)} :if={List.wrap(@content.tag) != []} property="article:tag" content={tag} />
     """
   end
 
-  attr(:content, :any, required: true)
+  attr(:content, SEO.OpenGraph.Book, required: true)
 
   def book(assigns) do
     ~H"""
-    <%= if @content.release_date do %>
-    <meta property="book:release_date" content={to_iso8601(@content.release_date)} />
-    <% end %>
-    <%= if @content.isbn do %>
-    <meta property="book:isbn" content={@content.isbn} />
-    <% end %>
-    <%= for author <- List.wrap(@content.author) do %>
-    <meta property="book:author" content={author} />
-    <% end %>
-    <%= for tag <- List.wrap(@content.tag) do %>
-    <meta property="book:tag" content={tag} />
-    <% end %>
+    <meta property="book:release_date" content={to_iso8601(@content.release_date)} :if={@content.release_date} />
+    <meta property="book:isbn" content={@content.isbn} :if={@content.isbn} />
+    <meta :for={author <- List.wrap(@content.author)} property="book:author" content={author} :if={List.wrap(@content.author) != []} />
+    <meta :for={tag <- List.wrap(@content.tag)} property="book:tag" content={tag} :if={List.wrap(@content.tag) != []} />
     """
   end
 
-  attr(:content, :any, required: true)
+  attr(:content, SEO.OpenGraph.Profile, required: true)
 
   def profile(assigns) do
     ~H"""
-    <%= if @content.first_name do %>
-    <meta property="profile:first_name" content={@content.first_name} />
-    <% end %>
-    <%= if @content.last_name do %>
-    <meta property="profile:last_name" content={@content.last_name} />
-    <% end %>
-    <%= if @content.username do %>
-    <meta property="profile:username" content={@content.username} />
-    <% end %>
-    <%= if @content.gender do %>
-    <meta property="profile:gender" content={@content.gender} />
-    <% end %>
+    <meta :if={@content.first_name} property="profile:first_name" content={@content.first_name} />
+    <meta :if={@content.last_name} property="profile:last_name" content={@content.last_name} />
+    <meta :if={@content.username} property="profile:username" content={@content.username} />
+    <meta :if={@content.gender} property="profile:gender" content={@content.gender} />
     """
   end
 
-  attr(:content, :any, required: true)
+  attr(:content, :any, required: true, doc: "Either an `SEO.OpenGraph.Image`, a string, or a URI")
 
   def image(assigns) do
     case assigns[:content] do
       %SEO.OpenGraph.Image{} ->
         ~H"""
-        <meta property="og:image" content={@content.url} />
-        <%= if @content.secure_url do %>
-        <meta property="og:image:secure_url" content={@content.secure_url} />
-        <% end %>
-        <%= if @content.type do %>
-        <meta property="og:image:type" content={@content.type} />
-        <% end %>
-        <%= if @content.width do %>
-        <meta property="og:image:width" content={@content.width} />
-        <% end %>
-        <%= if @content.height do %>
-        <meta property="og:image:height" content={@content.height} />
-        <% end %>
-        <%= if @content.alt do %>
-        <meta property="og:image:alt" content={@content.alt} />
+        <%= if @content.url do %>
+        <.url property="og:image" content={@content.url} />
+        <.url :if={@content.secure_url} property="og:image:secure_url" content={@content.secure_url} />
+        <meta :if={@content.type} property="og:image:type" content={@content.type} />
+        <meta :if={@content.width} property="og:image:width" content={@content.width} />
+        <meta :if={@content.height} property="og:image:height" content={@content.height} />
+        <meta :if={@content.alt} property="og:image:alt" content={@content.alt} />
         <% end %>
         """
 
@@ -291,21 +234,13 @@ defmodule SEO.OpenGraph do
     case assigns[:content] do
       %SEO.OpenGraph.Video{} ->
         ~H"""
-        <meta property="og:video" content={@content.url} />
-        <%= if @content.secure_url do %>
-        <meta property="og:video:secure_url" content={@content.secure_url} />
-        <% end %>
-        <%= if @content.mime do %>
-        <meta property="og:video:type" content={@content.mime} />
-        <% end %>
-        <%= if @content.width do %>
-        <meta property="og:video:width" content={@content.width} />
-        <% end %>
-        <%= if @content.height do %>
-        <meta property="og:video:height" content={@content.height} />
-        <% end %>
-        <%= if @content.alt do %>
-        <meta property="og:video:alt" content={@content.alt} />
+        <%= if @content.url do %>
+        <.url property="og:video" content={@content.url} />
+        <.url :if={@content.secure_url} property="og:video:secure_url" content={@content.secure_url} />
+        <meta :if={@content.mime} property="og:video:type" content={@content.mime} />
+        <meta :if={@content.width} property="og:video:width" content={@content.width} />
+        <meta :if={@content.height} property="og:video:height" content={@content.height} />
+        <meta :if={@content.alt} property="og:video:alt" content={@content.alt} />
         <% end %>
         """
 
@@ -316,18 +251,16 @@ defmodule SEO.OpenGraph do
     end
   end
 
-  attr(:content, :any, required: true)
+  attr(:content, SEO.OpenGraph.Audio, required: true)
 
   def audio(assigns) do
     case assigns[:content] do
       %SEO.OpenGraph.Audio{} ->
         ~H"""
-        <meta property="og:audio" content={@content.url} />
-        <%= if @content.secure_url do %>
-        <meta property="og:audio:secure_url" content={@content.secure_url} />
-        <% end %>
-        <%= if @content.mime do %>
-        <meta property="og:audio:type" content={@content.mime} />
+        <%= if @content.url do %>
+        <.url property="og:audio" content={@content.url} />
+        <.url :if={@content.secure_url} property="og:audio:secure_url" content={@content.secure_url} />
+        <meta :if={@content.type} property="og:audio:type" content={@content.type} />
         <% end %>
         """
 
