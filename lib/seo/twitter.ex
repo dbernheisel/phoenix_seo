@@ -4,18 +4,15 @@ defmodule SEO.Twitter do
   your website. Users who Tweet links to your content will have a "Card" added to the Tweet that's visible to their
   followers.
 
-  The different Card types each have a beautiful consumption experience built for Twitter’s web and mobile clients:
+  Examples
 
-  - Summary Card: Title, description, and thumbnail.
-  - Summary Card with Large Image: Similar to the Summary Card, but with a prominently-featured image.
-  - App Card: A Card with a direct download to a mobile app.
-  - Player Card: A Card that can display video/audio/media.
+  Summary card with large image: ![Summary card with Large Image](./assets/twitter-summary-large-example.png)
 
-  If used alongside the OpenGraph tags, the Twitter tags will win when shared on Twitter. If not provided, Twitter will
-  use the OpenGraph tags. Unless you have specific messaging for Twitter followers, it's typically good enough to use
-  OpenGraph for most data.
+  Player card: ![Player card](./assets/twitter-player-example.png)
 
-  https://developer.twitter.com/en/docs/twitter-for-websites/cards/guides/getting-started
+  ### Resources
+
+  - https://developer.twitter.com/en/docs/twitter-for-websites/cards/guides/getting-started
   """
 
   defstruct [
@@ -77,6 +74,44 @@ defmodule SEO.Twitter do
   @type creator :: String.t()
   @type pixels :: pos_integer()
 
+  @doc """
+  Build tags that customize how Twitter displays your page.
+
+  - `:card` - The different `:card` types each have a beautiful consumption experience built for Twitter’s
+  web and mobile clients.
+    - `:summary`: Title, description, and thumbnail.
+    - `:summary_large_image`: Similar to the Summary Card, but with a prominently-featured image.
+    - `:app`: A Card with a direct download to a mobile app.
+    - `:player`: A Card that can display video/audio/media.
+  - `:site` - The Twitter @username the card should be attributed to
+  - `:title` - A concise title for the related content.
+  - `:description` - A description that concisely summarizes the content as appropriate for presentation within a Tweet.
+  - `:image` - A URL to a unique image representing the content of the page. You should not use a generic
+  image such as your website logo, author photo, or other image that spans multiple pages. Images for this
+  Card support an aspect ratio of 2:1 with minimum dimensions of 300x157 or maximum of 4096x4096 pixels.
+  Images must be less than 5MB in size. JPG, PNG, WEBP and GIF formats are supported. Only the first frame
+  of an animated GIF will be used. SVG is not supported.
+  - `:image_alt` - A text description of the image conveying the essential nature of an image to users who
+  are visually impaired. Maximum 420 characters.
+  - `:player` - HTTPS URL of player iframe
+  - `:player_width` - Width of iframe in pixels
+  - `:player_height` - Height of iframe in pixels
+  - `:player_stream` - URL to raw video or audio stream
+  - `:app_name_iphone` - Name of your iPhone app
+  - `:app_id_iphone` - Your app ID in the iTunes App Store
+  - `:app_url_iphone` - Your app's custom URL scheme
+  - `:app_name_ipad` - Name of your iPad optimized app
+  - `:app_id_ipad` - Your app ID in the iTunes App Store
+  - `:app_url_ipad` - Your app's custom URL scheme
+  - `:app_name_googleplay` - Name of your Android app
+  - `:app_id_googleplay` - Your app ID in the Google Play Store
+  - `:app_url_googleplay` - Your app’s custom URL scheme
+  - `:app_country` - If your application is not available in the US App Store, you must set this value to the two-letter country code for the App Store that contains your application.
+
+  If used alongside the OpenGraph tags, the Twitter tags will win when shared on Twitter. If not provided, Twitter will
+  use the OpenGraph tags. Unless you have specific messaging for Twitter followers, it's typically good enough to use
+  OpenGraph for most data.
+  """
   def build(attrs, default \\ nil)
 
   def build(attrs, default) when is_map(attrs) do

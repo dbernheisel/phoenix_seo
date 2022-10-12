@@ -3,11 +3,14 @@ defmodule SEO.Breadcrumb do
   This is SEO for Google to display breadcrumbs in the search results.
   This allows the search result to search as multiple links.
 
-  https://developers.google.com/search/docs/data-types/breadcrumbs
-  https://json-ld.org/
+  ![Breadcrumb Example](./assets/breadcrumb-example.png)
 
-  tester: https://search.google.com/test/rich-results
-  tester: https://search.google.com/structured-data/testing-tool
+  ### Resources
+
+  - https://developers.google.com/search/docs/data-types/breadcrumbs
+  - https://json-ld.org/
+  - https://search.google.com/test/rich-results
+  - https://search.google.com/structured-data/testing-tool
   """
 
   use Phoenix.Component
@@ -15,7 +18,7 @@ defmodule SEO.Breadcrumb do
 
   defstruct []
 
-  attr(:item, :any, required: true)
+  attr(:item, SEO.Breadcrumb.List, required: true)
   attr(:default, SEO.Breadcrumb, required: true)
 
   def meta(assigns) do

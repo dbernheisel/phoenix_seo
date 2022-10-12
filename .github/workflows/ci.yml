@@ -1,0 +1,41 @@
+name: Tests
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  style:
+    runs-on: ubuntu-latest
+    name: Check Style
+    env:
+      MIX_ENV: test
+      CI: "true"
+    steps:
+      - uses: actions/checkout@v2
+      - uses: erlef/setup-beam@v1
+        with:
+          otp-version: '25'
+          elixir-version: '1.14.0'
+      - run: mix deps.unlock --check-unused
+      - run: mix deps.get --only dev
+      - run: mix format --check-formatted
+      - run: mix credo --strict
+
+  test:
+    runs-on: ubuntu-latest
+    name: Tests on latest version
+    env:
+      MIX_ENV: test
+      CI: "true"
+    steps:
+      - uses: actions/checkout@v2
+      - uses: erlef/setup-beam@v1
+        with:
+          otp-version: '25'
+          elixir-version: '1.14.0'
+      - run: rm mix.lock
+      - run: mix deps.get --only test
+      - run: mix compile --force --warnings-as-errors
+      - run: mix test

@@ -1,5 +1,21 @@
 defmodule SEO.Builder do
-  @moduledoc false
+  @moduledoc """
+  Skeleton functions for use when implementing `SEO.Build`. This will
+  implement the behaviour for you and allow you to override functions
+  that make sense for your item.
+
+  For example
+
+  ```elixir
+  defimpl SEO.Build, for: MyStruct do
+    use SEO.Builder
+
+    def open_graph(item) do
+      SEO.OpenGraph.build(...)
+    end
+  end
+  ```
+  """
 
   defmacro __using__(_opts) do
     quote do

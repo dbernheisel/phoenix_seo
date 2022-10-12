@@ -10,6 +10,9 @@ defmodule SEO.OpenGraph.Profile do
   - profile:gender - enum(male, female) - Their gender.
 
   """
+
+  use Phoenix.Component
+
   defstruct [
     :first_name,
     :last_name,
@@ -28,5 +31,25 @@ defmodule SEO.OpenGraph.Profile do
 
   def build(attrs) when is_map(attrs) or is_list(attrs) do
     struct(%__MODULE__{}, attrs)
+  end
+
+  attr(:content, :any, required: true)
+  attr(:property, :string, default: "profile")
+
+  def meta(assigns) do
+    case assigns[:content] do
+      %__MODULE__{} ->
+        ~H"""
+        <meta :if={@content.first_name} property={"#{@property}:first_name"} content={@content.first_name} />
+        <meta :if={@content.last_name} property={"#{@property}:last_name"} content={@content.last_name} />
+        <meta :if={@content.username} property={"#{@property}:username"} content={@content.username} />
+        <meta :if={@content.gender} property={"#{@property}:gender"} content={@content.gender} />
+        """
+
+      _url ->
+        ~H"""
+        <SEO.Utils.url :if={@content} property={@property} content={@content} />
+        """
+    end
   end
 end

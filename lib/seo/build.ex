@@ -1,4 +1,9 @@
 defprotocol SEO.Build do
+  @moduledoc """
+  Protocol to implement functions for customizing your items. It's recommended
+  to also use `SEO.Builder` so that skeleton functions can be implemented for
+  you, and you'd only implement the ones you need.
+  """
   @fallback_to_any true
 
   @spec breadcrumb_list(term, term) :: SEO.Breadcrumb.List.t() | nil

@@ -1,5 +1,7 @@
 defmodule SEO.Breadcrumb.Item do
-  @moduledoc ""
+  @moduledoc """
+  The referenced item in a `SEO.Breadcrumb.ListItem`
+  """
 
   defstruct [
     :name,
@@ -11,11 +13,15 @@ defmodule SEO.Breadcrumb.Item do
           "@id": String.t()
         }
 
-  def to_map(%__MODULE__{} = item) do
-    item |> Map.from_struct()
-  end
-
+  @doc """
+  Build an item in a `SEO.Breadcrumb.List`
+  """
   def build(attrs, _default \\ nil) when is_map(attrs) or is_list(attrs) do
     struct(%__MODULE__{}, attrs)
+  end
+
+  @doc false
+  def to_map(%__MODULE__{} = item) do
+    item |> Map.from_struct()
   end
 end

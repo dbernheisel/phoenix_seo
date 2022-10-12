@@ -1,12 +1,17 @@
 defmodule SEO.Unfurl do
   @moduledoc """
-  Other platforms seem to have adopted an older deprecated Twitter Product Card specification that allowed for two
-  arbitrary data points. For example, some blogs may include a reading time. Another example, if selling a product you
-  may display a variation (eg, color is black) and also display the price (eg, price is $20).
+  Some platforms (eg, Slack and Discord) have adopted an older and deprecated Twitter Product Card specification that
+  allows for two arbitrary data points. For example, some blogs may include a reading time. Another example, if selling a product you may display a variation (eg, color is black) and also display the price (eg, price is $20).
 
-  This module should be used alongside the SEO.OpenGraph module for completeness.
+  This module should be used alongside the `SEO.OpenGraph` module for completeness.
 
-  https://api.slack.com/reference/messaging/link-unfurling
+  For example, in the screenshot below, `:label1` is `"Reading Time"` and `:data1` is `"15 minutes"`, and `:label2` is
+  `"Published"` and `:data2` is `"2020-01-19"`.
+
+  ![Unfurl example](./assets/unfurl-example.png)
+
+  Resources
+  - https://api.slack.com/reference/messaging/link-unfurling#classic_unfurl
   """
 
   defstruct [
@@ -23,6 +28,17 @@ defmodule SEO.Unfurl do
           data2: nil | String.t()
         }
 
+  @doc """
+  Arbitrary data points about your object. label1 and data1 both should be provided in order to render. Same with label2/data2.
+
+  For example, label1 could be `"price"` and data1 could be `"$10"`.
+
+  - `:label1` - Label describing data1
+  - `:data1` - 1st data point
+  - `:label2` - Label describing data2
+  - `:data2` - 2nd data point
+
+  """
   def build(attrs, default \\ nil)
 
   def build(attrs, default) when is_list(attrs) do
@@ -35,7 +51,7 @@ defmodule SEO.Unfurl do
 
   use Phoenix.Component
 
-  attr(:item, :any, required: true)
+  attr(:item, __MODULE__, required: true)
 
   def meta(assigns) do
     ~H"""

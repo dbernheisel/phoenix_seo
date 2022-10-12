@@ -2,19 +2,37 @@ defmodule SEO.Compiler do
   @moduledoc false
 
   defmacro __before_compile__(env) do
+    SEO.Compiler.put_config(env.module)
+
+    quote location: :keep do
+      @doc false
+      def config, do: @config
+
+      @doc false
+      def config(mod), do: config()[mod] || struct(mod, [])
+
+      SEO.define_juice()
+    end
+  end
+
+  def put_config(mod) do
     poison = if Code.ensure_loaded?(Poison), do: Poison
     jason = if Code.ensure_loaded?(Jason), do: Jason
     phoenix_json = Application.get_env(:phoenix, :json_library)
     seo_json = Application.get_env(:seo, :json_library)
     json_library = seo_json || phoenix_json || jason || poison
+    validate_json(json_library, seo_json)
 
     config =
-      Module.get_attribute(env.module, :seo_options, [])
+      Module.get_attribute(mod, :seo_options, [])
       |> Enum.into(%{})
       |> Map.put_new(:json_library, json_library)
 
-    Module.put_attribute(env.module, :config, config)
+    Module.put_attribute(mod, :config, config)
+    Module.put_attribute(mod, :json_library, json_library)
+  end
 
+  def validate_json(json_library, seo_json) do
     cond do
       Code.ensure_loaded?(json_library) and function_exported?(json_library, :encode!, 1) ->
         :ok
@@ -48,18 +66,6 @@ defmodule SEO.Compiler do
         configured for Phoenix, then it will try to try to use Jason or Poison if
         available.
         """
-    end
-
-    Module.put_attribute(env.module, :json_library, json_library)
-
-    quote location: :keep do
-      @doc false
-      def config, do: @config
-
-      @doc false
-      def config(mod), do: config()[mod] || struct(mod, [])
-
-      SEO.define_juice()
     end
   end
 end

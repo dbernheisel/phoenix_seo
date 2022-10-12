@@ -1,4 +1,6 @@
 defmodule MyAppWeb.SEO do
+  @moduledoc false
+
   use SEO, [
     {SEO.Site,
      %SEO.Site{
@@ -26,10 +28,12 @@ defmodule MyAppWeb.SEO do
 end
 
 defmodule MyApp.Article do
+  @moduledoc false
   defstruct [:title, :description, :author, :reading]
 end
 
 defmodule MyApp.Article.Index do
+  @moduledoc false
   defstruct title: "My Articles",
             description: "Articles that describe tech"
 end
@@ -37,14 +41,14 @@ end
 defimpl SEO.Build, for: MyApp.Article.Index do
   use SEO.Builder
 
-  def site(article, _default) do
+  def site(index, _default) do
     SEO.Site.build(
-      title: article.title,
-      description: article.description
+      title: index.title,
+      description: index.description
     )
   end
 
-  def breadcrumb_list(_article, _default) do
+  def breadcrumb_list(_index, _default) do
     SEO.Breadcrumb.List.build([
       SEO.Breadcrumb.Item.build(
         position: 1,
@@ -60,6 +64,7 @@ defimpl SEO.Build, for: MyApp.Article do
 
   def site(article) do
     SEO.Site.build(
+      url: "https://example.com/#{article.id}",
       title: article.title,
       description: article.description
     )
