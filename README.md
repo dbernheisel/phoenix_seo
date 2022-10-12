@@ -185,6 +185,6 @@ end
 <head>
   <%# remove the Phoenix-generated <.live_title> component %>
   <%# and replace with MyAppWeb.SEO.juice component %>
-  <MyAppWeb.SEO.juice item={assigns[:seo] || []} page_title={assigns[:page_title]} />
+  <MyAppWeb.SEO.juice item={SEO.item(assigns)} page_title={assigns[:page_title]} />
 </head>
 ```

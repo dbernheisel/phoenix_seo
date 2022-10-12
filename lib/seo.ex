@@ -20,12 +20,16 @@ defmodule SEO do
           | Phoenix.LiveView.Socket.t()
           | Phoenix.LiveView.Socket.assigns()
   def assign(%Plug.Conn{} = conn_or_socket_or_assigns, item) do
-    Plug.Conn.assign(conn_or_socket_or_assigns, :seo, item)
+    Plug.Conn.put_private(conn, :seo, item)
   end
 
   def assign(conn_or_socket_or_assigns, item) do
     Phoenix.Component.assign(conn_or_socket_or_assigns, :seo, item)
   end
+
+  def item(%Plug.Conn{} = conn), do: conn.private[:seo] || []
+  def item(%{assigns: assigns}), do: assigns[:seo] || []
+  def item(assigns) when is_map(assigns), do: assigns[:seo] || []
 
   @doc false
   def define_juice do
