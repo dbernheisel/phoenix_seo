@@ -5,6 +5,7 @@ defmodule SEO.MixProject do
   def project do
     [
       app: :seo,
+      name: "SEO",
       version: @version,
       elixir: ">= 1.14.0",
       start_permanent: Mix.env() == :prod,
@@ -12,12 +13,12 @@ defmodule SEO.MixProject do
       aliases: aliases(),
       deps: deps(),
       docs: docs(),
+      homepage_url: "https://hexdocs.pm/phoenix_seo",
+      source_url: "https://github.com/dbernheisel/seo",
       preferred_cli_env: [tests: :test],
       package: package(),
-      homepage_url: "https://hexdocs.pm/seo",
-      source_url: "https://github.com/dbernheisel/seo",
       description:
-        "Framework for Phoenix applications to more-easily optimize your site for search engines and displaying rich results when your URLs are shared across the internet."
+        "Framework for Phoenix applications to optimize your site for search engines and displaying rich results when your URLs are shared across the internet."
     ]
   end
 
@@ -33,6 +34,7 @@ defmodule SEO.MixProject do
 
   defp package do
     [
+      name: "phoenix_seo",
       files: [
         "lib",
         "mix.exs",
