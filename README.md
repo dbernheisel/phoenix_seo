@@ -175,7 +175,7 @@ def mount(params, _session, socket) do
 end
 
 def handle_params(params, _uri, socket) do
-  {:noreply, assign(socket, seo: load_article(params))}
+  {:noreply, SEO.assign(socket, load_article(params))}
 end
 ```
 
