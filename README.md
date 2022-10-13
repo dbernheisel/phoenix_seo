@@ -59,6 +59,28 @@ defmodule MyAppWeb.SEO do
     )},
     json_library: Jason
   ]
+
+  # alternatively, you can put the config inside a `def config` if you want to define it at runtime 
+
+  use Phoenix.Component
+
+  attr(:item, :any, required: true)
+  attr(:page_title, :string, default: nil)
+  attr(:json_library, :atom, default: Jason)
+
+  @doc "Provide SEO juice"
+  def juice(assigns) do
+    ~H"""
+    <SEO.Site.meta item={SEO.Build.site(@item, config(SEO.Site))} page_title={@page_title} />
+    <SEO.OpenGraph.meta item={SEO.Build.open_graph(@item, config(SEO.OpenGraph))} />
+    <SEO.Twitter.meta item={SEO.Build.twitter(@item, config(SEO.Twitter))} />
+    <SEO.Unfurl.meta item={SEO.Build.unfurl(@item, config(SEO.Unfurl))} /> 
+    <%!-- <SEO.Facebook.meta item={SEO.Build.facebook(@item, config(SEO.Facebook))} /> --%>
+    <SEO.Breadcrumb.meta
+      item={SEO.Build.breadcrumb_list(@item, config(SEO.Breadcrumb))}
+      json_library={@json_library}
+    />
+  """
 end
 ```
 
@@ -84,32 +106,32 @@ defimpl MyApp.Article, for: SEO.Build do
   alias MyAppWeb.Router.Helpers, as: Routes
   @endpoint MyAppWeb.Endpoint
 
-  def site(article) do
-    SEO.Site.build(
+  def site(article, defaults) do
+    SEO.Site.build([
       title: article.title,
       description: article.short_description
-    )
+    ], defaults)
   end
 
-  def unfurl(article) do
-    SEO.Unfurl.build(
+  def unfurl(article, defaults) do
+    SEO.Unfurl.build([
       label1: "Reading Time",
       data1: "#{article.reading_time} min",
       label2: "Category",
       data2: article.category
-    )
+    ], defaults)
   end
 
-  def twitter(article) do
+  def twitter(article, defaults) do
     if creator = article.author.twitter_handle do
-      SEO.Twitter.build([])
+      SEO.Twitter.build([], defaults)
     else
-      SEO.Twitter.build(creator: creator)
+      SEO.Twitter.build([creator: creator], defaults)
     end
   end
 
-  def open_graph(article) do
-    SEO.OpenGraph.build(
+  def open_graph(article, defaults) do
+    SEO.OpenGraph.build([
       title: article.title,
       type_detail: SEO.OpenGraph.Article.build(
         published_time: article.published_at,
@@ -122,10 +144,10 @@ defimpl MyApp.Article, for: SEO.Build do
       locale, "en_US",
       type: :article,
       description: article.short_description
-    )
+    ], defaults)
   end
 
-  def breadcrumb_list(article) do
+  def breadcrumb_list(article, _) do
     SEO.Breadcrumb.List.build([
       [name: "Posts", item: Routes.blog_url(@endpoint, :index)],
       [name: article.title, item: Routes.blog_url(@endpoint, :show, post.id)]
