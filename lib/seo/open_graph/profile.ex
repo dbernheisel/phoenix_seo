@@ -1,13 +1,13 @@
 defmodule SEO.OpenGraph.Profile do
   @moduledoc """
 
-  https://ogp.me/#type_profile
+  - `:first_name` - A name normally given to an individual by a parent or self-chosen.
+  - `:last_name` - A name inherited from a family or marriage and by which the individual is commonly known.
+  - `:username` - A short unique string to identify them.
+  - `:gender` - Their gender.
 
-  - profile - Namespace URI: https://ogp.me/ns/profile#
-  - profile:first_name - string - A name normally given to an individual by a parent or self-chosen.
-  - profile:last_name - string - A name inherited from a family or marriage and by which the individual is commonly known.
-  - profile:username - string - A short unique string to identify them.
-  - profile:gender - enum(male, female) - Their gender.
+  ### Resources
+  - https://ogp.me/#type_profile
 
   """
 

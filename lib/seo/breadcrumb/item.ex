@@ -5,12 +5,12 @@ defmodule SEO.Breadcrumb.Item do
 
   defstruct [
     :name,
-    :"@id"
+    :id
   ]
 
   @type t :: %__MODULE__{
           name: String.t(),
-          "@id": String.t()
+          id: String.t()
         }
 
   @doc """
@@ -24,6 +24,17 @@ defmodule SEO.Breadcrumb.Item do
 
   @doc false
   def to_map(%__MODULE__{} = item) do
-    item |> Map.from_struct()
+    item |> Map.from_struct() |> rename()
+  end
+
+  @rename %{id: "@id"}
+  @doc false
+  defp rename(attrs) do
+    Enum.reduce(@rename, attrs, fn {from, to}, acc ->
+      case Map.pop(acc, from) do
+        {nil, popped} -> popped
+        {value, popped} -> Map.put(popped, to, value)
+      end
+    end)
   end
 end

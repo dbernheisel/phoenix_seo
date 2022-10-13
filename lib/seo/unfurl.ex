@@ -49,15 +49,20 @@ defmodule SEO.Unfurl do
   use Phoenix.Component
 
   attr(:item, __MODULE__, required: true)
+  attr(:config, :any, default: nil)
 
   def meta(assigns) do
+    assigns = assign(assigns, :item, build(assigns[:item], assigns[:config]))
+
     ~H"""
+    <%= if @item do %>
     <%= if @item.data1 && @item.label1 do %>
     <meta name="twitter:label1" content={@item.label1} />
     <meta name="twitter:data1" content={@item.data1} />
     <% end %><%= if @item.data2 && @item.label2 do %>
     <meta name="twitter:label2" content={@item.label2} />
     <meta name="twitter:data2" content={@item.data2} />
+    <% end %>
     <% end %>
     """
   end

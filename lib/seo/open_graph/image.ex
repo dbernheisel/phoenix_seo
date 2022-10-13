@@ -1,14 +1,14 @@
 defmodule SEO.OpenGraph.Image do
   @moduledoc """
-  URL for the image. The `og:image` property has some optional structured properties:
+  URL or details for the image. The `og:image` property has some optional structured properties:
 
-  - `og:image:url` - Identical to `og:image`.
-  - `og:image:secure_url` - An alternate url to use if the webpage requires HTTPS.
-  - `og:image:type` - A MIME type for this image.
-  - `og:image:width` - The number of pixels wide.
-  - `og:image:height` - The number of pixels high.
-  - `og:image:alt` - A description of what is in the image (not a caption). If the page specifies an `og:image` it should
-  specify `og:image:alt`.
+  - `:url` - Identical to `og:image`.
+  - `:secure_url` - An alternate url to use if the webpage requires HTTPS.
+  - `:type` - A MIME type for this image.
+  - `:width` - The number of pixels wide.
+  - `:height` - The number of pixels high.
+  - `:alt` - A description of what is in the image (not a caption). If the page specifies an image it should
+  also specify `:alt`.
 
   **NOTE**: to update an image after it's been published, use a new URL for the new image. Images are typically cached
   based on the URL and won't be updated unless the URL changes. In Phoenix, the URL is typically using a hashed
@@ -17,7 +17,7 @@ defmodule SEO.OpenGraph.Image do
   Best practices:
   - Use images that are at least 1080 pixels in width for best display on high resolution devices. At the minimum, you should use images that are 600 pixels in width to display image link ads. We recommend using 1:1 images in your ad creatives for better performance with image link ads.
   - Pre-cache your images by running the URL through the URL Sharing Debugger tool to pre-fetch metadata for the website. You should also do this if you update the image for a piece of content.
-  - Use `og:image:width` and `og:image:height` Open Graph tags to specify the image dimensions to the crawler so that it can render the image immediately without having to asynchronously download and process it.
+  - Use `:width` and `:height` to specify the image dimensions to the crawler so that it can render the image immediately without having to asynchronously download and process it.
 
   Resources
   - https://ogp.me/#structured
@@ -53,10 +53,13 @@ defmodule SEO.OpenGraph.Image do
     SEO.Utils.merge_defaults(__MODULE__, attrs, default)
   end
 
-  attr(:content, :any, required: true, doc: "Either an `SEO.OpenGraph.Image`, a string, or a URI")
+  attr(:content, :any, default: nil, doc: "Either an `SEO.OpenGraph.Image`, a string, or a URI")
 
   def meta(assigns) do
     case assigns[:content] do
+      nil ->
+        ~H""
+
       %__MODULE__{} ->
         ~H"""
         <%= if @content.url do %>

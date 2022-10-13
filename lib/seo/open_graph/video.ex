@@ -78,6 +78,9 @@ defmodule SEO.OpenGraph.Video do
 
   def meta(assigns) do
     case assigns[:content] do
+      nil ->
+        ~H""
+
       %__MODULE__{} ->
         ~H"""
         <%= if @content.url do %>

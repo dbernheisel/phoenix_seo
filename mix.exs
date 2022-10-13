@@ -58,7 +58,42 @@ defmodule SEO.MixProject do
       assets: "assets",
       logo: "priv/logomark-small.png",
       source_ref: @version,
+      groups_for_modules: groups_for_modules(),
       extras: ["CHANGELOG.md", "LICENSE"]
+    ]
+  end
+
+  defp groups_for_modules do
+    [
+      Domains: [
+        SEO.Breadcrumb,
+        SEO.OpenGraph,
+        SEO.Site,
+        SEO.Twitter,
+        SEO.Facebook,
+        SEO.Unfurl
+      ],
+      "Open Graph": [
+        SEO.OpenGraph.Article,
+        SEO.OpenGraph.Audio,
+        SEO.OpenGraph.Book,
+        SEO.OpenGraph.Image,
+        SEO.OpenGraph.Profile,
+        SEO.OpenGraph.Video,
+        SEO.OpenGraph.Website
+      ],
+      Breadcrumbs: [
+        SEO.Breadcrumb.Item,
+        SEO.Breadcrumb.ListItem
+      ],
+      Protocol: [
+        SEO.Breadcrumb.Build,
+        SEO.OpenGraph.Build,
+        SEO.Site.Build,
+        SEO.Twitter.Build,
+        SEO.Facebook.Build,
+        SEO.Unfurl.Build
+      ]
     ]
   end
 

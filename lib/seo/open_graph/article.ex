@@ -48,9 +48,11 @@ defmodule SEO.OpenGraph.Article do
   use Phoenix.Component
   alias SEO.Utils
 
-  attr(:content, __MODULE__, required: true)
+  attr(:content, __MODULE__, default: nil)
 
   def meta(assigns) do
+    assigns = assign(assigns, :content, build(assigns[:content], assigns[:config]))
+
     ~H"""
     <meta :if={@content.published_time} property="article:published_time" content={Utils.to_iso8601(@content.published_time)} />
     <meta :if={@content.modified_time} property="article:modified_time" content={Utils.to_iso8601(@content.modified_time)} />

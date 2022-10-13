@@ -6,13 +6,12 @@ defmodule SEO.Breadcrumb.ListItem do
   defstruct [
     :position,
     :item,
-    "@context": "https://schema.org",
+    :name,
     "@type": "ListItem"
   ]
 
   @type t :: %__MODULE__{
           position: pos_integer(),
-          "@context": String.t(),
           "@type": String.t(),
           item: SEO.Breadcrumb.Item.t()
         }

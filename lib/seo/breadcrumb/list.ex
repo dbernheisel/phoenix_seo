@@ -11,7 +11,6 @@ defmodule SEO.Breadcrumb.List do
   e.g. beginning with '1' for the first item in the list.
   """
 
-  alias SEO.Breadcrumb.Item
   alias SEO.Breadcrumb.ListItem
 
   defstruct "@context": "https://schema.org",
@@ -27,10 +26,9 @@ defmodule SEO.Breadcrumb.List do
   @doc """
   Build a list of items that represent breadcrumbs for your item.
 
-  You may build the list with `SEO.Breadcrumb.ListItem`, or
-  `SEO.Breadcrumb.Item`, or with simply attributes that will build an item.
-  The position will be inferred from the list provided. If you need to supply
-  the position manually, you need to supply `SEO.Breadcrumb.ListItem`.
+  You may build the list with `SEO.Breadcrumb.ListItem` or with attributes that will build
+  a ListItem. The position will be inferred from the list provided, but if you need to
+  supply the position manually, you must supply `SEO.Breadcrumb.ListItem`.
 
   For example:
 
@@ -48,17 +46,13 @@ defmodule SEO.Breadcrumb.List do
     %__MODULE__{itemListElement: format_items(attrs)}
   end
 
-  def build(_attrs, _default), do: []
+  def build(%__MODULE__{} = attrs, _default), do: attrs
+
+  def build(_attrs, _default), do: nil
 
   @doc false
   def to_map(%__MODULE__{} = item) do
-    %{
-      item
-      | itemListElement:
-          Enum.map(item.itemListElement, fn list_item ->
-            %{ListItem.to_map(list_item) | item: Item.to_map(list_item.item)}
-          end)
-    }
+    %{item | itemListElement: Enum.map(item.itemListElement, &ListItem.to_map/1)}
     |> Map.from_struct()
   end
 
@@ -72,11 +66,11 @@ defmodule SEO.Breadcrumb.List do
         %ListItem{position: pos} = list_item ->
           %{list_item | position: pos || i}
 
-        %Item{} = item ->
-          ListItem.build(item: item, position: i)
-
         attrs when is_list(attrs) or is_map(attrs) ->
-          ListItem.build(item: Item.build(attrs), position: i)
+          ListItem.build(attrs, position: i)
+
+        {k, v} ->
+          ListItem.build([{k, v}], position: i)
       end
     end)
   end

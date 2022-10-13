@@ -79,12 +79,29 @@ defmodule MyApp.Article do
     ]
 end
 
-defimpl SEO.Build, for: MyApp.Article do
-  use SEO.Builder
+defimpl SEO.OpenGraph.Build, for: MyApp.Article do
   alias MyAppWeb.Router.Helpers, as: Routes
   @endpoint MyAppWeb.Endpoint
 
-  def site(article) do
+  def build(article, default \\ nil) do
+    SEO.OpenGraph.build([
+      title: article.title,
+      type_detail: SEO.OpenGraph.Article.build(
+        published_time: article.published_at,
+        author: article.author.name,
+        section: "Reviews",
+        tag: article.tags
+      ),
+      image: put_image(article),
+      url: Routes.article_url(@endpoint, article.id),
+      type: :article,
+      description: article.short_description
+    ], default)
+  end
+end
+
+defimpl SEO.Site.Build, for: MyApp.Article do
+  def build(article, default \\ nil) do
     [
       title: article.title,
       description: article.short_description
@@ -106,22 +123,6 @@ defimpl SEO.Build, for: MyApp.Article do
     else
       [creator: creator]
     end
-  end
-
-  def open_graph(article) do
-    [
-      title: article.title,
-      type_detail: SEO.OpenGraph.Article.build(
-        published_time: article.published_at,
-        author: article.author.name,
-        section: "Reviews",
-        tag: article.tags
-      ),
-      image: put_image(article),
-      url: Routes.article_url(@endpoint, article.id),
-      type: :article,
-      description: article.short_description
-    ]
   end
 
   def breadcrumb_list(article) do

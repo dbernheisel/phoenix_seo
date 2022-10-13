@@ -10,6 +10,9 @@ defmodule SEO.Site do
   - https://developers.google.com/search/docs/crawling-indexing/robots-meta-tag
   - https://developers.google.com/search/docs/crawling-indexing/special-tags
   - https://developers.google.com/search/docs/appearance/title-link
+  - https://realfavicongenerator.net/
+  - https://developer.apple.com/library/archive/documentation/AppleApplications/Reference/SafariWebContent/pinnedTabs/pinnedTabs.html
+  - https://www.w3.org/TR/appmanifest/#using-a-link-element-to-link-to-a-manifest
   """
 
   use Phoenix.Component
@@ -26,7 +29,12 @@ defmodule SEO.Site do
     :googlebot,
     :google_site_verification,
     :robots,
-    alternate_languages: []
+    :alternate_languages,
+    :windows_tile_color,
+    :theme_color,
+    :mask_icon_color,
+    :mask_icon_url,
+    :manifest_url
   ]
 
   @type t :: %__MODULE__{
@@ -34,25 +42,37 @@ defmodule SEO.Site do
           title: String.t() | nil,
           title_prefix: String.t() | nil,
           title_suffix: String.t() | nil,
+          description: String.t() | nil,
           canonical_url: URI.t() | String.t() | nil,
-          rating: String.t() | nil,
           robots: String.t() | list(String.t()) | nil,
-          googlebot: String.t() | nil,
-          alternate_languages: list({String.t(), String.t() | URI.t()}),
+          alternate_languages: list({String.t(), String.t() | URI.t()}) | nil,
           google: String.t() | list(String.t()) | nil,
-          description: String.t() | nil
+          googlebot: String.t() | nil,
+          rating: String.t() | nil,
+          windows_tile_color: color_hex() | nil,
+          theme_color: color_hex() | nil,
+          mask_icon_color: color_hex() | nil,
+          mask_icon_url: URI.t() | String.t() | nil,
+          manifest_url: URI.t() | String.t() | nil
         }
+
+  @typedoc """
+  Color hex of 7 characters or name, eg "#663399", eg "red"
+  """
+  @type color_hex :: String.t()
 
   @doc """
   Metadata that describes the site generally.
 
   - `:title` - Title of the page.
+  - `:default_title` - Fallback title when title is nil.
   - `:description` - A one to two sentence description of your item.
   - `:canonical_url` - A URL that is most representative of your item.
   - `:rating` - `"adult"`. If a rating of `"adult"` is applied, it's also recommended to separate adult assets into a
   folder such as `example.com/explicit/wow.jpg`. No value provided means the content is appropriate for everyone.
   - `:alternate_languages` -  If your site is multilingual, you can inform search engines. Supply a list of tuples of the
   lang_code and the URL for the page. For example:
+
     ```elixir
     [
       {"en_US", Routes.article_url(@endpoint, article.id)},
@@ -105,30 +125,52 @@ defmodule SEO.Site do
     - `"max-video-preview:[number]"` Max number of seconds of a video preview. The number may be:
       - `0` show a static image instead
       - `-1` allow any preview length
+
+  - `:windows_tile_color` - The color of the tile behind your icon when rendered on the Windows start menu. Accepts a
+  - `:theme_color` - On mobile devices, the chrome of the browser may use the theme color. Accepts a color hex value.
+  hex value
   """
-  def build(attrs, default \\ %__MODULE__{})
+  def build(attrs, default \\ nil)
 
   def build(attrs, default) do
     SEO.Utils.merge_defaults(__MODULE__, attrs, default)
   end
 
-  attr(:item, :any, required: true)
+  attr(:item, :any, default: nil)
   attr(:page_title, :string, default: nil)
+  attr(:config, :any, default: nil)
 
   def meta(assigns) do
+    assigns = assign(assigns, :item, build(assigns[:item], assigns[:config]))
+
     ~H"""
-    <.live_title prefix={@item.title_prefix} suffix={@item.title_suffix}><%= @page_title || @item.title || @item.default_title %></.live_title>
-    <link :if={@item.canonical_url} rel="canonical" href={@item.canonical_url} />
+    <%= if @item do %>
+    <.live_title prefix={@item.title_prefix} suffix={@item.title_suffix}><%= @page_title || @item.title || @item.default_title %></.live_title><%= if @item.canonical_url do %>
+    <link rel="canonical" href={@item.canonical_url} />
+    <% end %><%= if @item.alternate_languages && @item.alternate_languages != [] do %>
     <link :for={{lang, url} <- @item.alternate_languages} rel="alternate" hreflag={lang} href={"#{url}"} />
-    <meta :if={@item.description} name="description" content={@item.description} />
-    <meta :if={@item.rating} name="rating" content={@item.rating} />
-    <%= if @item.robots && !Enum.empty?(List.wrap(@item.robots)) do %>
+    <% end %><%= if @item.description do %>
+    <meta name="description" content={@item.description} />
+    <% end %><%= if @item.rating do %>
+    <meta name="rating" content={@item.rating} />
+    <% end %><%= if @item.robots && !Enum.empty?(List.wrap(@item.robots)) do %>
     <meta name="robots" content={Enum.join(List.wrap(@item.robots), ", ")} />
     <% end %><%= if @item.google && !Enum.empty?(List.wrap(@item.google)) do %>
     <meta name="google" content={Enum.join(List.wrap(@item.google), ", ")} />
+    <% end %><%= if @item.googlebot do %>
+    <meta name="googlebot" content={@item.googlebot} />
+    <% end %><%= if @item.google_site_verification do %>
+    <meta name="google-site-verification" content={@item.google_site_verification} />
+    <% end %><%= if @item.windows_tile_color do %>
+    <meta name="msapplication-TileColor" content={@item.windows_tile_color} />
+    <% end %><%= if @item.theme_color do %>
+    <meta name="theme-color" content={@item.theme_color} />
+    <% end %><%= if @item.mask_icon_url && @item.mask_icon_color do %>
+    <link rel="mask-icon" href={"#{@item.mask_icon_url}"} color={@item.mask_icon_color}>
+    <% end %><%= if @item.manifest_url do %>
+    <link rel="manifest" href={"#{@item.manifest_url}"}>
     <% end %>
-    <meta :if={@item.googlebot} name="googlebot" content={@item.googlebot} />
-    <meta :if={@item.google_site_verification} name="google-site-verification" content={@item.google_site_verification} />
+    <% end %>
     """
   end
 end

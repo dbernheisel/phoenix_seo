@@ -1,8 +1,9 @@
 defmodule SEO.OpenGraph do
   @moduledoc """
-  Build OpenGraph tags. This is destined for Facebook, Google, Twitter, and Slack.
+  Build OpenGraph tags. This is consumed by platforms such as Google, Facebook, Twitter,
+  Slack, and others.
 
-  For example, the following is the Open Graph protocol markup for The Rock on IMDB:
+  For example, the following is the OpenGraph markup for the movie "The Rock" on IMDB:
 
   ```html
   <html>
@@ -26,9 +27,6 @@ defmodule SEO.OpenGraph do
   - https://developer.twitter.com/en/docs/tweets/optimize-with-cards/overview/abouts-cards
   """
 
-  ## TODO
-  # - Tokenizer that turns HTML into sentences. re: https://github.com/wardbradt/HTMLST
-
   use Phoenix.Component
   alias SEO.OpenGraph.Article
   alias SEO.OpenGraph.Audio
@@ -36,11 +34,13 @@ defmodule SEO.OpenGraph do
   alias SEO.OpenGraph.Image
   alias SEO.OpenGraph.Profile
   alias SEO.OpenGraph.Video
+  alias SEO.Utils
 
   defstruct [
     :url,
     :title,
     :description,
+    :determiner,
     :site_name,
     :type_detail,
     :image,
@@ -48,8 +48,7 @@ defmodule SEO.OpenGraph do
     :locale_alternate,
     :audio,
     :video,
-    type: :website,
-    determiner: :blank
+    type: :website
   ]
 
   @type t :: %__MODULE__{
@@ -72,15 +71,17 @@ defmodule SEO.OpenGraph do
   @type type_detail :: Article.t() | Profile.t() | Book.t() | nil
 
   @typedoc """
-  The word that appears before this item's title in a sentence. If `:auto` is chosen, the consumer of your data should
-  chose between "a" or "an".
-  """
-  @type open_graph_determiner :: :a | :an | :the | :auto | :blank
+  The word that appears before this item's title in a sentence.
 
+  If `:auto` is chosen, the consumer of your data should chose between "a" or "an".
+  """
+  @type open_graph_determiner :: :a | :an | :the | :auto | nil
+
+  @typedoc "The type of OpenGraph object."
   @type open_graph_type :: :article | :book | :profile | :website
 
   @doc """
-  Turn your structs into graph items.
+  Represent your items on the graph of the internet. 🤩🌐📄
 
   ## Basic Metadata
 
@@ -88,11 +89,11 @@ defmodule SEO.OpenGraph do
 
   - `:title` - The title of your item as it should appear within the graph, e.g., "The Rock".
   - `:type` - The type of your item, e.g., `:article`. Depending on the type you specify, other properties
-    may also be required.
+    may also be required. Default is `:website`.
   - `:image` - An image URL or `SEO.OpenGraph.Image` that represents your item within the graph.
   - `:url` - The canonical URL of your item that will be used as its permanent ID in the graph, e.g.,
     "https://www.imdb.com/title/tt0117500/". Ultimately, this is where the programs will scrape for metadata.
-    For example, if you point the og:url to a YouTube video page, the scraper will use the metadata found on
+    For example, if you use a url of a YouTube video page, the scraper will use the OpenGraph tags found on
     that video page and not the currently-visited site.
 
   ## Optional Metadata
@@ -102,10 +103,10 @@ defmodule SEO.OpenGraph do
   - `:audio` - A URL to a complementing audio file. You may also be more detail with `SEO.OpenGraph.Audio`
   - `:description` - A one to two sentence description of your item.
   - `:determiner` - The word that appears before this item's title in a sentence. An enum of `:a`, `:an`, `:the`,
-    `:blank`, `:auto`. If `:auto` is chosen, the consumer of your data should chose between `:a` or `:an`.
-    Default is `:blank`.
-  - `:locale` - The locale these tags are marked up in. Of the format language_TERRITORY. Blank is treated as `"en_US"`.
-  - `:locale:alternate` - An array of other locales this page is available in.
+    `nil`, `:auto`. If `:auto` is chosen, the consumer of your data should chose between `:a` or `:an`.
+  - `:locale` - The locale these tags are marked up in. Of the format language_TERRITORY.
+    Unsupplied is consumed as `"en_US"`.
+  - `:locale_alternate` - A list of other locales this page is available in and their URLs.
   - `:site_name` - If your item is part of a larger web site, the name which should be displayed for the overall
     site. e.g., "IMDb".
   - `:video` - A URL to a complementing video file. You may also provide more detail with `SEO.OpenGraph.Video`
@@ -115,46 +116,71 @@ defmodule SEO.OpenGraph do
 
   def build(attrs, default) do
     __MODULE__
-    |> SEO.Utils.merge_defaults(attrs, default)
-    |> build_type_detail(SEO.Utils.to_map(attrs))
+    |> Utils.merge_defaults(attrs, default)
+    |> build_type_detail()
   end
 
   @doc false
-  def build_type_detail(%{type: :website} = og, _attrs), do: og
+  def build_type_detail(nil), do: nil
+  def build_type_detail(%{type: :website} = og), do: og
 
-  def build_type_detail(%{type: :article} = og, attrs) do
-    %{og | type_detail: Article.build(attrs)}
+  def build_type_detail(%{type: :article} = og) do
+    %{og | type_detail: Article.build(og.type_detail)}
   end
 
-  def build_type_detail(%{type: :book} = og, attrs) do
-    %{og | type_detail: Book.build(attrs)}
+  def build_type_detail(%{type: :book} = og) do
+    %{og | type_detail: Book.build(og.type_detail)}
   end
 
-  def build_type_detail(%{type: :profile} = og, attrs) do
-    %{og | type_detail: Profile.build(attrs)}
+  def build_type_detail(%{type: :profile} = og) do
+    %{og | type_detail: Profile.build(og.type_detail)}
   end
 
-  attr(:item, __MODULE__, required: true)
+  attr(:item, __MODULE__, default: nil)
+  attr(:config, :any, default: nil)
 
   def meta(assigns) do
+    assigns = assign(assigns, :item, build(assigns[:item], assigns[:config]))
+
     ~H"""
-    <meta property="og:title" content={@item.title} :if={@item.title} />
-    <meta property="og:description" content={SEO.Utils.truncate(@item.description)} :if={@item.description} />
+    <%= if @item do %>
+    <%= if @item.title do %>
+    <meta property="og:title" content={@item.title} />
+    <% end %>
+    <%= if @item.description do %>
+    <meta property="og:description" content={@item.description |> Utils.squash_newlines() |> Utils.truncate()} />
+    <% end %>
     <meta property="og:type" content={@item.type} />
-    <SEO.Utils.url property="og:url" content={@item.url} :if={@item.url} />
-    <meta property="og:site_name" content={@item.site_name} :if={@item.site_name} />
-    <meta property="og:determiner" content={format_determiner(@item.determiner)} :if={@item.determiner != :blank} />
-    <meta property="og:locale" content={@item.locale} :if={@item.locale} />
-    <meta :for={locale <- List.wrap(@item.locale_alternate)} property="og:locale:alternate" content={locale} :if={List.wrap(@item.locale_alternate) != []} />
-    <Book.meta content={@item.type_detail} :if={@item.type == :book} />
-    <Article.meta content={@item.type_detail} :if={@item.type == :article} />
-    <Profile.meta content={@item.type_detail} :if={@item.type == :profile} />
-    <Image.meta :for={image <- List.wrap(@item.image)} content={image} />
-    <Audio.meta :for={audio <- List.wrap(@item.audio)} content={audio} />
-    <Video.meta :for={video <- List.wrap(@item.video)} content={video} />
+    <%= if @item.url do %>
+    <Utils.url property="og:url" content={@item.url} />
+    <% end %><%= if @item.site_name do %>
+    <meta property="og:site_name" content={@item.site_name} />
+    <% end %><%= if @item.determiner do %>
+    <meta property="og:determiner" content={"#{@item.determiner}"} />
+    <% end %><%= if @item.locale do %>
+    <meta property="og:locale" content={@item.locale} />
+    <% end %><%= if locales = List.wrap(@item.locale_alternate) != [] do %>
+    <meta :for={locale <- locales} property="og:locale:alternate" content={locale} />
+    <% end %><%= if @item.type == :book do %>
+    <Book.meta content={@item.type_detail} />
+    <% end %><%= if @item.type == :article do %>
+    <Article.meta content={@item.type_detail} />
+    <% end %><%= if @item.type == :article do %>
+    <Article.meta content={@item.type_detail} />
+    <% end %><%= if @item.type == :profile do %>
+    <Profile.meta content={@item.type_detail} />
+    <% end %><%= if images = List.wrap(@item.image) != [] do %>
+    <Image.meta :for={image <- images} content={image} />
+    <% end %><%= if audios = List.wrap(@item.audio) != [] do %>
+    <Audio.meta :for={audio <- audios} content={audio} />
+    <% end %><%= if videos = List.wrap(@item.video) != [] do %>
+    <Video.meta :for={video <- videos} content={video} />
+    <% end %>
+    <% end %>
     """
   end
+end
 
-  defp format_determiner(:blank), do: nil
-  defp format_determiner(determiner), do: "#{determiner}"
+defimpl SEO.OpenGraph.Build, for: Any do
+  def build(item), do: SEO.OpenGraph.build(item)
 end

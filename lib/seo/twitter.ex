@@ -120,33 +120,62 @@ defmodule SEO.Twitter do
 
   use Phoenix.Component
 
-  attr(:item, SEO.Twitter, required: true)
+  attr(:item, SEO.Twitter, default: nil)
+  attr(:config, :any, default: nil)
 
   def meta(assigns) do
+    assigns = assign(assigns, :item, build(assigns[:item], assigns[:config]))
+
     ~H"""
-    <meta name="twitter:card" content={@item.card} :if={@item.title || @item.description} />
-    <meta name="twitter:title" content={@item.title} :if={@item.title} />
-    <meta name="twitter:description" content={@item.description} :if={@item.description} />
-    <meta name="twitter:site" content={@item.site} :if={@item.site} />
-    <meta name="twitter:site_id" content={@item.site_id} :if={@item.site_id} />
-    <meta name="twitter:creator" content={@item.creator} :if={@item.creator} />
-    <meta name="twitter:creator_id" content={@item.creator_id} :if={@item.creator_id} />
-    <meta name="twitter:image" content={"#{@item.image}"} :if={@item.image} />
-    <meta name="twitter:image:alt" content={@item.image_alt} :if={@item.image_alt} />
-    <meta name="twitter:player" content={"#{@item.player}"} :if={@item.player} />
-    <meta name="twitter:player:width" content={@item.player_width} :if={@item.player_width} />
-    <meta name="twitter:player:height" content={@item.player_height} :if={@item.player_height} />
-    <meta name="twitter:player:stream" content={"#{@item.player_stream}"} :if={@item.player_stream} />
-    <meta name="twitter:app:name:iphone" content={@item.app_name_iphone} :if={@item.app_name_iphone} />
-    <meta name="twitter:app:id:iphone" content={@item.app_id_iphone} :if={@item.app_id_iphone} />
-    <meta name="twitter:app:url:iphone" content={"#{@item.app_url_iphone}"} :if={@item.app_url_iphone} />
-    <meta name="twitter:app:name:ipad" content={@item.app_name_ipad} :if={@item.app_name_ipad} />
-    <meta name="twitter:app:id:ipad" content={@item.app_id_ipad} :if={@item.app_id_ipad} />
-    <meta name="twitter:app:url:ipad" content={"#{@item.app_url_ipad}"} :if={@item.app_url_ipad} />
-    <meta name="twitter:app:name:googleplay" content={@item.app_name_googleplay} :if={@item.app_name_googleplay} />
-    <meta name="twitter:app:id:googleplay" content={@item.app_id_googleplay} :if={@item.app_id_googleplay} />
-    <meta name="twitter:app:url:googleplay" content={"#{@item.app_url_googleplay}"} :if={@item.app_url_googleplay} />
-    <meta name="twitter:app:country" content={@item.app_country} :if={@item.app_country} />
+    <%= if @item do %>
+    <%= if @item.title || @item.description do %>
+    <meta name="twitter:card" content={@item.card} />
+    <% end %><%= if @item.title do %>
+    <meta name="twitter:title" content={@item.title} />
+    <% end %><%= if @item.description do %>
+    <meta name="twitter:description" content={@item.description} />
+    <% end %><%= if @item.site do %>
+    <meta name="twitter:site" content={@item.site} />
+    <% end %><%= if @item.site_id do %>
+    <meta name="twitter:site_id" content={@item.site_id} />
+    <% end %><%= if @item.creator do %>
+    <meta name="twitter:creator" content={@item.creator} />
+    <% end %><%= if @item.creator_id do %>
+    <meta name="twitter:creator_id" content={@item.creator_id} />
+    <% end %><%= if @item.image do %>
+    <meta name="twitter:image" content={"#{@item.image}"} />
+    <% end %><%= if @item.image_alt do %>
+    <meta name="twitter:image:alt" content={@item.image_alt} />
+    <% end %><%= if @item.player do %>
+    <meta name="twitter:player" content={"#{@item.player}"} />
+    <% end %><%= if @item.player_width do %>
+    <meta name="twitter:player:width" content={@item.player_width} />
+    <% end %><%= if @item.player_height do %>
+    <meta name="twitter:player:height" content={@item.player_height} />
+    <% end %><%= if @item.player_stream do %>
+    <meta name="twitter:player:stream" content={"#{@item.player_stream}"} />
+    <% end %><%= if @item.app_name_iphone do %>
+    <meta name="twitter:app:name:iphone" content={@item.app_name_iphone} />
+    <% end %><%= if @item.app_id_iphone do %>
+    <meta name="twitter:app:id:iphone" content={@item.app_id_iphone} />
+    <% end %><%= if @item.app_url_iphone do %>
+    <meta name="twitter:app:url:iphone" content={"#{@item.app_url_iphone}"} />
+    <% end %><%= if @item.app_name_ipad do %>
+    <meta name="twitter:app:name:ipad" content={@item.app_name_ipad} />
+    <% end %><%= if @item.app_id_ipad do %>
+    <meta name="twitter:app:id:ipad" content={@item.app_id_ipad} />
+    <% end %><%= if @item.app_url_ipad do %>
+    <meta name="twitter:app:url:ipad" content={"#{@item.app_url_ipad}"} />
+    <% end %><%= if @item.app_name_googleplay do %>
+    <meta name="twitter:app:name:googleplay" content={@item.app_name_googleplay} />
+    <% end %><%= if @item.app_id_googleplay do %>
+    <meta name="twitter:app:id:googleplay" content={@item.app_id_googleplay} />
+    <% end %><%= if @item.app_url_googleplay do %>
+    <meta name="twitter:app:url:googleplay" content={"#{@item.app_url_googleplay}"} />
+    <% end %><%= if @item.app_country do %>
+    <meta name="twitter:app:country" content={@item.app_country} />
+    <% end %>
+    <% end %>
     """
   end
 end
