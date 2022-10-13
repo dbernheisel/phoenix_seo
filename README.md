@@ -39,24 +39,24 @@ end
 ```elixir
 defmodule MyAppWeb.SEO do
   use SEO, [
-    {SEO.Site, SEO.Site.build(
+    site: [
       default_title: "Default Title",
       description: "A blog about development",
       title_suffix: " · My App"
-    )},
-    {SEO.OpenGraph, SEO.OpenGraph.build(
+    ],
+    open_graph: [
       description: "A blog about development",
       site_name: "David Bernheisel's Blog",
       type: :website,
       locale: "en_US"
-    )},
-    {SEO.Twitter, SEO.Twitter.build(
+    ],
+    twitter: [
       site: "@bernheisel",
       site_id: "27704724",
       creator: "@bernheisel",
       creator_id: "27704724",
       card: :summary
-    )},
+    ],
     json_library: Jason
   ]
 end
@@ -85,31 +85,31 @@ defimpl SEO.Build, for: MyApp.Article do
   @endpoint MyAppWeb.Endpoint
 
   def site(article) do
-    SEO.Site.build(
+    [
       title: article.title,
       description: article.short_description
-    )
+    ]
   end
 
   def unfurl(article) do
-    SEO.Unfurl.build(
+    [     
       label1: "Reading Time",
       data1: "#{article.reading_time} min",
       label2: "Category",
       data2: article.category
-    )
+    ]
   end
 
   def twitter(article) do
     if creator = article.author.twitter_handle do
-      SEO.Twitter.build([])
+      []
     else
-      SEO.Twitter.build(creator: creator)
+      [creator: creator]
     end
   end
 
   def open_graph(article) do
-    SEO.OpenGraph.build(
+    [
       title: article.title,
       type_detail: SEO.OpenGraph.Article.build(
         published_time: article.published_at,
@@ -122,14 +122,14 @@ defimpl SEO.Build, for: MyApp.Article do
       locale, "en_US",
       type: :article,
       description: article.short_description
-    )
+    ]
   end
 
   def breadcrumb_list(article) do
-    SEO.Breadcrumb.List.build([
+    [
       [name: "Posts", item: Routes.blog_url(@endpoint, :index)],
       [name: article.title, item: Routes.blog_url(@endpoint, :show, article.id)]
-    ])
+    ]
   end
 
   defp put_image(article) do
