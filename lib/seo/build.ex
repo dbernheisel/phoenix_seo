@@ -22,6 +22,10 @@ defprotocol SEO.Build do
   def site(term, default)
   def site(term)
 
+  @spec facebook(term, term) :: SEO.Facebook.t() | nil
+  def facebook(term, default)
+  def facebook(term)
+
   @spec unfurl(term, term) :: SEO.Unfurl.t() | nil
   def unfurl(term, default)
   def unfurl(term)

@@ -16,16 +16,16 @@ defmodule SEO.Breadcrumb do
   use Phoenix.Component
   alias SEO.Breadcrumb.List
 
-  defstruct []
-
-  attr(:item, SEO.Breadcrumb.List, required: true)
+  attr(:item, SEO.Breadcrumb.List)
   attr(:json_library, :atom, required: true)
 
   def meta(assigns) do
     ~H"""
+    <%= if @item != [] do %>
     <script type="application/ld+json">
       <%= Phoenix.HTML.raw(@json_library.encode!(List.to_map(@item))) %>
     </script>
+    <% end %>
     """
   end
 end

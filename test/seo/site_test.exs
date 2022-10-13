@@ -36,8 +36,9 @@ defmodule SEO.SiteTest do
     end
 
     test "renders with no struct and no default" do
-      item = []
-      render_component(&Site.meta/1, build_assigns(item))
+      item = nil
+      result = render_component(&Site.meta/1, build_assigns(item))
+      assert result == "<title></title>\n\n\n\n\n\n\n"
     end
 
     test "defaults can be a keyword list, map, or struct of attributes" do

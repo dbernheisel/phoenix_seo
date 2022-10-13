@@ -33,11 +33,6 @@ defmodule SEO.Utils do
     |> String.trim()
   end
 
-  def merge_defaults(assigns) do
-    item = struct(assigns[:item], Map.from_struct(assigns[:default]))
-    Phoenix.Component.assign(assigns, :item, item)
-  end
-
   def to_iso8601(%NaiveDateTime{} = ndt), do: NaiveDateTime.to_iso8601(ndt)
   def to_iso8601(%DateTime{} = dt), do: DateTime.to_iso8601(dt)
   def to_iso8601(%Date{} = d), do: Date.to_iso8601(d)
@@ -50,6 +45,7 @@ defmodule SEO.Utils do
   end
 
   def to_map(nil), do: %{}
+  def to_map([]), do: %{}
   def to_map(x) when is_struct(x), do: Map.from_struct(x)
   def to_map(x) when is_list(x), do: Enum.into(x, %{})
   def to_map(x) when is_map(x), do: x

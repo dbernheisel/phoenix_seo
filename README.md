@@ -47,14 +47,14 @@ defmodule MyAppWeb.SEO do
     ),
     open_graph: SEO.OpenGraph.build(
       description: "A blog about development",
-      site_name: "David Bernheisel's Blog",
+      site_name: "My Blog",
       type: :website,
       locale: "en_US"
     ),
     twitter: SEO.Twitter.build(
-      site: "@bernheisel",
+      site: "@example",
       site_id: "27704724",
-      creator: "@bernheisel",
+      creator: "@example",
       creator_id: "27704724",
       card: :summary
     )
@@ -118,7 +118,7 @@ defimpl SEO.Build, for: MyApp.Article do
         tag: article.tags
       ),
       image: put_image(article),
-      url: Routes.blog_url(@endpoint, article.id),
+      url: Routes.article_url(@endpoint, article.id),
       type: :article,
       description: article.short_description
     ]
@@ -126,13 +126,13 @@ defimpl SEO.Build, for: MyApp.Article do
 
   def breadcrumb_list(article) do
     [
-      [name: "Posts", item: Routes.blog_url(@endpoint, :index)],
-      [name: article.title, item: Routes.blog_url(@endpoint, :show, article.id)]
+      [name: "Articles", item: Routes.article_url(@endpoint, :index)],
+      [name: article.title, item: Routes.article_url(@endpoint, :show, article.id)]
     ]
   end
 
   defp put_image(article) do
-    file = "/images/blog/#{article.id}.png"
+    file = "/images/article/#{article.id}.png"
 
     exists? =
       [Application.app_dir(:my_app), "/priv/static", file]
@@ -169,8 +169,8 @@ end
 # In a Phoenix LiveView, make sure you handle with
 # mount/3 or handle_params/3 so it's present on
 # first static render.
-def mount(params, _session, socket) do
-  {:ok, socket}
+def mount(_params, _session, socket) do
+  {:ok, socket, temporary_assigns: [SEO.key()]}
 end
 
 def handle_params(params, _uri, socket) do
@@ -178,12 +178,28 @@ def handle_params(params, _uri, socket) do
 end
 ```
 
-4. Use your SEO module in your root layout
+4. Juice up your root layout
 
 ```heex
 <head>
   <%# remove the Phoenix-generated <.live_title> component %>
-  <%# and replace with MyAppWeb.SEO.juice component %>
-  <MyAppWeb.SEO.juice item={SEO.item(assigns)} page_title={assigns[:page_title]} />
+  <%# and replace with SEO.juice component %>
+  <SEO.juice config={MyAppWeb.SEO.config()} item={SEO.item(assigns)} page_title={assigns[:page_title]} />
+</head>
+```
+
+Alternatively, you may selectively render components. You can provide runtime
+configuration this way as well. For example:
+
+```heex
+<head>
+  <%# With your SEO module's configuration %>
+  <SEO.OpenGraph.meta item={SEO.Build.open_graph(SEO.item(assigns), MyAppWeb.SEO.config(:open_graph))} />
+
+  <%# Or with runtime configuration %>
+  <SEO.OpenGraph.meta item={SEO.Build.open_graph(SEO.item(assigns), %{site_name: "Foo Fighters"})} />
+
+  <%# Or without configuration is fine too %>
+  <SEO.OpenGraph.meta item={SEO.Build.open_graph(SEO.item(assigns))} />
 </head>
 ```

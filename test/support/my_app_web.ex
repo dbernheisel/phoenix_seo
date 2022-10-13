@@ -7,7 +7,7 @@ defmodule MyAppWeb.SEO do
       SEO.Site.build(
         default_title: "Default Title",
         description: "A blog about development",
-        title_suffix: " · My App"
+        title_suffix: "Suf"
       ),
     open_graph:
       SEO.OpenGraph.build(
@@ -40,14 +40,14 @@ end
 defimpl SEO.Build, for: MyApp.Article.Index do
   use SEO.Builder
 
-  def site(index, _default) do
+  def site(index) do
     SEO.Site.build(
       title: index.title,
       description: index.description
     )
   end
 
-  def breadcrumb_list(_index, _default) do
+  def breadcrumb_list(_index) do
     SEO.Breadcrumb.List.build([
       SEO.Breadcrumb.Item.build(
         position: 1,

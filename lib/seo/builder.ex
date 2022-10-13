@@ -13,6 +13,11 @@ defmodule SEO.Builder do
     def open_graph(item) do
       SEO.OpenGraph.build(...)
     end
+
+    # Optionally, you may also implement arity 2 which also receives the config for the domain
+    def open_graph(item, default_open_graph_attrs) do
+      SEO.OpenGraph.build(...)
+    end
   end
   ```
   """
@@ -29,6 +34,8 @@ defmodule SEO.Builder do
       def twitter(item), do: SEO.Twitter.build(item)
       def unfurl(item, default), do: SEO.Unfurl.build(item, default)
       def unfurl(item), do: SEO.Unfurl.build(item)
+      def facebook(item, default), do: SEO.Facebook.build(item, default)
+      def facebook(item), do: SEO.Facebook.build(item)
 
       defoverridable SEO.Build
     end

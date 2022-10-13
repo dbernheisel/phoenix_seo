@@ -1,36 +1,20 @@
-defmodule SEO.Compiler do
+defmodule SEO.Config do
   @moduledoc false
 
-  defmacro __before_compile__(env) do
-    SEO.Compiler.put_config(env.module)
-
-    quote location: :keep do
-      @doc false
-      def config, do: @config
-      def config(domain), do: config()[domain]
-
-      SEO.define_juice()
-    end
-  end
-
-  def put_config(mod) do
+  def validate!(config) do
     poison = if Code.ensure_loaded?(Poison), do: Poison
     jason = if Code.ensure_loaded?(Jason), do: Jason
     phoenix_json = Application.get_env(:phoenix, :json_library)
     seo_json = Application.get_env(:seo, :json_library)
     json_library = seo_json || phoenix_json || jason || poison
-    validate_json(json_library, seo_json)
+    validate_json!(json_library, seo_json)
 
-    config =
-      Module.get_attribute(mod, :seo_options, [])
-      |> Enum.into(%{})
-      |> Map.put_new(:json_library, json_library)
-
-    Module.put_attribute(mod, :config, config)
-    Module.put_attribute(mod, :json_library, json_library)
+    config
+    |> Enum.into(%{})
+    |> Map.put_new(:json_library, json_library)
   end
 
-  def validate_json(json_library, seo_json) do
+  defp validate_json!(json_library, seo_json) do
     cond do
       Code.ensure_loaded?(json_library) and function_exported?(json_library, :encode!, 1) ->
         :ok
