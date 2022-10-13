@@ -106,16 +106,10 @@ defmodule SEO.Site do
       - `0` show a static image instead
       - `-1` allow any preview length
   """
-  def build(attrs, default \\ %__MODULE__{})
+  def build(attrs, defaults \\ %__MODULE__{})
 
-  def build(attrs, default) when is_map(attrs) do
-    %__MODULE__{}
-    |> Map.merge(default)
-    |> Map.merge(attrs)
-  end
-
-  def build(attrs, default) when is_list(attrs) do
-    build(Enum.into(attrs, %{}), default)
+  def build(attrs, defaults) do
+    SEO.Utils.merge_defaults(__MODULE__, attrs, defaults)
   end
 
   attr(:item, :any, required: true)

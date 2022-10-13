@@ -111,17 +111,10 @@ defmodule SEO.OpenGraph do
   - `:video` - A URL to a complementing video file. You may also provide more detail with `SEO.OpenGraph.Video`
   """
 
-  def build(attrs, default \\ nil)
+  def build(attrs, defaults \\ %__MODULE__{})
 
-  def build(attrs, default) when is_map(attrs) do
-    %__MODULE__{}
-    |> struct(Map.merge(default || %{}, attrs))
-    |> build_type_detail(attrs)
-  end
-
-  def build(attrs, default) when is_list(attrs) do
-    %__MODULE__{}
-    |> struct(Keyword.merge(default || [], attrs))
+  def build(attrs, defaults) do
+    SEO.Utils.merge_defaults(__MODULE__, attrs, defaults)
     |> build_type_detail(attrs)
   end
 
@@ -149,7 +142,7 @@ defmodule SEO.OpenGraph do
     <meta property="og:type" content={@item.type} />
     <SEO.Utils.url property="og:url" content={@item.url} :if={@item.url} />
     <meta property="og:site_name" content={@item.site_name} :if={@item.site_name} />
-    <meta property="og:determiner" content={format_determiner(@item.determiner)} :if={@item.determiner} />
+    <meta property="og:determiner" content={format_determiner(@item.determiner)} :if={@item.determiner !=:blank} />
     <meta property="og:locale" content={@item.locale} :if={@item.locale} />
     <meta :for={locale <- List.wrap(@item.locale_alternate)} property="og:locale:alternate" content={locale} :if={List.wrap(@item.locale_alternate) != []} />
     <Book.meta content={@item.type_detail} :if={@item.type == :book} />
@@ -161,6 +154,6 @@ defmodule SEO.OpenGraph do
     """
   end
 
-  defp format_determiner(:blank), do: ""
+  defp format_determiner(:blank), do: nil
   defp format_determiner(determiner), do: "#{determiner}"
 end

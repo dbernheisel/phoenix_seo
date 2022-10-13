@@ -112,14 +112,10 @@ defmodule SEO.Twitter do
   use the OpenGraph tags. Unless you have specific messaging for Twitter followers, it's typically good enough to use
   OpenGraph for most data.
   """
-  def build(attrs, default \\ nil)
+  def build(attrs, defaults \\ %__MODULE__{})
 
-  def build(attrs, default) when is_map(attrs) do
-    struct(__MODULE__, Map.merge(default || %{}, attrs))
-  end
-
-  def build(attrs, default) when is_list(attrs) do
-    struct(__MODULE__, Keyword.merge(default || [], attrs))
+  def build(attrs, defaults) do
+    SEO.Utils.merge_defaults(__MODULE__, attrs, defaults)
   end
 
   use Phoenix.Component
@@ -128,7 +124,7 @@ defmodule SEO.Twitter do
 
   def meta(assigns) do
     ~H"""
-    <meta name="twitter:card" content={@item.card} :if={@item.title || @title.description} />
+    <meta name="twitter:card" content={@item.card} :if={@item.title || @item.description} />
     <meta name="twitter:title" content={@item.title} :if={@item.title} />
     <meta name="twitter:description" content={@item.description} :if={@item.description} />
     <meta name="twitter:site" content={@item.site} :if={@item.site} />
