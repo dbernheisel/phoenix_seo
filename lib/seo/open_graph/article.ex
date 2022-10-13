@@ -39,8 +39,10 @@ defmodule SEO.OpenGraph.Article do
   - `:section` - A high-level section name. E.g. `"Technology"`
   - `:tag` - Tag words associated with this article. E.g. `["Elixir", "Ecto"]`
   """
-  def build(attrs) when is_map(attrs) or is_list(attrs) do
-    struct(%__MODULE__{}, attrs)
+  def build(attrs, default \\ nil)
+
+  def build(attrs, default) do
+    SEO.Utils.merge_defaults(__MODULE__, attrs, default)
   end
 
   use Phoenix.Component

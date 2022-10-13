@@ -108,14 +108,8 @@ defmodule SEO.Site do
   """
   def build(attrs, default \\ %__MODULE__{})
 
-  def build(attrs, default) when is_map(attrs) do
-    %__MODULE__{}
-    |> Map.merge(default)
-    |> Map.merge(attrs)
-  end
-
-  def build(attrs, default) when is_list(attrs) do
-    build(Enum.into(attrs, %{}), default)
+  def build(attrs, default) do
+    SEO.Utils.merge_defaults(__MODULE__, attrs, default)
   end
 
   attr(:item, :any, required: true)

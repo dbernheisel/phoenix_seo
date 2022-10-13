@@ -1,30 +1,29 @@
 defmodule MyAppWeb.SEO do
   @moduledoc false
 
-  use SEO, [
-    {SEO.Site,
-     %SEO.Site{
-       default_title: "Default Title",
-       description: "A blog about development",
-       title_suffix: " · My App"
-     }},
-    {SEO.OpenGraph,
-     %SEO.OpenGraph{
-       description: "A blog about development",
-       site_name: "David Bernheisel's Blog",
-       type: "website",
-       locale: "en_US"
-     }},
-    {SEO.Twitter,
-     %SEO.Twitter{
-       site: "@bernheisel",
-       site_id: "27704724",
-       creator: "@bernheisel",
-       creator_id: "27704724",
-       card: :summary
-     }},
-    json_library: Jason
-  ]
+  use SEO,
+    json_library: Jason,
+    site:
+      SEO.Site.build(
+        default_title: "Default Title",
+        description: "A blog about development",
+        title_suffix: " · My App"
+      ),
+    open_graph:
+      SEO.OpenGraph.build(
+        description: "A blog about development",
+        site_name: "David Bernheisel's Blog",
+        type: :website,
+        locale: "en_US"
+      ),
+    twitter:
+      SEO.Twitter.build(
+        site: "@bernheisel",
+        site_id: "27704724",
+        creator: "@bernheisel",
+        creator_id: "27704724",
+        card: :summary
+      )
 end
 
 defmodule MyApp.Article do

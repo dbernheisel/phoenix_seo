@@ -68,8 +68,10 @@ defmodule SEO.OpenGraph.Video do
     - `:full_hd` - 1080p quality with resolution greater than 1080x1920 and bitrate higher than 2Mbps
   """
 
-  def build(attrs) when is_map(attrs) or is_list(attrs) do
-    struct(%__MODULE__{}, attrs)
+  def build(attrs, default \\ nil)
+
+  def build(attrs, default) do
+    SEO.Utils.merge_defaults(__MODULE__, attrs, default)
   end
 
   attr(:content, :any, required: true)

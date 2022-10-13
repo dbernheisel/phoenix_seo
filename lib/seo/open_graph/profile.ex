@@ -29,8 +29,10 @@ defmodule SEO.OpenGraph.Profile do
           gender: String.t()
         }
 
-  def build(attrs) when is_map(attrs) or is_list(attrs) do
-    struct(%__MODULE__{}, attrs)
+  def build(attrs, default \\ nil)
+
+  def build(attrs, default) do
+    SEO.Utils.merge_defaults(__MODULE__, attrs, default)
   end
 
   attr(:content, :any, required: true)

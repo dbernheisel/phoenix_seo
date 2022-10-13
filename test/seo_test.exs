@@ -7,28 +7,30 @@ defmodule SEOTest do
       item = %{foo: :bar}
       conn = %Plug.Conn{} |> SEO.assign(item)
 
-      assert ^item = SEO.get(conn)
+      assert ^item = SEO.item(conn)
     end
 
     test "gets the item from a LiveView Socket" do
       item = %{foo: :bar}
       socket = %Phoenix.LiveView.Socket{} |> SEO.assign(item)
 
-      assert ^item = SEO.get(socket)
+      assert ^item = SEO.item(socket)
     end
-
-    test "gets the item from assigns" do
-      item = %{foo: :bar}
-      conn = %Plug.Conn{} |> SEO.assign(item)
-      socket = %Phoenix.LiveView.Socket{} |> SEO.assign(item)
-
-      assert ^item = SEO.get(conn.assigns)
-      assert ^item = SEO.get(socket.assigns)
-    end
-
   end
 
   describe "assign" do
+    test "assigns for a Plug.Conn" do
+      item = %{foo: :bar}
+      conn = %Plug.Conn{} |> SEO.assign(item)
 
+      assert %{private: %{seo: ^item}} = conn
+    end
+
+    test "assigns for a LiveView Socket" do
+      item = %{foo: :bar}
+      socket = %Phoenix.LiveView.Socket{} |> SEO.assign(item)
+
+      assert %{assigns: %{seo: ^item}} = socket
+    end
   end
 end

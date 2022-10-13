@@ -39,14 +39,11 @@ defmodule SEO.Unfurl do
   - `:data2` - 2nd data point
 
   """
+
   def build(attrs, default \\ nil)
 
-  def build(attrs, default) when is_list(attrs) do
-    struct(%__MODULE__{}, Keyword.merge(default || [], attrs))
-  end
-
-  def build(attrs, default) when is_map(attrs) do
-    struct(%__MODULE__{}, Map.merge(default || %{}, attrs))
+  def build(attrs, default) do
+    SEO.Utils.merge_defaults(__MODULE__, attrs, default)
   end
 
   use Phoenix.Component

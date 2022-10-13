@@ -39,25 +39,25 @@ end
 ```elixir
 defmodule MyAppWeb.SEO do
   use SEO, [
-    site: [
+    json_library: Jason,
+    site: SEO.Site.build(
       default_title: "Default Title",
       description: "A blog about development",
       title_suffix: " · My App"
-    ],
-    open_graph: [
+    ),
+    open_graph: SEO.OpenGraph.build(
       description: "A blog about development",
       site_name: "David Bernheisel's Blog",
       type: :website,
       locale: "en_US"
-    ],
-    twitter: [
+    ),
+    twitter: SEO.Twitter.build(
       site: "@bernheisel",
       site_id: "27704724",
       creator: "@bernheisel",
       creator_id: "27704724",
       card: :summary
-    ],
-    json_library: Jason
+    )
   ]
 end
 ```
@@ -66,7 +66,7 @@ end
 
 ```elixir
 defmodule MyApp.Article do
-  # This might be an Ecto schema, or just a plain struct
+  # This might be an Ecto schema or a plain struct
   defstruct [
       :id,
       :title,
@@ -92,7 +92,7 @@ defimpl SEO.Build, for: MyApp.Article do
   end
 
   def unfurl(article) do
-    [     
+    [
       label1: "Reading Time",
       data1: "#{article.reading_time} min",
       label2: "Category",
@@ -119,7 +119,6 @@ defimpl SEO.Build, for: MyApp.Article do
       ),
       image: put_image(article),
       url: Routes.blog_url(@endpoint, article.id),
-      locale, "en_US",
       type: :article,
       description: article.short_description
     ]

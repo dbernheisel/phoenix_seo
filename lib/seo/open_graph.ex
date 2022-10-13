@@ -113,16 +113,10 @@ defmodule SEO.OpenGraph do
 
   def build(attrs, default \\ nil)
 
-  def build(attrs, default) when is_map(attrs) do
-    %__MODULE__{}
-    |> struct(Map.merge(default || %{}, attrs))
-    |> build_type_detail(attrs)
-  end
-
-  def build(attrs, default) when is_list(attrs) do
-    %__MODULE__{}
-    |> struct(Keyword.merge(default || [], attrs))
-    |> build_type_detail(attrs)
+  def build(attrs, default) do
+    __MODULE__
+    |> SEO.Utils.merge_defaults(attrs, default)
+    |> build_type_detail(SEO.Utils.to_map(attrs))
   end
 
   @doc false

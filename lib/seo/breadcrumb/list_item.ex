@@ -17,8 +17,10 @@ defmodule SEO.Breadcrumb.ListItem do
           item: SEO.Breadcrumb.Item.t()
         }
 
-  def build(attrs, _default \\ nil) when is_map(attrs) or is_list(attrs) do
-    struct(%__MODULE__{}, attrs)
+  def build(attrs, default \\ nil)
+
+  def build(attrs, default) do
+    SEO.Utils.merge_defaults(__MODULE__, attrs, default)
   end
 
   @doc false

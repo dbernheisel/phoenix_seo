@@ -7,9 +7,7 @@ defmodule SEO.Compiler do
     quote location: :keep do
       @doc false
       def config, do: @config
-
-      @doc false
-      def config(mod), do: config()[mod] || struct(mod, [])
+      def config(domain), do: config()[domain]
 
       SEO.define_juice()
     end
