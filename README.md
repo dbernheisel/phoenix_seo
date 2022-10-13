@@ -47,7 +47,7 @@ defmodule MyAppWeb.SEO do
     {SEO.OpenGraph, SEO.OpenGraph.build(
       description: "A blog about development",
       site_name: "David Bernheisel's Blog",
-      type: "website",
+      type: :website,
       locale: "en_US"
     )},
     {SEO.Twitter, SEO.Twitter.build(
@@ -79,7 +79,7 @@ defmodule MyApp.Article do
     ]
 end
 
-defimpl MyApp.Article, for: SEO.Build do
+defimpl SEO.Build, for: MyApp.Article do
   use SEO.Builder
   alias MyAppWeb.Router.Helpers, as: Routes
   @endpoint MyAppWeb.Endpoint
@@ -117,7 +117,7 @@ defimpl MyApp.Article, for: SEO.Build do
         section: "Reviews",
         tag: article.tags
       ),
-      image: image(article),
+      image: put_image(article),
       url: Routes.blog_url(@endpoint, article.id),
       locale, "en_US",
       type: :article,
@@ -128,7 +128,7 @@ defimpl MyApp.Article, for: SEO.Build do
   def breadcrumb_list(article) do
     SEO.Breadcrumb.List.build([
       [name: "Posts", item: Routes.blog_url(@endpoint, :index)],
-      [name: article.title, item: Routes.blog_url(@endpoint, :show, post.id)]
+      [name: article.title, item: Routes.blog_url(@endpoint, :show, article.id)]
     ])
   end
 
