@@ -24,7 +24,7 @@ defmodule SEO.Breadcrumb do
   def meta(assigns) do
     ~H"""
     <script type="application/ld+json">
-      <%= Phoenix.HTML.raw(@json_mod.encode!(List.to_map(@item))) %>
+      <%= Phoenix.HTML.raw(@json_library.encode!(List.to_map(@item))) %>
     </script>
     """
   end
