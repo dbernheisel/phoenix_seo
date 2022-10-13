@@ -47,7 +47,7 @@ defmodule SEO do
         <SEO.OpenGraph.meta item={SEO.Build.open_graph(@item, config(:open_graph))} />
         <SEO.Twitter.meta item={SEO.Build.twitter(@item, config(:twitter))} />
         <SEO.Facebook.meta item={SEO.Build.facebook(@item, config(:facebook))} />
-        <SEO.Breadcrumb.meta item={SEO.Build.breadcrumb_list(@item, config(:breadcrumb))} />
+        <SEO.Breadcrumb.meta json_library={config(:json_library)} item={SEO.Build.breadcrumb_list(@item, config(:breadcrumb))} />
         """
       end
     end

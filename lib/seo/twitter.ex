@@ -124,7 +124,7 @@ defmodule SEO.Twitter do
 
   def meta(assigns) do
     ~H"""
-    <meta name="twitter:card" content={@item.card} :if={@item.title || @title.description} />
+    <meta name="twitter:card" content={@item.card} :if={@item.title || @item.description} />
     <meta name="twitter:title" content={@item.title} :if={@item.title} />
     <meta name="twitter:description" content={@item.description} :if={@item.description} />
     <meta name="twitter:site" content={@item.site} :if={@item.site} />

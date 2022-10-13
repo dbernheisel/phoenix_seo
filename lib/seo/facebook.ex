@@ -29,9 +29,7 @@ defmodule SEO.Facebook do
 
   def meta(assigns) do
     ~H"""
-    <%= if @item.app_id do %>
-    <meta name="fb:app_id" content={@item.app_id} />
-    <% end %>
+    <meta :if={@item.app_id} name="fb:app_id" content={@item.app_id} />
     """
   end
 end

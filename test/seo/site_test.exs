@@ -5,20 +5,21 @@ defmodule SEO.SiteTest do
 
   describe "meta" do
     test "renders everything" do
-      default = SEO.Site.build(
-        title_suffix: "Suf",
-        title_prefix: "Pre",
-        canonical_url: "https://example.com/canonical",
-        rating: "Adult",
-        robots: ["noindex", "nofollow"],
-        googlebot: "notranslate",
-        alternate_languages: [
-          {"en_US", "https://en.example.com"},
-          {"ja_JP", URI.parse("https://jp.example.com")}
-        ],
-        google: ["nositelinkssearch", "nopagereadaloud"],
-        description: "description"
-      )
+      default =
+        SEO.Site.build(
+          title_suffix: "Suf",
+          title_prefix: "Pre",
+          canonical_url: "https://example.com/canonical",
+          rating: "Adult",
+          robots: ["noindex", "nofollow"],
+          googlebot: "notranslate",
+          alternate_languages: [
+            {"en_US", "https://en.example.com"},
+            {"ja_JP", URI.parse("https://jp.example.com")}
+          ],
+          google: ["nositelinkssearch", "nopagereadaloud"],
+          description: "description"
+        )
 
       item = %MyApp.Article{title: "Title"}
 

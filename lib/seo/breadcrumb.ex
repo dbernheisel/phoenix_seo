@@ -19,15 +19,13 @@ defmodule SEO.Breadcrumb do
   defstruct []
 
   attr(:item, SEO.Breadcrumb.List, required: true)
-  attr(:default, SEO.Breadcrumb, required: true)
+  attr(:json_library, :atom, required: true)
 
   def meta(assigns) do
     ~H"""
     <script type="application/ld+json">
-      <%= Phoenix.HTML.raw(@default[:json_library].encode!(to_map(@item))) %>
+      <%= Phoenix.HTML.raw(@json_mod.encode!(List.to_map(@item))) %>
     </script>
     """
   end
-
-  defp to_map(%List{} = list), do: List.to_map(list)
 end

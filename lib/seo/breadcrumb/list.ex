@@ -41,6 +41,7 @@ defmodule SEO.Breadcrumb.List do
   ])
   ```
   """
+
   def build(attrs, _default \\ nil) when is_list(attrs) do
     %__MODULE__{itemListElement: format_items(attrs)}
   end
