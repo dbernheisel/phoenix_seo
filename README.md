@@ -67,84 +67,91 @@ end
 ```elixir
 defmodule MyApp.Article do
   # This might be an Ecto schema or a plain struct
-  defstruct [
-      :id,
-      :title,
-      :short_description,
-      :reading_time,
-      :category,
-      :author,
-      :published_at,
-      tags: []
-    ]
+  defstruct [:id, :title, :description, :author, :reading]
 end
 
 defimpl SEO.OpenGraph.Build, for: MyApp.Article do
   alias MyAppWeb.Router.Helpers, as: Routes
   @endpoint MyAppWeb.Endpoint
 
-  def build(article, default \\ nil) do
-    SEO.OpenGraph.build([
-      title: article.title,
-      type_detail: SEO.OpenGraph.Article.build(
-        published_time: article.published_at,
-        author: article.author.name,
-        section: "Reviews",
-        tag: article.tags
-      ),
-      image: put_image(article),
-      url: Routes.article_url(@endpoint, article.id),
+  def build(article) do
+    SEO.OpenGraph.build(
       type: :article,
-      description: article.short_description
-    ], default)
-  end
-end
-
-defimpl SEO.Site.Build, for: MyApp.Article do
-  def build(article, default \\ nil) do
-    [
+      type_detail:
+        SEO.OpenGraph.Article.build(
+          published_time: ~D[2022-10-13],
+          author: article.author,
+          section: "Tech"
+        ),
+      image: image(article),
       title: article.title,
-      description: article.short_description
-    ]
+      description: article.description
+    )
   end
 
-  def unfurl(article) do
-    [
-      label1: "Reading Time",
-      data1: "#{article.reading_time} min",
-      label2: "Category",
-      data2: article.category
-    ]
-  end
-
-  def twitter(article) do
-    if creator = article.author.twitter_handle do
-      []
-    else
-      [creator: creator]
-    end
-  end
-
-  def breadcrumb_list(article) do
-    [
-      [name: "Articles", item: Routes.article_url(@endpoint, :index)],
-      [name: article.title, item: Routes.article_url(@endpoint, :show, article.id)]
-    ]
-  end
-
-  defp put_image(article) do
+  defp image(article) do
     file = "/images/article/#{article.id}.png"
 
     exists? =
-      [Application.app_dir(:my_app), "/priv/static", file]
+      [Application.app_dir(:seo), "/priv/static", file]
       |> Path.join()
       |> File.exists?()
 
     if exists? do
-      Routes.static_url(@endpoint, file), image_alt: article.title}
-    else
-      nil
+      SEO.OpenGraph.Image.build(
+        url: Routes.static_url(@endpoint, file),
+        secure_url: Routes.static_url(@endpoint, file),
+        alt: article.title
+      )
     end
+  end
+end
+
+defimpl SEO.Site.Build, for: MyApp.Article do
+  alias MyAppWeb.Router.Helpers, as: Routes
+  @endpoint MyAppWeb.Endpoint
+
+  def build(article) do
+    SEO.Site.build(
+      url: Routes.article_url(@endpoint, :show, article.id),
+      title: article.title,
+      description: article.description
+    )
+  end
+end
+
+defimpl SEO.Facebook.Build, for: MyApp.Article do
+  def build(_article) do
+    SEO.Facebook.build(app_id: "123")
+  end
+end
+
+defimpl SEO.Twitter.Build, for: MyApp.Article do
+  def build(article) do
+    SEO.Twitter.build(description: article.description, title: article.title)
+  end
+end
+
+defimpl SEO.Unfurl.Build, for: MyApp.Article do
+  def build(article) do
+    SEO.Unfurl.build(
+      label1: "Title",
+      data1: article.title,
+      label2: "Reading Time",
+      data2: article.reading || "5min"
+    )
+  end
+end
+
+defimpl SEO.Breadcrumb.Build, for: MyApp.Article do
+  alias MyAppWeb.Router.Helpers, as: Routes
+  @endpoint MyAppWeb.Endpoint
+
+  def build(article) do
+    SEO.Breadcrumb.List.build([
+      %{name: "Articles", item: Routes.article_url(@endpoint, :index),
+      %{name: article.title, item: Routes.article_url(@endpoint, :show, article.id)
+    ])
   end
 end
 ```
