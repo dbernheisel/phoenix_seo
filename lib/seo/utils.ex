@@ -33,9 +33,19 @@ defmodule SEO.Utils do
     |> String.trim()
   end
 
-  def merge_defaults(assigns) do
-    item = struct(assigns[:item], Map.from_struct(assigns[:default]))
-    Phoenix.Component.assign(assigns, :item, item)
+  # def merge_defaults(assigns) do
+  #   item = struct(assigns[:item], Map.from_struct(assigns[:default]))
+  #   Phoenix.Component.assign(assigns, :item, item)
+  # end
+
+  def merge_defaults(module, attrs, defaults) when defaults == %{} or defaults == [] or is_nil(defaults) do
+    merge_defaults(module, attrs, struct(module))
+  end
+  def merge_defaults(_module, attrs, defaults) when is_struct(defaults) and ( is_map(attrs) or is_list(attrs) ) and not is_struct(attrs) do
+    struct(defaults, attrs)
+  end
+  def merge_defaults(module, attrs, defaults) when ( is_map(attrs) or is_list(attrs) ) and not is_struct(attrs) do
+    merge_defaults(module, attrs, struct(module, defaults))
   end
 
   def to_iso8601(%NaiveDateTime{} = ndt), do: NaiveDateTime.to_iso8601(ndt)
