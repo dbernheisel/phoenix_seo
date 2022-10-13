@@ -1,7 +1,7 @@
 <!-- badges -->
 
-[![Hex.pm Version](http://img.shields.io/hexpm/v/seo.svg)](https://hex.pm/packages/seo)
-[![Hex docs](http://img.shields.io/badge/hex.pm-docs-blue.svg?style=flat)](https://hexdocs.pm/seo)
+[![Hex.pm Version](http://img.shields.io/hexpm/v/seo.svg)](https://hex.pm/packages/phoenix_seo)
+[![Hex docs](http://img.shields.io/badge/hex.pm-docs-blue.svg?style=flat)](https://hexdocs.pm/phoenix_seo)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE.md)
 
 # SEO
