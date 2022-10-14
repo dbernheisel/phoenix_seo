@@ -41,10 +41,11 @@ defmodule SEO.OpenGraph.Book do
     Utils.merge_defaults(__MODULE__, attrs, default)
   end
 
-  attr(:content, __MODULE__, required: true)
+  attr(:content, __MODULE__, default: nil)
 
   def meta(assigns) do
     ~H"""
+    <%= if @content do %>
     <%= if @content.isbn do %>
     <meta property="book:isbn" content={@content.isbn} />
     <% end %><%= if @content.release_date do %>
@@ -53,6 +54,7 @@ defmodule SEO.OpenGraph.Book do
     <Utils.url :for={author <- authors} property="book:author" content={author} />
     <% end %><%= if (tags = List.wrap(@content.tag)) != [] do %>
     <meta :for={tag <- tags} property="book:tag" content={tag} />
+    <% end %>
     <% end %>
     """
   end

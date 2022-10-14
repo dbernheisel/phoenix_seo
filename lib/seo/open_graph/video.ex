@@ -86,7 +86,7 @@ defmodule SEO.OpenGraph.Video do
     end
   end
 
-  attr(:content, :any, required: true)
+  attr(:content, :any, default: nil)
 
   def meta(assigns) do
     case assigns[:content] do

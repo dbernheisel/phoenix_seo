@@ -38,17 +38,25 @@ defmodule SEO.OpenGraph.Profile do
     SEO.Utils.merge_defaults(__MODULE__, attrs, default)
   end
 
-  attr(:content, :any, required: true)
+  attr(:content, :any, default: nil)
   attr(:property, :string, default: "profile")
 
   def meta(assigns) do
     case assigns[:content] do
+      nil ->
+        ~H""
+
       %__MODULE__{} ->
         ~H"""
-        <meta :if={@content.first_name} property={"#{@property}:first_name"} content={@content.first_name} />
-        <meta :if={@content.last_name} property={"#{@property}:last_name"} content={@content.last_name} />
-        <meta :if={@content.username} property={"#{@property}:username"} content={@content.username} />
-        <meta :if={@content.gender} property={"#{@property}:gender"} content={@content.gender} />
+        <%= if @content.first_name do %>
+        <meta property={"#{@property}:first_name"} content={@content.first_name} />
+        <% end %><%= if @content.last_name do %>
+        <meta property={"#{@property}:last_name"} content={@content.last_name} />
+        <% end %><%= if @content.username do %>
+        <meta property={"#{@property}:username"} content={@content.username} />
+        <% end %><%= if @content.gender do %>
+        <meta property={"#{@property}:gender"} content={@content.gender} />
+        <% end %>
         """
 
       _url ->

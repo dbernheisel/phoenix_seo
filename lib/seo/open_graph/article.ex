@@ -56,12 +56,21 @@ defmodule SEO.OpenGraph.Article do
     assigns = assign(assigns, :content, build(assigns[:content], assigns[:config]))
 
     ~H"""
-    <meta :if={@content.published_time} property="article:published_time" content={Utils.to_iso8601(@content.published_time)} />
-    <meta :if={@content.modified_time} property="article:modified_time" content={Utils.to_iso8601(@content.modified_time)} />
-    <meta :if={@content.expiration_time} property="article:expiration_time" content={Utils.to_iso8601(@content.expiration_time)} />
-    <meta :if={@content.section} property="article:section" content={@content.section} />
-    <SEO.OpenGraph.Profile.meta :for={author <- List.wrap(@content.author)} :if={List.wrap(@content.author) != []} property="article:author" content={author} />
-    <meta :for={tag <- List.wrap(@content.tag)} :if={List.wrap(@content.tag) != []} property="article:tag" content={tag} />
+    <%= if @content do %>
+    <%= if @content.published_time do %>
+    <meta property="article:published_time" content={Utils.to_iso8601(@content.published_time)} />
+    <% end %><%= if @content.modified_time do %>
+    <meta property="article:modified_time" content={Utils.to_iso8601(@content.modified_time)} />
+    <% end %><%= if @content.expiration_time do %>
+    <meta property="article:expiration_time" content={Utils.to_iso8601(@content.expiration_time)} />
+    <% end %><%= if @content.section do %>
+    <meta property="article:section" content={@content.section} />
+    <% end %><%= if (authors = List.wrap(@content.author)) != [] do %>
+    <SEO.OpenGraph.Profile.meta :for={author <- authors} property="article:author" content={author} />
+    <% end %><%= if (tags = List.wrap(@content.tag)) != [] do %>
+    <meta :for={tag <- tags} property="article:tag" content={tag} />
+    <% end %>
+    <% end %>
     """
   end
 end

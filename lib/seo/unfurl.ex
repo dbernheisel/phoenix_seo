@@ -48,7 +48,7 @@ defmodule SEO.Unfurl do
 
   use Phoenix.Component
 
-  attr(:item, __MODULE__, required: true)
+  attr(:item, __MODULE__, default: nil)
   attr(:config, :any, default: nil)
 
   def meta(assigns) do

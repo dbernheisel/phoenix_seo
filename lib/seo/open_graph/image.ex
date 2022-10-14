@@ -2,14 +2,6 @@ defmodule SEO.OpenGraph.Image do
   @moduledoc """
   URL or details for the image. The `og:image` property has some optional structured properties:
 
-  - `:url` - Identical to `og:image`.
-  - `:secure_url` - An alternate url to use if the webpage requires HTTPS.
-  - `:type` - A MIME type for this image.
-  - `:width` - The number of pixels wide.
-  - `:height` - The number of pixels high.
-  - `:alt` - A description of what is in the image (not a caption). If the page specifies an image it should
-  also specify `:alt`.
-
   **NOTE**: to update an image after it's been published, use a new URL for the new image. Images are typically cached
   based on the URL and won't be updated unless the URL changes. In Phoenix, the URL is typically using a hashed
   version of the image (see `mix phx.digest`), so this should be handled automatically.
@@ -48,6 +40,19 @@ defmodule SEO.OpenGraph.Image do
   @type mime :: String.t()
   @type pixels :: pos_integer()
 
+  @doc """
+  Build an OpenGraph image
+
+  - `:url` - Identical to `og:image`.
+  - `:secure_url` - An alternate url to use if the webpage requires HTTPS. If not supplied but `:url` starts with
+    "https" then this will be populated with the url as well.
+  - `:type` - A MIME type for this image.
+  - `:width` - The number of pixels wide.
+  - `:height` - The number of pixels high.
+  - `:alt` - A description of what is in the image (not a caption). If the page specifies an image it should
+  also specify `:alt`.
+
+  """
   @spec build(SEO.attrs(), SEO.config()) :: t() | nil
   def build(attrs, default \\ nil)
 
