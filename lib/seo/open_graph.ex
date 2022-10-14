@@ -112,6 +112,8 @@ defmodule SEO.OpenGraph do
   - `:video` - A URL to a complementing video file. You may also provide more detail with `SEO.OpenGraph.Video`
   """
 
+  @spec build(SEO.attrs()) :: t() | nil
+  @spec build(SEO.attrs(), SEO.config()) :: t() | nil
   def build(attrs, default \\ nil)
 
   def build(attrs, default) do
@@ -177,8 +179,4 @@ defmodule SEO.OpenGraph do
     <% end %>
     """
   end
-end
-
-defimpl SEO.OpenGraph.Build, for: Any do
-  def build(item), do: SEO.OpenGraph.build(item)
 end

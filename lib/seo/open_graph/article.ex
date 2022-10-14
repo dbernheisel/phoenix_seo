@@ -39,6 +39,8 @@ defmodule SEO.OpenGraph.Article do
   - `:section` - A high-level section name. E.g. `"Technology"`
   - `:tag` - Tag words associated with this article. E.g. `["Elixir", "Ecto"]`
   """
+
+  @spec build(SEO.attrs(), SEO.config()) :: t() | nil
   def build(attrs, default \\ nil)
 
   def build(attrs, default) do

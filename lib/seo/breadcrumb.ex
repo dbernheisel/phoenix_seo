@@ -53,7 +53,3 @@ defmodule SEO.Breadcrumb do
     """
   end
 end
-
-defimpl SEO.Breadcrumb.Build, for: Any do
-  def build(item), do: SEO.Breadcrumb.List.build(item)
-end

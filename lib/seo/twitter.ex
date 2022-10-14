@@ -77,12 +77,11 @@ defmodule SEO.Twitter do
   @doc """
   Build tags that customize how Twitter displays your page.
 
-  - `:card` - The different `:card` types each have a beautiful consumption experience built for Twitter’s
-  web and mobile clients.
-    - `:summary`: Title, description, and thumbnail.
-    - `:summary_large_image`: Similar to the Summary Card, but with a prominently-featured image.
-    - `:app`: A Card with a direct download to a mobile app.
-    - `:player`: A Card that can display video/audio/media.
+  - `:card` - The different `:card` types each have a different presentation
+    - `:summary` - card with title, description, and thumbnail.
+    - `:summary_large_image` - similar to the `:summary` card, but with a prominently-featured image.
+    - `:app` - card with a direct download to a mobile app.
+    - `:player` - card that can display video/audio/media.
   - `:site` - The Twitter @username the card should be attributed to
   - `:title` - A concise title for the related content.
   - `:description` - A description that concisely summarizes the content as appropriate for presentation within a Tweet.
@@ -112,6 +111,8 @@ defmodule SEO.Twitter do
   use the OpenGraph tags. Unless you have specific messaging for Twitter followers, it's typically good enough to use
   OpenGraph for most data.
   """
+
+  @spec build(SEO.attrs(), SEO.config()) :: t() | nil
   def build(attrs, default \\ nil)
 
   def build(attrs, default) do

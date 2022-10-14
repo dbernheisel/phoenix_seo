@@ -69,6 +69,7 @@ defmodule SEO.OpenGraph.Video do
     - `:full_hd` - 1080p quality with resolution greater than 1080x1920 and bitrate higher than 2Mbps
   """
 
+  @spec build(SEO.attrs(), SEO.config()) :: t() | nil
   def build(attrs, default \\ nil)
 
   def build(attrs, default) do

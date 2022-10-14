@@ -67,3 +67,7 @@ defmodule SEO.Unfurl do
     """
   end
 end
+
+defimpl SEO.Unfurl.Build, for: Any do
+  def build(item), do: SEO.Unfurl.build(item)
+end

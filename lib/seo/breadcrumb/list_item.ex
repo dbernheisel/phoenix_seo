@@ -18,6 +18,8 @@ defmodule SEO.Breadcrumb.ListItem do
 
   @doc """
   """
+
+  @spec build(SEO.attrs(), SEO.config()) :: t() | nil
   def build(attrs, default \\ nil)
 
   def build(attrs, default) do

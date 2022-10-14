@@ -48,6 +48,7 @@ defmodule SEO.OpenGraph.Image do
   @type mime :: String.t()
   @type pixels :: pos_integer()
 
+  @spec build(SEO.attrs(), SEO.config()) :: t() | nil
   def build(attrs, default \\ nil)
 
   def build(attrs, default) do

@@ -179,7 +179,7 @@ end
 # first static render.
 def mount(_params, _session, socket) do
   # You may mark it as temporary since it's only needed on the first render.
-  {:ok, socket, temporary_assigns: [SEO.key()]}
+  {:ok, socket, temporary_assigns: [{SEO.key(), nil}]}
 end
 
 def handle_params(params, _uri, socket) do
@@ -195,7 +195,7 @@ end
   <%# and replace with SEO.juice component %>
   <SEO.juice
     config={MyAppWeb.SEO.config()}
-    item={SEO.item(assigns)}
+    item={SEO.item(@conn)}
     page_title={assigns[:page_title]}
   />
 </head>

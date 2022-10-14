@@ -40,6 +40,7 @@ defmodule SEO.Breadcrumb.List do
   ```
   """
 
+  @spec build(SEO.attrs(), SEO.config()) :: t() | nil
   def build(attrs, _default \\ nil)
 
   def build(attrs, _default) when is_list(attrs) do

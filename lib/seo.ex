@@ -126,4 +126,10 @@ defmodule SEO do
   def item(conn_or_socket)
   def item(%Plug.Conn{} = conn), do: conn.private[@key] || []
   def item(%Phoenix.LiveView.Socket{} = socket), do: socket.assigns[@key] || []
+
+  @typedoc "Attributes describing an item"
+  @type attrs :: struct() | map() | Keyword.t() | nil
+
+  @typedoc "Fallback attributes describing an item and configuration"
+  @type config :: struct() | map() | Keyword.t() | nil
 end

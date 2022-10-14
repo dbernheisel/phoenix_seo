@@ -25,7 +25,7 @@ defmodule SEO.Utils do
   def format_date(%DateTime{} = dt), do: DateTime.to_iso8601(dt)
 
   ## TODO
-  # - Tokenizer that turns HTML into sentences. re: https://github.com/wardbradt/HTMLST
+  # - Tokenizer that turns HTML into sentences. eg: https://github.com/wardbradt/HTMLST
 
   def truncate(text, length \\ 200) do
     if String.length(text) <= length do

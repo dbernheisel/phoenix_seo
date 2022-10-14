@@ -17,6 +17,8 @@ defmodule SEO.Facebook do
   In order to use Facebook Insights you must add the `:app_id` to your page. Insights lets you view analytics for traffic
   to your site from Facebook. Find the app ID in your Facebook App Dashboard.
   """
+
+  @spec build(SEO.attrs(), SEO.config()) :: t() | nil
   def build(attrs, default \\ nil)
 
   def build(attrs, default) do
@@ -39,8 +41,4 @@ defmodule SEO.Facebook do
     <% end %>
     """
   end
-end
-
-defimpl SEO.Facebook.Build, for: Any do
-  def build(item), do: SEO.Facebook.build(item)
 end

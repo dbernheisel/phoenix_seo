@@ -27,6 +27,8 @@ defmodule SEO.OpenGraph.Audio do
   - `:secure_url` - An alternate url to use if the webpage requires HTTPS.
   - `:type` - A MIME type for this audio, eg, `"audio/mpeg"`.
   """
+
+  @spec build(SEO.attrs(), SEO.config()) :: t() | nil
   def build(attrs, default \\ nil)
 
   def build(attrs, default) do
