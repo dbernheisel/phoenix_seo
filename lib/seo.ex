@@ -80,7 +80,7 @@ defmodule SEO do
   ```
   """
 
-  attr(:item, :any, required: true, doc: "Item to render that implements `SEO.Build`")
+  attr(:item, :any, required: true, doc: "Item to render that implements SEO protocols")
   attr(:page_title, :string, default: nil, doc: "Page Title. Overrides item's title if supplied")
   attr(:config, :any, default: nil, doc: "Configuration for your SEO module")
 
@@ -124,7 +124,7 @@ defmodule SEO do
   @doc "Fetch the SEO item from the Plug.Conn or LiveView Socket"
   @spec item(Plug.Conn.t() | Phoenix.LiveView.Socket.t()) :: any()
   def item(conn_or_socket)
-  def item(%Plug.Conn{} = conn), do: conn.private[@key] || []
+  def item(%Plug.Conn{} = conn), do: conn.private[@key] || conn.assigns[@key] || []
   def item(%Phoenix.LiveView.Socket{} = socket), do: socket.assigns[@key] || []
 
   @typedoc "Attributes describing an item"
