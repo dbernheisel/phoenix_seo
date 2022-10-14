@@ -82,7 +82,10 @@ defmodule SEO.Twitter do
     - `:summary_large_image` - similar to the `:summary` card, but with a prominently-featured image.
     - `:app` - card with a direct download to a mobile app.
     - `:player` - card that can display video/audio/media.
-  - `:site` - The Twitter @username the card should be attributed to
+  - `:creator` - The Twitter @username the card should be attributed to.
+  - `:creator_id` - The Twitter id of the user the card should be attributed to.
+  - `:site` - The Twitter @username for the website.
+  - `:site_id` - The Twitter id for the website.
   - `:title` - A concise title for the related content.
   - `:description` - A description that concisely summarizes the content as appropriate for presentation within a Tweet.
   - `:image` - A URL to a unique image representing the content of the page. You should not use a generic
