@@ -12,6 +12,7 @@ defmodule SEO.OpenGraph.Video do
   """
 
   use Phoenix.Component
+  alias SEO.Utils
 
   defstruct [
     :url,
@@ -46,7 +47,7 @@ defmodule SEO.OpenGraph.Video do
   The `og:video` property has some optional structured properties:
 
   - `:url` - The url with metadata that describes the video.
-  - `:secure_url` - An alternate url to use if the webpage requires HTTPS.
+  - `:secure_url` - An alternate url to use if the webpage requires HTTPS. If the URL starts with `https` then
   - `:type` - A MIME type for this video. Facebook supports both mp4 and Flash videos, `application/x-shockwave-flash`
     or `video/mp4`, but please for the love of all that is holy don't use Shockwave Flash.
   - `:width` - The width in pixels.
@@ -71,7 +72,17 @@ defmodule SEO.OpenGraph.Video do
   def build(attrs, default \\ nil)
 
   def build(attrs, default) do
-    SEO.Utils.merge_defaults(__MODULE__, attrs, default)
+    __MODULE__
+    |> Utils.merge_defaults(attrs, default)
+    |> maybe_put_secure_url()
+  end
+
+  defp maybe_put_secure_url(video) do
+    case video.url do
+      %URI{scheme: "https"} = uri -> %{video | secure_url: uri}
+      "https" <> _ = url -> %{video | secure_url: url}
+      _ -> video
+    end
   end
 
   attr(:content, :any, required: true)
@@ -83,22 +94,32 @@ defmodule SEO.OpenGraph.Video do
 
       %__MODULE__{} ->
         ~H"""
+        <%= if @content.url || @content.secure_url do %>
         <%= if @content.url do %>
-        <SEO.Utils.url property="og:video" content={@content.url} />
-        <SEO.Utils.url :if={@content.secure_url} property="og:video:secure_url" content={@content.secure_url} />
-        <meta :if={@content.mime} property="og:video:type" content={@content.mime} />
-        <meta :if={@content.width} property="og:video:width" content={@content.width} />
-        <meta :if={@content.height} property="og:video:height" content={@content.height} />
-        <meta :if={@content.alt} property="og:video:alt" content={@content.alt} />
-        <meta :if={@content.ya_bitrate} property="ya:ovs:bitrate" content={@content.ya_bitrate} />
-        <meta :if={@content.ya_quality} property="ya:ovs:quality" content={format_ya_quality(@content.ya_quality)} />
-        <meta :if={@content.ya_allow_embed} property="ya:ovs:allow_embed" content={"#{@content.ya_allow_embed}"} />
+        <Utils.url property="og:video" content={@content.url} />
+        <% end %><%= if @content.secure_url do %>
+        <Utils.url property="og:video:secure_url" content={@content.secure_url} />
+        <% end %><%= if @content.type do %>
+        <meta property="og:video:type" content={@content.type} />
+        <% end %><%= if @content.width do %>
+        <meta property="og:video:width" content={@content.width} />
+        <% end %><%= if @content.height do %>
+        <meta property="og:video:height" content={@content.height} />
+        <% end %><%= if @content.alt do %>
+        <meta property="og:video:alt" content={@content.alt} />
+        <% end %><%= if @content.ya_bitrate do %>
+        <meta property="ya:ovs:bitrate" content={@content.ya_bitrate} />
+        <% end %><%= if @content.ya_quality do %>
+        <meta property="ya:ovs:quality" content={format_ya_quality(@content.ya_quality)} />
+        <% end %><%= if @content.ya_allow_embed do %>
+        <meta property="ya:ovs:allow_embed" content={"#{@content.ya_allow_embed}"} />
+        <% end %>
         <% end %>
         """
 
       _url ->
         ~H"""
-        <SEO.Utils.url property="og:video" content={@content} />
+        <Utils.url property="og:video" content={@content} />
         """
     end
   end

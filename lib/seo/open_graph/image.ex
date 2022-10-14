@@ -25,6 +25,7 @@ defmodule SEO.OpenGraph.Image do
   """
 
   use Phoenix.Component
+  alias SEO.Utils
 
   defstruct [
     :url,
@@ -50,7 +51,17 @@ defmodule SEO.OpenGraph.Image do
   def build(attrs, default \\ nil)
 
   def build(attrs, default) do
-    SEO.Utils.merge_defaults(__MODULE__, attrs, default)
+    __MODULE__
+    |> Utils.merge_defaults(attrs, default)
+    |> maybe_put_secure_url()
+  end
+
+  defp maybe_put_secure_url(image) do
+    case image.url do
+      %URI{scheme: "https"} = uri -> %{image | secure_url: uri}
+      "https" <> _ = url -> %{image | secure_url: url}
+      _ -> image
+    end
   end
 
   attr(:content, :any, default: nil, doc: "Either an `SEO.OpenGraph.Image`, a string, or a URI")
@@ -62,19 +73,26 @@ defmodule SEO.OpenGraph.Image do
 
       %__MODULE__{} ->
         ~H"""
+        <%= if @content.url || @content.secure_url do %>
         <%= if @content.url do %>
-        <SEO.Utils.url property="og:image" content={@content.url} />
-        <SEO.Utils.url :if={@content.secure_url} property="og:image:secure_url" content={@content.secure_url} />
-        <meta :if={@content.type} property="og:image:type" content={@content.type} />
-        <meta :if={@content.width} property="og:image:width" content={@content.width} />
-        <meta :if={@content.height} property="og:image:height" content={@content.height} />
-        <meta :if={@content.alt} property="og:image:alt" content={@content.alt} />
+        <Utils.url property="og:image" content={@content.url} />
+        <% end %><%= if @content.secure_url do %>
+        <Utils.url property="og:image:secure_url" content={@content.secure_url} />
+        <% end %><%= if @content.type do %>
+        <meta property="og:image:type" content={@content.type} />
+        <% end %><%= if @content.width do %>
+        <meta property="og:image:width" content={@content.width} />
+        <% end %><%= if @content.height do %>
+        <meta property="og:image:height" content={@content.height} />
+        <% end %><%= if @content.alt do %>
+        <meta property="og:image:alt" content={@content.alt} />
+        <% end %>
         <% end %>
         """
 
       _url ->
         ~H"""
-        <SEO.Utils.url property="og:image" content={@content} />
+        <Utils.url property="og:image" content={@content} />
         """
     end
   end

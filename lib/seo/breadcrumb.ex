@@ -12,6 +12,8 @@ defmodule SEO.Breadcrumb do
   - https://search.google.com/test/rich-results
   - https://search.google.com/structured-data/testing-tool
 
+  Rendered example inside a `<script type="application/ld+json">`:
+
   ```json
   {
     "@context": "https://schema.org",

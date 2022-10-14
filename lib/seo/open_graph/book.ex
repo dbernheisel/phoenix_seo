@@ -20,7 +20,7 @@ defmodule SEO.OpenGraph.Book do
 
   @type t :: %__MODULE__{
           namespace: String.t(),
-          author: SEO.OpenGraph.Profile.t() | list(SEO.OpenGraph.Profile.t()) | String.t(),
+          author: URI.t() | String.t() | list(URI.t() | String.t()) | nil,
           isbn: String.t(),
           release_date: DateTime.t() | NaiveDateTime.t() | Date.t(),
           tag: String.t() | list(String.t())
@@ -29,7 +29,8 @@ defmodule SEO.OpenGraph.Book do
   @doc """
   Metadata that describes a book.
 
-  - `:author` - Who wrote this book. This may be a `SEO.OpenGraph.Profile` or a list of the profiles.
+  - `:author` - Who wrote this book. This may be a name or a URL that implements `SEO.OpenGraph.Profile` for the author
+    with additional details. This may be supplied as a list of authors.
   - `:isbn` - The ISBN
   - `:release_date` - The date the book was released.
   - `:tag` - Tag words associated with this book.
@@ -37,17 +38,22 @@ defmodule SEO.OpenGraph.Book do
   def build(attrs, default \\ nil)
 
   def build(attrs, default) do
-    SEO.Utils.merge_defaults(__MODULE__, attrs, default)
+    Utils.merge_defaults(__MODULE__, attrs, default)
   end
 
   attr(:content, __MODULE__, required: true)
 
   def meta(assigns) do
     ~H"""
-    <meta property="book:release_date" content={Utils.to_iso8601(@content.release_date)} :if={@content.release_date} />
-    <meta property="book:isbn" content={@content.isbn} :if={@content.isbn} />
-    <meta :for={author <- List.wrap(@content.author)} property="book:author" content={author} :if={List.wrap(@content.author) != []} />
-    <meta :for={tag <- List.wrap(@content.tag)} property="book:tag" content={tag} :if={List.wrap(@content.tag) != []} />
+    <%= if @content.isbn do %>
+    <meta property="book:isbn" content={@content.isbn} />
+    <% end %><%= if @content.release_date do %>
+    <meta property="book:release_date" content={Utils.to_iso8601(@content.release_date)} />
+    <% end %><%= if (authors = List.wrap(@content.author)) != [] do %>
+    <Utils.url :for={author <- authors} property="book:author" content={author} />
+    <% end %><%= if (tags = List.wrap(@content.tag)) != [] do %>
+    <meta :for={tag <- tags} property="book:tag" content={tag} />
+    <% end %>
     """
   end
 end

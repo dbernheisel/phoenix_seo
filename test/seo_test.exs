@@ -1,7 +1,6 @@
 defmodule SEOTest do
   use ExUnit.Case, async: true
   import Phoenix.LiveViewTest
-  doctest SEO
 
   describe "juice" do
     test "renders everything from item" do

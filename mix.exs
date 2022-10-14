@@ -79,11 +79,10 @@ defmodule SEO.MixProject do
         SEO.OpenGraph.Book,
         SEO.OpenGraph.Image,
         SEO.OpenGraph.Profile,
-        SEO.OpenGraph.Video,
-        SEO.OpenGraph.Website
+        SEO.OpenGraph.Video
       ],
       Breadcrumbs: [
-        SEO.Breadcrumb.Item,
+        SEO.Breadcrumb.List,
         SEO.Breadcrumb.ListItem
       ],
       Protocol: [

@@ -28,6 +28,38 @@ defimpl SEO.OpenGraph.Build, for: MyApp.Article do
   end
 end
 
+defimpl SEO.OpenGraph.Build, for: MyApp.Book do
+  def build(book) do
+    SEO.OpenGraph.build(
+      type: :book,
+      type_detail:
+        SEO.OpenGraph.Book.build(
+          release_date: book.release_date,
+          isbn: book.isbn,
+          tag: ["children", "comedy"],
+          author: book.author
+        ),
+      title: book.title,
+      description: book.description
+    )
+  end
+end
+
+defimpl SEO.OpenGraph.Build, for: MyApp.Profile do
+  def build(profile) do
+    SEO.OpenGraph.build(
+      type: :profile,
+      type_detail:
+        SEO.OpenGraph.Profile.build(
+          first_name: profile.first_name,
+          last_name: profile.last_name,
+          gender: profile.gender
+        ),
+      title: Enum.join([profile.first_name, profile.last_name], " ")
+    )
+  end
+end
+
 defimpl SEO.Site.Build, for: MyApp.Article do
   def build(article) do
     SEO.Site.build(

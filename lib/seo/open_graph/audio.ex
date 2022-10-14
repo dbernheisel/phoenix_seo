@@ -4,6 +4,7 @@ defmodule SEO.OpenGraph.Audio do
   """
 
   use Phoenix.Component
+  alias SEO.Utils
 
   defstruct [
     :url,
@@ -29,25 +30,40 @@ defmodule SEO.OpenGraph.Audio do
   def build(attrs, default \\ nil)
 
   def build(attrs, default) do
-    SEO.Utils.merge_defaults(__MODULE__, attrs, default)
+    __MODULE__
+    |> Utils.merge_defaults(attrs, default)
+    |> maybe_put_secure_url()
+  end
+
+  defp maybe_put_secure_url(audio) do
+    case audio.url do
+      %URI{scheme: "https"} = uri -> %{audio | secure_url: uri}
+      "https" <> _ = url -> %{audio | secure_url: url}
+      _ -> audio
+    end
   end
 
   attr(:content, :any, required: true)
 
   def meta(assigns) do
     case assigns[:content] do
+      nil ->
+        ~H""
+
       %__MODULE__{} ->
         ~H"""
         <%= if @content.url do %>
-        <SEO.Utils.url property="og:audio" content={@content.url} />
-        <SEO.Utils.url :if={@content.secure_url} property="og:audio:secure_url" content={@content.secure_url} />
-        <meta :if={@content.type} property="og:audio:type" content={@content.type} />
+        <Utils.url property="og:audio" content={@content.url} /><%= if @content.secure_url do %>
+        <Utils.url property="og:audio:secure_url" content={@content.secure_url} />
+        <% end %><%= if @content.type do %>
+        <meta property="og:audio:type" content={@content.type} />
+        <% end %>
         <% end %>
         """
 
       _url ->
         ~H"""
-        <SEO.Utils.url property="og:audio" content={@content} />
+        <Utils.url property="og:audio" content={@content} />
         """
     end
   end

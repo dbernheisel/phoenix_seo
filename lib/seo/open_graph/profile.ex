@@ -1,11 +1,6 @@
 defmodule SEO.OpenGraph.Profile do
   @moduledoc """
 
-  - `:first_name` - A name normally given to an individual by a parent or self-chosen.
-  - `:last_name` - A name inherited from a family or marriage and by which the individual is commonly known.
-  - `:username` - A short unique string to identify them.
-  - `:gender` - Their gender.
-
   ### Resources
   - https://ogp.me/#type_profile
 
@@ -29,6 +24,14 @@ defmodule SEO.OpenGraph.Profile do
           gender: String.t()
         }
 
+  @doc """
+  Build a OpenGraph Profile
+
+  - `:first_name` - A name normally given to an individual by a parent or self-chosen.
+  - `:last_name` - A name inherited from a family or marriage and by which the individual is commonly known.
+  - `:username` - A short unique string to identify them.
+  - `:gender` - Their gender.
+  """
   def build(attrs, default \\ nil)
 
   def build(attrs, default) do

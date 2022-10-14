@@ -13,9 +13,11 @@ defmodule SEO.Breadcrumb.ListItem do
   @type t :: %__MODULE__{
           position: pos_integer(),
           "@type": String.t(),
-          item: SEO.Breadcrumb.Item.t()
+          item: String.t() | URI.t()
         }
 
+  @doc """
+  """
   def build(attrs, default \\ nil)
 
   def build(attrs, default) do

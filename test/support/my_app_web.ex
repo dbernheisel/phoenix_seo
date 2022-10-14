@@ -31,6 +31,16 @@ defmodule MyApp.Article do
   defstruct [:id, :title, :description, :author, :reading]
 end
 
+defmodule MyApp.Book do
+  @moduledoc false
+  defstruct [:id, :title, :isbn, :description, :author, :release_date]
+end
+
+defmodule MyApp.Profile do
+  @moduledoc false
+  defstruct [:id, :last_name, :first_name, :gender]
+end
+
 defmodule MyApp.NotImplemented do
   @moduledoc false
   defstruct [:id]

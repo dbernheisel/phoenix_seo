@@ -67,7 +67,7 @@ end
 ```elixir
 defmodule MyApp.Article do
   # This might be an Ecto schema or a plain struct
-  defstruct [:id, :title, :description, :author, :reading]
+  defstruct [:id, :title, :description, :author, :reading, :published_at]
 end
 
 defimpl SEO.OpenGraph.Build, for: MyApp.Article do
@@ -79,7 +79,7 @@ defimpl SEO.OpenGraph.Build, for: MyApp.Article do
       type: :article,
       type_detail:
         SEO.OpenGraph.Article.build(
-          published_time: ~D[2022-10-13],
+          published_time: article.published_at |> DateTime.to_date() |> Date.to_iso8601(),
           author: article.author,
           section: "Tech"
         ),
@@ -135,10 +135,10 @@ end
 defimpl SEO.Unfurl.Build, for: MyApp.Article do
   def build(article) do
     SEO.Unfurl.build(
-      label1: "Title",
-      data1: article.title,
-      label2: "Reading Time",
-      data2: article.reading || "5min"
+      label1: "Reading Time",
+      data1: "5 minutes",
+      label2: "Published",
+      data2: DateTime.to_iso8601(article.published_at)
     )
   end
 end
@@ -178,6 +178,7 @@ end
 # mount/3 or handle_params/3 so it's present on
 # first static render.
 def mount(_params, _session, socket) do
+  # You may mark it as temporary since it's only needed on the first render.
   {:ok, socket, temporary_assigns: [SEO.key()]}
 end
 
@@ -186,28 +187,37 @@ def handle_params(params, _uri, socket) do
 end
 ```
 
-4. Juice up your root layout
+4. Juice up your root layout:
 
 ```heex
 <head>
   <%# remove the Phoenix-generated <.live_title> component %>
   <%# and replace with SEO.juice component %>
-  <SEO.juice config={MyAppWeb.SEO.config()} item={SEO.item(assigns)} page_title={assigns[:page_title]} />
+  <SEO.juice
+    config={MyAppWeb.SEO.config()}
+    item={SEO.item(assigns)}
+    page_title={assigns[:page_title]}
+  />
 </head>
 ```
 
-Alternatively, you may selectively render components. You can provide runtime
-configuration this way as well. For example:
+Alternatively, you may selectively render components. For example:
 
 ```heex
 <head>
   <%# With your SEO module's configuration %>
-  <SEO.OpenGraph.meta item={SEO.Build.open_graph(SEO.item(assigns), MyAppWeb.SEO.config(:open_graph))} />
+  <SEO.OpenGraph.meta
+    config={MyAppWeb.SEO.config(:open_graph)}
+    item={SEO.OpenGraph.Build.build(SEO.item(assigns))}
+  />
 
-  <%# Or with runtime configuration %>
-  <SEO.OpenGraph.meta item={SEO.Build.open_graph(SEO.item(assigns), %{site_name: "Foo Fighters"})} />
+  <%# Or with some other default configuration %>
+  <SEO.OpenGraph.meta
+    config={[default_title: "Foo Fighters"]}
+    item={SEO.OpenGraph.Build.build(SEO.item(assigns))}
+  />
 
-  <%# Or without configuration is fine too %>
-  <SEO.OpenGraph.meta item={SEO.Build.open_graph(SEO.item(assigns))} />
+  <%# Or without defaults %>
+  <SEO.OpenGraph.meta item={SEO.OpenGraph.Build.build(SEO.item(assigns))} />
 </head>
 ```

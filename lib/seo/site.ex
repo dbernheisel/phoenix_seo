@@ -2,6 +2,12 @@ defmodule SEO.Site do
   @moduledoc """
   Metadata about your site.
 
+  ### Example:
+
+  Mask Icon: ![Mask Icon Example](./assets/masked-icon-example.jpg)
+
+  Theme Color: ![Theme Color Example](./assets/theme-color-example.png)
+
   ### Resources
 
   - https://developer.mozilla.org/en-US/docs/Learn/HTML/Introduction_to_HTML/The_head_metadata_in_HTML
@@ -49,27 +55,32 @@ defmodule SEO.Site do
           google: String.t() | list(String.t()) | nil,
           googlebot: String.t() | nil,
           rating: String.t() | nil,
-          windows_tile_color: color_hex() | nil,
-          theme_color: color_hex() | nil,
-          mask_icon_color: color_hex() | nil,
+          windows_tile_color: css_color() | nil,
+          theme_color: css_color() | nil,
+          mask_icon_color: css_color() | nil,
           mask_icon_url: URI.t() | String.t() | nil,
           manifest_url: URI.t() | String.t() | nil
         }
 
   @typedoc """
-  Color hex of 7 characters or name, eg "#663399", eg "red"
+  CSS color value.  For example, "#663399", "red", "rgb(0, 1, 3)". https://www.w3.org/TR/css-color-3/
   """
-  @type color_hex :: String.t()
+  @type css_color :: String.t()
 
   @doc """
   Metadata that describes the site generally.
 
-  - `:title` - Title of the page.
-  - `:default_title` - Fallback title when title is nil.
+  - `:title` - Title of the page. If `:page_title` is provided to the component, that will always win.
+
+  - `:default_title` - Fallback title when `:title` and `:page_title` is nil.
+
   - `:description` - A one to two sentence description of your item.
+
   - `:canonical_url` - A URL that is most representative of your item.
+
   - `:rating` - `"adult"`. If a rating of `"adult"` is applied, it's also recommended to separate adult assets into a
   folder such as `example.com/explicit/wow.jpg`. No value provided means the content is appropriate for everyone.
+
   - `:alternate_languages` -  If your site is multilingual, you can inform search engines. Supply a list of tuples of the
   lang_code and the URL for the page. For example:
 
@@ -79,6 +90,7 @@ defmodule SEO.Site do
       {"ja_JP", Routes.jp_article_url(@endpoint, article.id)}
     ]
     ```
+
   - `:google` - Google-specific metadata. It can be one of these values or a list of these values:
     - `"nositelinkssearch"`. When users search for your site, Google Search results sometimes display a search box
     specific to your site, along with other direct links to your site. This tag tells Google not to show the sitelinks
@@ -93,6 +105,7 @@ defmodule SEO.Site do
     your unique and compelling content to a much larger group of users. However, there may be situations where
     this is not desired. This meta tag tells Google that you don't want Google to provide a translation for
     this page.
+
   - `:google_site_verification` - You can use this tag on the top-level page of your site to verify ownership for Search
   Console. Please note that while the values of the name and content attributes must match exactly what is provided to
   you (including upper and lower case), it doesn't matter if you change the tag from XHTML to HTML or if the format of
@@ -126,10 +139,20 @@ defmodule SEO.Site do
       - `0` show a static image instead
       - `-1` allow any preview length
 
-  - `:windows_tile_color` - The color of the tile behind your icon when rendered on the Windows start menu. Accepts a
-  - `:theme_color` - On mobile devices, the chrome of the browser may use the theme color. Accepts a color hex value.
-  hex value
+  - `:windows_tile_color` - The color of the tile behind your icon when rendered on the Microsoft Windows start menu.
+    Accepts a CSS color value, such as a hex or name.
+
+  - `:theme_color` - The chrome of the browser may use the theme color. Accepts a CSS color value. It creates a nice
+    effect if this is set to the same color as the page's background.
+
+  - `:mask_icon_url` - URL of the mask SVG icon. Accepts an `%URI{}` or a string. This is used by Safari when the page
+    is pinned to a tab. The SVG file must use 100% black for all vectors with a transparent background, a single layer,
+    and the viewBox attribute must be set to `"0 0 16 16"`.
+
+  - `:mask_icon_color` - Safari will use the `:mask_icon_url` as the icon when pinned, and you may colorize the icon
+    with a CSS color value.
   """
+
   def build(attrs, default \\ nil)
 
   def build(attrs, default) do

@@ -31,7 +31,11 @@ defmodule SEO do
   <head>
     <%# remove the Phoenix-generated <.live_title> component %>
     <%# and replace with SEO.juice component %>
-    <SEO.juice config={MyAppWeb.SEO.config()} item={SEO.item(assigns)} page_title={assigns[:page_title]} />
+    <SEO.juice
+      config={MyAppWeb.SEO.config()}
+      item={SEO.item(assigns)}
+      page_title={assigns[:page_title]}
+    />
   </head>
   ```
 
@@ -40,10 +44,16 @@ defmodule SEO do
   ```heex
   <head>
     <%# With your SEO module's configuration %>
-    <SEO.OpenGraph.meta item={SEO.OpenGraph.Build.build(SEO.item(assigns), MyAppWeb.SEO.config(:open_graph))} />
+    <SEO.OpenGraph.meta
+      config={MyAppWeb.SEO.config(:open_graph)}
+      item={SEO.OpenGraph.Build.build(SEO.item(assigns))}
+    />
 
     <%# Or with runtime configuration %>
-    <SEO.Twitter.meta item={SEO.Twitter.Build.build(SEO.item(assigns), %{site_name: "Foo Fighters"})} />
+    <SEO.Twitter.meta
+      config={%{site_name: "Foo Fighters"}}
+      item={SEO.Twitter.Build.build(SEO.item(assigns))}
+    />
 
     <%# Or without configuration is fine too %>
     <SEO.Unfurl.meta item={SEO.Unfurl.Build.build(SEO.item(assigns))} />

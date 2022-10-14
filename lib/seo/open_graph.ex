@@ -165,15 +165,13 @@ defmodule SEO.OpenGraph do
     <Book.meta content={@item.type_detail} />
     <% end %><%= if @item.type == :article do %>
     <Article.meta content={@item.type_detail} />
-    <% end %><%= if @item.type == :article do %>
-    <Article.meta content={@item.type_detail} />
     <% end %><%= if @item.type == :profile do %>
     <Profile.meta content={@item.type_detail} />
-    <% end %><%= if images = List.wrap(@item.image) != [] do %>
+    <% end %><%= if (images = List.wrap(@item.image)) != [] do %>
     <Image.meta :for={image <- images} content={image} />
-    <% end %><%= if audios = List.wrap(@item.audio) != [] do %>
+    <% end %><%= if (audios = List.wrap(@item.audio)) != [] do %>
     <Audio.meta :for={audio <- audios} content={audio} />
-    <% end %><%= if videos = List.wrap(@item.video) != [] do %>
+    <% end %><%= if (videos = List.wrap(@item.video)) != [] do %>
     <Video.meta :for={video <- videos} content={video} />
     <% end %>
     <% end %>
