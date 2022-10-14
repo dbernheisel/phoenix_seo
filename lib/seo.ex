@@ -5,6 +5,25 @@ defmodule SEO do
              |> String.split("<!-- MDOC !-->")
              |> Enum.fetch!(1)
 
+  @doc """
+  Setup your defaults. Domains are mapped this way:
+
+  - `:site` -> `SEO.Site`
+  - `:open_graph` -> `SEO.OpenGraph`
+  - `:unfurl` -> `SEO.Unfurl`
+  - `:facebook` -> `SEO.Facebook`
+  - `:twitter` -> `SEO.Twitter`
+  - `:breadcrumb` -> `SEO.Breadcrumb`
+
+  For example:
+
+  ```elixir
+  use SEO, [
+    site: SEO.Site.build(description: "My Blog of many words and infrequent posts", default_title: "Fanastic Site")
+    facebook: SEO.Facebook.build(app_id: "123")
+  ]
+  ```
+  """
   defmacro __using__(opts) do
     SEO.define_config(opts)
   end
@@ -79,8 +98,7 @@ defmodule SEO do
   end
 
   @keys ~w[site unfurl open_graph twitter facebook breadcrumb]a
-  @doc false
-  def assign_configs(assigns, config) do
+  defp assign_configs(assigns, config) do
     Enum.reduce(@keys, assigns, fn domain, assigns ->
       assign_new(assigns, :"#{domain}_config", fn -> config && config[domain] end)
     end)
