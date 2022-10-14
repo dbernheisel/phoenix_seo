@@ -22,6 +22,7 @@ defmodule SEO.Site do
   """
 
   use Phoenix.Component
+  alias SEO.Utils
 
   defstruct [
     :description,
@@ -145,7 +146,7 @@ defmodule SEO.Site do
   def build(attrs, default \\ nil)
 
   def build(attrs, default) do
-    SEO.Utils.merge_defaults(__MODULE__, attrs, default)
+    Utils.merge_defaults(__MODULE__, attrs, default)
   end
 
   attr(:item, :any, default: nil)
@@ -162,7 +163,7 @@ defmodule SEO.Site do
     <% end %><%= if @item.alternate_languages && @item.alternate_languages != [] do %>
     <link :for={{lang, url} <- @item.alternate_languages} rel="alternate" hreflag={lang} href={"#{url}"} />
     <% end %><%= if @item.description do %>
-    <meta name="description" content={@item.description} />
+    <meta name="description" content={@item.description |> Utils.squash_newlines() |> Utils.truncate()} />
     <% end %><%= if @item.rating do %>
     <meta name="rating" content={@item.rating} />
     <% end %><%= if @item.robots && !Enum.empty?(List.wrap(@item.robots)) do %>
