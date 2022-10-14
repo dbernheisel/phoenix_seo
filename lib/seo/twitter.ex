@@ -128,9 +128,8 @@ defmodule SEO.Twitter do
 
     ~H"""
     <%= if @item do %>
-    <%= if @item.title || @item.description do %>
     <meta name="twitter:card" content={@item.card} />
-    <% end %><%= if @item.title do %>
+    <%= if @item.title do %>
     <meta name="twitter:title" content={@item.title} />
     <% end %><%= if @item.description do %>
     <meta name="twitter:description" content={@item.description} />
