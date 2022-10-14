@@ -5,7 +5,7 @@ defmodule SEO.Config do
     poison = if Code.ensure_loaded?(Poison), do: Poison
     jason = if Code.ensure_loaded?(Jason), do: Jason
     phoenix_json = Application.get_env(:phoenix, :json_library)
-    seo_json = Application.get_env(:seo, :json_library)
+    seo_json = Application.get_env(:phoenix_seo, :json_library)
     json_library = seo_json || phoenix_json || jason || poison
     validate_json!(json_library, seo_json)
 

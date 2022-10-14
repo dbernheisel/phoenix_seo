@@ -4,7 +4,7 @@ defmodule SEO.MixProject do
 
   def project do
     [
-      app: :seo,
+      app: :phoenix_seo,
       name: "SEO",
       version: @version,
       elixir: ">= 1.14.0",

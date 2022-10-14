@@ -18,7 +18,7 @@ defimpl SEO.OpenGraph.Build, for: MyApp.Article do
     file = "/images/article/#{article.id}.png"
 
     exists? =
-      [Application.app_dir(:seo), "/priv/static", file]
+      [Application.app_dir(:phoenix_seo), "/priv/static", file]
       |> Path.join()
       |> File.exists?()
 
