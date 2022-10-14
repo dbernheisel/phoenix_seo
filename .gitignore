@@ -24,3 +24,4 @@ seo-*.tar
 
 # Temporary files, for example, from tests.
 /tmp/
+phoenix_seo*.tar
