@@ -45,7 +45,7 @@ defmodule SEO.Breadcrumb do
     assigns = assign(assigns, :item, List.build(assigns[:item], assigns[:config]))
 
     ~H"""
-    <%= if @item && @item != [] do %>
+    <%= if @item do %>
     <script type="application/ld+json">
       <%= Phoenix.HTML.raw(@json_library.encode!(List.to_map(@item))) %>
     </script>

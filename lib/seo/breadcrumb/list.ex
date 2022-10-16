@@ -44,7 +44,12 @@ defmodule SEO.Breadcrumb.List do
   def build(attrs, _default \\ nil)
 
   def build(attrs, _default) when is_list(attrs) do
-    %__MODULE__{itemListElement: format_items(attrs)}
+    case attrs do
+      attrs when attrs == [] -> nil
+      attrs when attrs == %{} -> nil
+      nil -> nil
+      attrs -> %__MODULE__{itemListElement: format_items(attrs)}
+    end
   end
 
   def build(%__MODULE__{} = attrs, _default), do: attrs
