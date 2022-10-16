@@ -43,7 +43,6 @@ defmodule MyAppWeb.SEO do
   use SEO, [
     json_library: Jason,
     # a function reference will be called with a conn during render
-    # note: you must pass conn to the SEO.juice component for this to work
     site: &__MODULE__.site_config/1,
     open_graph: SEO.OpenGraph.build(
       description: "A blog about development",
@@ -51,6 +50,7 @@ defmodule MyAppWeb.SEO do
       type: :website,
       locale: "en_US"
     ),
+    facebook: SEO.Facebook.build(app_id: "123"),
     twitter: SEO.Twitter.build(
       site: "@example",
       site_id: "27704724",
@@ -131,12 +131,6 @@ defimpl SEO.Site.Build, for: MyApp.Article do
   end
 end
 
-defimpl SEO.Facebook.Build, for: MyApp.Article do
-  def build(_article, _conn) do
-    SEO.Facebook.build(app_id: "123")
-  end
-end
-
 defimpl SEO.Twitter.Build, for: MyApp.Article do
   def build(article, _conn) do
     SEO.Twitter.build(description: article.description, title: article.title)
@@ -159,8 +153,8 @@ defimpl SEO.Breadcrumb.Build, for: MyApp.Article do
 
   def build(article, conn) do
     SEO.Breadcrumb.List.build([
-      %{name: "Articles", item: Routes.article_url(conn, :index),
-      %{name: article.title, item: Routes.article_url(conn, :show, article.id)
+      %{name: "Articles", item: Routes.article_url(conn, :index)},
+      %{name: article.title, item: Routes.article_url(conn, :show, article.id)}
     ])
   end
 end
@@ -179,6 +173,9 @@ def show(conn, params) do
 end
 
 def index(conn, params) do
+  # Note: it's better to implement a struct that represent a route like this,
+  # so you can customize it per implementation. In this example below, the
+  # `:title` attribute will be passed to all domains.
   conn
   |> SEO.assign(%{title: "Listing Best Hugs"})
   |> render("show.html")
@@ -231,4 +228,42 @@ Alternatively, you may selectively render components. For example:
   <%# Or without defaults %>
   <SEO.OpenGraph.meta item={SEO.OpenGraph.Build.build(SEO.item(@conn))} />
 </head>
+```
+
+## FAQ
+
+Question: **What do I do for non-show routes, like for index routes?**
+
+Answer:
+
+You can pass maps or keyword lists for non-specific routes like index routes;
+however, since it's not an implementation of a struct, it's generic and will be
+passed to all SEO domains. In the case where an attribute is shared between
+domains, such as a Twitter title and an Site title and an OpenGraph title, then
+you won't be able to implement them differently. This is probably ok in most
+cases.
+
+Even better, you can define a struct on your controller or LiveView and pass
+that struct as the SEO item, then implement the struct per domain.
+
+For example:
+
+```elixir
+defmodule MyAppWeb.PokemonController do
+  use MyAppWeb, :controller
+
+  defstruct [title: "Listing Pokemon"]
+
+  def index(conn, _params) do
+    # ... your usual index logic
+    SEO.assign(conn, %__MODULE__{})
+  end
+
+end
+
+defimpl SEO.OpenGraph.Build, for: MyAppWeb.PokeonController do
+  def build(index, conn) do
+    SEO.OpenGraph.build(title: index.title, ...)
+  end
+end
 ```
