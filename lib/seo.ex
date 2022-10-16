@@ -33,10 +33,14 @@ defmodule SEO do
     quote location: :keep, bind_quoted: [opts: opts] do
       @seo_options SEO.Config.validate!(opts)
 
-      @doc false
+      @doc """
+      Get configuration for SEO.
+
+      config/0 will return all SEO config
+      config/1 with SEO domain atom will return that domain's config
+      """
       def config, do: @seo_options
 
-      @doc false
       def config(domain), do: config()[domain] || []
     end
   end
@@ -51,6 +55,7 @@ defmodule SEO do
     <%# remove the Phoenix-generated <.live_title> component %>
     <%# and replace with SEO.juice component %>
     <SEO.juice
+      conn={@conn}
       config={MyAppWeb.SEO.config()}
       item={SEO.item(assigns)}
       page_title={assigns[:page_title]}
@@ -81,27 +86,71 @@ defmodule SEO do
   """
 
   attr(:item, :any, required: true, doc: "Item to render that implements SEO protocols")
+
+  attr(:conn, Plug.Conn,
+    required: true,
+    doc: "Plug.Conn for the request. Used for domain configs that are functions"
+  )
+
   attr(:page_title, :string, default: nil, doc: "Page Title. Overrides item's title if supplied")
-  attr(:config, :any, default: nil, doc: "Configuration for your SEO module")
+
+  attr(:config, :any,
+    default: nil,
+    doc: "Configuration for your SEO module or another module that implements config/0
+    and config/1."
+  )
+
+  attr(:json_library, :atom,
+    default: nil,
+    doc: "JSON library to use when rendering JSON. `config[:json_library]` will
+    be used if not supplied."
+  )
 
   def juice(assigns) do
-    assigns = assign_configs(assigns, assigns[:config])
+    assigns = assign_configs(assigns, assigns[:config], assigns[:conn])
 
     ~H"""
-    <SEO.Site.meta config={@site_config} item={SEO.Site.Build.build(@item)} page_title={@page_title} />
-    <SEO.Unfurl.meta config={@unfurl_config} item={SEO.Unfurl.Build.build(@item)} />
-    <SEO.OpenGraph.meta config={@open_graph_config} item={SEO.OpenGraph.Build.build(@item)} />
-    <SEO.Twitter.meta config={@twitter_config} item={SEO.Twitter.Build.build(@item)} />
-    <SEO.Facebook.meta config={@facebook_config} item={SEO.Facebook.Build.build(@item)} />
-    <SEO.Breadcrumb.meta config={@breadcrumb_config} item={SEO.Breadcrumb.Build.build(@item)} json_library={@config[:json_library]} :if={@config[:json_library]} />
+    <SEO.Site.meta config={@site_config} item={SEO.Site.Build.build(@item, @conn)} page_title={@page_title} />
+    <SEO.Unfurl.meta config={@unfurl_config} item={SEO.Unfurl.Build.build(@item, @conn)} />
+    <SEO.OpenGraph.meta config={@open_graph_config} item={SEO.OpenGraph.Build.build(@item, @conn)} />
+    <SEO.Twitter.meta config={@twitter_config} item={SEO.Twitter.Build.build(@item, @conn)} />
+    <SEO.Facebook.meta config={@facebook_config} item={SEO.Facebook.Build.build(@item, @conn)} />
+    <SEO.Breadcrumb.meta config={@breadcrumb_config} item={SEO.Breadcrumb.Build.build(@item, @conn)} json_library={@json_library} :if={@json_library} />
     """
   end
 
-  @keys ~w[site unfurl open_graph twitter facebook breadcrumb]a
-  defp assign_configs(assigns, config) do
-    Enum.reduce(@keys, assigns, fn domain, assigns ->
-      assign_new(assigns, :"#{domain}_config", fn -> config && config[domain] end)
+  defp assign_configs(assigns, mod, conn) when is_atom(mod) do
+    config =
+      case to_string(mod) do
+        "Elixir." <> _ -> mod.config()
+        "" -> []
+      end
+
+    assign_configs(assigns, config, conn)
+  end
+
+  defp assign_configs(assigns, config, conn) do
+    assigns
+    |> assign(:config, config)
+    |> assign(:json_library, assigns[:json_library] || config[:json_library])
+    |> assign_configs(conn)
+  end
+
+  @domains ~w[json_library site unfurl open_graph twitter facebook breadcrumb]a
+  defp assign_configs(assigns, conn) do
+    Enum.reduce(@domains, assigns, fn domain, assigns ->
+      assign_new(assigns, :"#{domain}_config", fn ->
+        get_domain_config(assigns[:config], domain, conn)
+      end)
     end)
+  end
+
+  defp get_domain_config(config, domain, conn) do
+    case config[domain] do
+      nil -> []
+      domain_config when is_function(domain_config) -> domain_config.(conn) || []
+      domain_config -> domain_config
+    end
   end
 
   @key :seo

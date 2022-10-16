@@ -76,6 +76,8 @@ defmodule SEO.SiteTest do
     end
   end
 
-  defp build_assigns(item), do: [item: Site.Build.build(item)]
-  defp build_assigns(item, default), do: [item: Site.Build.build(item), config: default]
+  defp build_assigns(item), do: [item: Site.Build.build(item, %Plug.Conn{})]
+
+  defp build_assigns(item, default),
+    do: [item: Site.Build.build(item, %Plug.Conn{}), config: default]
 end

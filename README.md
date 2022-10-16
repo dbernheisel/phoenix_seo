@@ -38,13 +38,13 @@ end
 
 ```elixir
 defmodule MyAppWeb.SEO do
+  alias MyAppWeb.Router.Helpers, as: Routes
+
   use SEO, [
     json_library: Jason,
-    site: SEO.Site.build(
-      default_title: "Default Title",
-      description: "A blog about development",
-      title_suffix: " · My App"
-    ),
+    # a function reference will be called with a conn during render
+    # note: you must pass conn to the SEO.juice component for this to work
+    site: &__MODULE__.site_config/1,
     open_graph: SEO.OpenGraph.build(
       description: "A blog about development",
       site_name: "My Blog",
@@ -59,6 +59,19 @@ defmodule MyAppWeb.SEO do
       card: :summary
     )
   ]
+
+  def site_config(conn) do
+    SEO.Site.build(
+      default_title: "Default Title",
+      description: "A blog about development",
+      title_suffix: " · My App",
+      theme_color: "#663399",
+      windows_tile_color: "#663399",
+      mask_icon_color: "#663399",
+      mask_icon_url: Routes.static_path(conn, "/images/safari-pinned-tab.svg"),
+      manifest_url: Routes.robot_path(conn, :site_webmanifest)
+    )
+  end
 end
 ```
 
@@ -72,9 +85,8 @@ end
 
 defimpl SEO.OpenGraph.Build, for: MyApp.Article do
   alias MyAppWeb.Router.Helpers, as: Routes
-  @endpoint MyAppWeb.Endpoint
 
-  def build(article) do
+  def build(article, conn) do
     SEO.OpenGraph.build(
       type: :article,
       type_detail:
@@ -83,13 +95,13 @@ defimpl SEO.OpenGraph.Build, for: MyApp.Article do
           author: article.author,
           section: "Tech"
         ),
-      image: image(article),
+      image: image(article, conn),
       title: article.title,
       description: article.description
     )
   end
 
-  defp image(article) do
+  defp image(article, conn) do
     file = "/images/article/#{article.id}.png"
 
     exists? =
@@ -99,8 +111,8 @@ defimpl SEO.OpenGraph.Build, for: MyApp.Article do
 
     if exists? do
       SEO.OpenGraph.Image.build(
-        url: Routes.static_url(@endpoint, file),
-        secure_url: Routes.static_url(@endpoint, file),
+        url: Routes.static_url(conn, file),
+        secure_url: Routes.static_url(conn, file),
         alt: article.title
       )
     end
@@ -109,11 +121,10 @@ end
 
 defimpl SEO.Site.Build, for: MyApp.Article do
   alias MyAppWeb.Router.Helpers, as: Routes
-  @endpoint MyAppWeb.Endpoint
 
-  def build(article) do
+  def build(article, conn) do
     SEO.Site.build(
-      url: Routes.article_url(@endpoint, :show, article.id),
+      url: Routes.article_url(conn, :show, article.id),
       title: article.title,
       description: article.description
     )
@@ -121,19 +132,19 @@ defimpl SEO.Site.Build, for: MyApp.Article do
 end
 
 defimpl SEO.Facebook.Build, for: MyApp.Article do
-  def build(_article) do
+  def build(_article, _conn) do
     SEO.Facebook.build(app_id: "123")
   end
 end
 
 defimpl SEO.Twitter.Build, for: MyApp.Article do
-  def build(article) do
+  def build(article, _conn) do
     SEO.Twitter.build(description: article.description, title: article.title)
   end
 end
 
 defimpl SEO.Unfurl.Build, for: MyApp.Article do
-  def build(article) do
+  def build(article, _conn) do
     SEO.Unfurl.build(
       label1: "Reading Time",
       data1: "5 minutes",
@@ -145,12 +156,11 @@ end
 
 defimpl SEO.Breadcrumb.Build, for: MyApp.Article do
   alias MyAppWeb.Router.Helpers, as: Routes
-  @endpoint MyAppWeb.Endpoint
 
-  def build(article) do
+  def build(article, conn) do
     SEO.Breadcrumb.List.build([
-      %{name: "Articles", item: Routes.article_url(@endpoint, :index),
-      %{name: article.title, item: Routes.article_url(@endpoint, :show, article.id)
+      %{name: "Articles", item: Routes.article_url(conn, :index),
+      %{name: article.title, item: Routes.article_url(conn, :show, article.id)
     ])
   end
 end
@@ -194,6 +204,7 @@ end
   <%# remove the Phoenix-generated <.live_title> component %>
   <%# and replace with SEO.juice component %>
   <SEO.juice
+    conn={@conn}
     config={MyAppWeb.SEO.config()}
     item={SEO.item(@conn)}
     page_title={assigns[:page_title]}

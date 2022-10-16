@@ -2,10 +2,20 @@ defmodule SEOTest do
   use ExUnit.Case, async: true
   import Phoenix.LiveViewTest
 
+  defmodule TestConfig do
+    def config do
+      [json_library: Jason, site: [description: "TestConfig Description"]]
+    end
+
+    def config(domain) do
+      config()[domain] || []
+    end
+  end
+
   describe "juice" do
     test "renders everything from item" do
       item = %MyApp.Article{title: "Title", description: "Description"}
-      result = render_component(&SEO.juice/1, config: [json_library: Jason], item: item)
+      result = render_component(&SEO.juice/1, build_assigns(item, json_library: Jason))
 
       # assert an attribute for each domain
       # site
@@ -28,7 +38,7 @@ defmodule SEOTest do
 
     test "renders almost nothing when struct not implemented" do
       item = %MyApp.NotImplemented{id: "No"}
-      result = render_component(&SEO.juice/1, item: item)
+      result = render_component(&SEO.juice/1, build_assigns(item))
 
       # assert an attribute for each domain
       # site
@@ -39,16 +49,36 @@ defmodule SEOTest do
 
     test "renders from map" do
       item = %{title: "Title"}
-      result = render_component(&SEO.juice/1, item: item)
+      result = render_component(&SEO.juice/1, build_assigns(item))
 
       assert result =~ ~s|<title>Title</title>|
     end
 
     test "renders from list" do
       item = [title: "Title"]
-      result = render_component(&SEO.juice/1, item: item)
+      result = render_component(&SEO.juice/1, build_assigns(item))
 
       assert result =~ ~s|<title>Title</title>|
+    end
+
+    test "renders with a function config" do
+      config = [
+        site: fn _conn ->
+          [description: "functional programming is fun"]
+        end
+      ]
+
+      item = [title: "Title"]
+      result = render_component(&SEO.juice/1, build_assigns(item, config))
+
+      assert result =~ ~s|<meta name="description" content="functional programming is fun">|
+    end
+
+    test "renders with a module config" do
+      item = [title: "Title"]
+      result = render_component(&SEO.juice/1, build_assigns(item, SEOTest.TestConfig))
+
+      assert result =~ ~s|<meta name="description" content="TestConfig Description">|
     end
   end
 
@@ -82,5 +112,9 @@ defmodule SEOTest do
 
       assert %{assigns: %{seo: ^item}} = socket
     end
+  end
+
+  defp build_assigns(item, config \\ []) do
+    [conn: %Plug.Conn{}, item: item, config: config]
   end
 end

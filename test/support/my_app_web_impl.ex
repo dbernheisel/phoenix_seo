@@ -1,5 +1,5 @@
 defimpl SEO.OpenGraph.Build, for: MyApp.Article do
-  def build(article) do
+  def build(article, _conn) do
     SEO.OpenGraph.build(
       type: :article,
       type_detail:
@@ -29,7 +29,7 @@ defimpl SEO.OpenGraph.Build, for: MyApp.Article do
 end
 
 defimpl SEO.OpenGraph.Build, for: MyApp.Book do
-  def build(book) do
+  def build(book, _conn) do
     SEO.OpenGraph.build(
       type: :book,
       type_detail:
@@ -46,7 +46,7 @@ defimpl SEO.OpenGraph.Build, for: MyApp.Book do
 end
 
 defimpl SEO.OpenGraph.Build, for: MyApp.Profile do
-  def build(profile) do
+  def build(profile, _conn) do
     SEO.OpenGraph.build(
       type: :profile,
       type_detail:
@@ -61,7 +61,7 @@ defimpl SEO.OpenGraph.Build, for: MyApp.Profile do
 end
 
 defimpl SEO.Site.Build, for: MyApp.Article do
-  def build(article) do
+  def build(article, _conn) do
     SEO.Site.build(
       url: "https://example.com/#{article.id}",
       title: article.title,
@@ -71,19 +71,19 @@ defimpl SEO.Site.Build, for: MyApp.Article do
 end
 
 defimpl SEO.Facebook.Build, for: MyApp.Article do
-  def build(_article) do
+  def build(_article, _conn) do
     SEO.Facebook.build(app_id: "123")
   end
 end
 
 defimpl SEO.Twitter.Build, for: MyApp.Article do
-  def build(article) do
+  def build(article, _conn) do
     SEO.Twitter.build(description: article.description, title: article.title)
   end
 end
 
 defimpl SEO.Unfurl.Build, for: MyApp.Article do
-  def build(article) do
+  def build(article, _conn) do
     SEO.Unfurl.build(
       label1: "Title",
       data1: article.title,
@@ -94,7 +94,7 @@ defimpl SEO.Unfurl.Build, for: MyApp.Article do
 end
 
 defimpl SEO.Breadcrumb.Build, for: MyApp.Article do
-  def build(article) do
+  def build(article, _conn) do
     SEO.Breadcrumb.List.build([
       %{name: "Articles", item: "https://example.com/articles"},
       %{name: article.title, item: "https://example.com/articles/#{article.id || "my_id"}"}

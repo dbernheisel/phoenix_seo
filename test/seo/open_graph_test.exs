@@ -271,6 +271,8 @@ defmodule SEO.OpenGraphTest do
     end
   end
 
-  defp build_assigns(item), do: [item: OpenGraph.Build.build(item)]
-  defp build_assigns(item, default), do: [config: default, item: OpenGraph.Build.build(item)]
+  defp build_assigns(item), do: [item: OpenGraph.Build.build(item, %Plug.Conn{})]
+
+  defp build_assigns(item, default),
+    do: [config: default, item: OpenGraph.Build.build(item, %Plug.Conn{})]
 end
