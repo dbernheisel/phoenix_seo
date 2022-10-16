@@ -208,16 +208,16 @@ Alternatively, you may selectively render components. For example:
   <%# With your SEO module's configuration %>
   <SEO.OpenGraph.meta
     config={MyAppWeb.SEO.config(:open_graph)}
-    item={SEO.OpenGraph.Build.build(SEO.item(assigns))}
+    item={SEO.OpenGraph.Build.build(SEO.item(@conn))}
   />
 
   <%# Or with some other default configuration %>
   <SEO.OpenGraph.meta
     config={[default_title: "Foo Fighters"]}
-    item={SEO.OpenGraph.Build.build(SEO.item(assigns))}
+    item={SEO.OpenGraph.Build.build(SEO.item(@conn))}
   />
 
   <%# Or without defaults %>
-  <SEO.OpenGraph.meta item={SEO.OpenGraph.Build.build(SEO.item(assigns))} />
+  <SEO.OpenGraph.meta item={SEO.OpenGraph.Build.build(SEO.item(@conn))} />
 </head>
 ```
