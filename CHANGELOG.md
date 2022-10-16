@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.4 (October 16, 2022)
+
+- Fix empty breadcrumbs
+- Squash newlines and trim description
+
 ## 0.1.3 (October 14, 2022)
 
 - Fix fetching SEO item from LiveView
