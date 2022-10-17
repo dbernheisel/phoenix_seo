@@ -14,7 +14,7 @@ defmodule SEO.MixProject do
       deps: deps(),
       docs: docs(),
       homepage_url: "https://hexdocs.pm/phoenix_seo",
-      source_url: "https://github.com/dbernheisel/seo",
+      source_url: "https://github.com/dbernheisel/phoenix_seo",
       preferred_cli_env: [tests: :test],
       package: package(),
       description:
@@ -45,9 +45,9 @@ defmodule SEO.MixProject do
       maintainers: ["David Bernheisel"],
       licenses: ["MIT"],
       links: %{
-        "GitHub" => "https://github.com/dbernheisel/seo",
-        "Readme" => "https://github.com/dbernheisel/seo/blob/#{@version}/README.md",
-        "Changelog" => "https://github.com/dbernheisel/seo/blob/#{@version}/CHANGELOG.md"
+        "GitHub" => "https://github.com/dbernheisel/phoenix_seo",
+        "Readme" => "https://github.com/dbernheisel/phoenix_seo/blob/#{@version}/README.md",
+        "Changelog" => "https://github.com/dbernheisel/phoenix_seo/blob/#{@version}/CHANGELOG.md"
       }
     ]
   end
