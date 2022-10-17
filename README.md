@@ -45,7 +45,6 @@ defmodule MyAppWeb.SEO do
     open_graph: SEO.OpenGraph.build(
       description: "A blog about development",
       site_name: "My Blog",
-      type: :website,
       locale: "en_US"
     ),
     facebook: SEO.Facebook.build(app_id: "123"),
@@ -86,8 +85,7 @@ defimpl SEO.OpenGraph.Build, for: MyApp.Article do
 
   def build(article, conn) do
     SEO.OpenGraph.build(
-      type: :article,
-      type_detail:
+      detail:
         SEO.OpenGraph.Article.build(
           published_time: article.published_at,
           author: article.author,

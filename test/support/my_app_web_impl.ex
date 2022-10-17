@@ -1,8 +1,7 @@
 defimpl SEO.OpenGraph.Build, for: MyApp.Article do
   def build(article, _conn) do
     SEO.OpenGraph.build(
-      type: :article,
-      type_detail:
+      detail:
         SEO.OpenGraph.Article.build(
           published_time: ~D[2022-10-13],
           author: article.author,
@@ -31,8 +30,7 @@ end
 defimpl SEO.OpenGraph.Build, for: MyApp.Book do
   def build(book, _conn) do
     SEO.OpenGraph.build(
-      type: :book,
-      type_detail:
+      detail:
         SEO.OpenGraph.Book.build(
           release_date: book.release_date,
           isbn: book.isbn,
@@ -48,8 +46,7 @@ end
 defimpl SEO.OpenGraph.Build, for: MyApp.Profile do
   def build(profile, _conn) do
     SEO.OpenGraph.build(
-      type: :profile,
-      type_detail:
+      detail:
         SEO.OpenGraph.Profile.build(
           first_name: profile.first_name,
           last_name: profile.last_name,

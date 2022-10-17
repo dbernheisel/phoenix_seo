@@ -2,6 +2,9 @@
 
 ## unreleased
 
+- BREAKING: simplify OpenGraph fields `:type` and `:type_detail` into one
+  `:detail`. The appropriate values in `:detail` will infer to the type.
+
 ## 0.1.6 (2022-10-17)
 
 - Add SEO.Config @behaviour and implement it during `use SEO`.

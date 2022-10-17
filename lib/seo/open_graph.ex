@@ -48,13 +48,12 @@ defmodule SEO.OpenGraph do
     :locale_alternate,
     :audio,
     :video,
-    type: :website
+    :detail
   ]
 
   @type t :: %__MODULE__{
           title: String.t(),
-          type: open_graph_type(),
-          type_detail: type_detail(),
+          detail: Article.t() | Profile.t() | Book.t() | nil,
           url: URI.t() | String.t(),
           description: String.t() | nil,
           determiner: open_graph_determiner(),
@@ -68,7 +67,6 @@ defmodule SEO.OpenGraph do
 
   @typedoc "language code and territory code, eg: en_US"
   @type language_territory :: String.t()
-  @type type_detail :: Article.t() | Profile.t() | Book.t() | nil
 
   @typedoc """
   The word that appears before this item's title in a sentence.
@@ -76,9 +74,6 @@ defmodule SEO.OpenGraph do
   If `:auto` is chosen, the consumer of your data should chose between "a" or "an".
   """
   @type open_graph_determiner :: :a | :an | :the | :auto | nil
-
-  @typedoc "The type of OpenGraph object."
-  @type open_graph_type :: :article | :book | :profile | :website
 
   @doc """
   Represent your items on the graph of the internet. 🤩🌐📄
@@ -88,8 +83,7 @@ defmodule SEO.OpenGraph do
   The four required properties for every page are:
 
   - `:title` - The title of your item as it should appear within the graph, e.g., "The Rock".
-  - `:type` - The type of your item, e.g., `:article`. Depending on the type you specify, other properties
-    may also be required. Default is `:website`.
+  - `:detail` - The detail of your item, e.g., `%SEO.OpenGraph.Article{}`.
   - `:image` - An image URL or `SEO.OpenGraph.Image` that represents your item within the graph.
   - `:url` - The canonical URL of your item that will be used as its permanent ID in the graph, e.g.,
     https://www.imdb.com/title/tt0117500/. Ultimately, this is where the programs will scrape for metadata.
@@ -117,32 +111,17 @@ defmodule SEO.OpenGraph do
   def build(attrs, default \\ nil)
 
   def build(attrs, default) do
-    __MODULE__
-    |> Utils.merge_defaults(attrs, default)
-    |> build_type_detail()
-  end
-
-  @doc false
-  def build_type_detail(nil), do: nil
-  def build_type_detail(%{type: :website} = og), do: og
-
-  def build_type_detail(%{type: :article} = og) do
-    %{og | type_detail: Article.build(og.type_detail)}
-  end
-
-  def build_type_detail(%{type: :book} = og) do
-    %{og | type_detail: Book.build(og.type_detail)}
-  end
-
-  def build_type_detail(%{type: :profile} = og) do
-    %{og | type_detail: Profile.build(og.type_detail)}
+    Utils.merge_defaults(__MODULE__, attrs, default)
   end
 
   attr(:item, __MODULE__, default: nil)
   attr(:config, :any, default: nil)
 
   def meta(assigns) do
-    assigns = assign(assigns, :item, build(assigns[:item], assigns[:config]))
+    assigns =
+      assigns
+      |> assign(:item, build(assigns[:item], assigns[:config]))
+      |> assign_type()
 
     ~H"""
     <%= if @item do %>
@@ -152,7 +131,7 @@ defmodule SEO.OpenGraph do
     <%= if @item.description do %>
     <meta property="og:description" content={@item.description |> Utils.squash_newlines() |> Utils.truncate()} />
     <% end %>
-    <meta property="og:type" content={@item.type} />
+    <meta property="og:type" content={@type} />
     <%= if @item.url do %>
     <Utils.url property="og:url" content={@item.url} />
     <% end %><%= if @item.site_name do %>
@@ -163,12 +142,12 @@ defmodule SEO.OpenGraph do
     <meta property="og:locale" content={@item.locale} />
     <% end %><%= if locales = List.wrap(@item.locale_alternate) != [] do %>
     <meta :for={locale <- locales} property="og:locale:alternate" content={locale} />
-    <% end %><%= if @item.type == :book do %>
-    <Book.meta content={@item.type_detail} />
-    <% end %><%= if @item.type == :article do %>
-    <Article.meta content={@item.type_detail} />
-    <% end %><%= if @item.type == :profile do %>
-    <Profile.meta content={@item.type_detail} />
+    <% end %><%= if @type == "book" do %>
+    <Book.meta content={@item.detail} />
+    <% end %><%= if @type == "article" do %>
+    <Article.meta content={@item.detail} />
+    <% end %><%= if @type == "profile" do %>
+    <Profile.meta content={@item.detail} />
     <% end %><%= if (images = List.wrap(@item.image)) != [] do %>
     <Image.meta :for={image <- images} content={image} />
     <% end %><%= if (audios = List.wrap(@item.audio)) != [] do %>
@@ -178,5 +157,44 @@ defmodule SEO.OpenGraph do
     <% end %>
     <% end %>
     """
+  end
+
+  defp assign_type(assigns) do
+    assign_new(assigns, :type, fn a ->
+      case a[:item][:detail] do
+        nil -> "website"
+        %Article{} -> "article"
+        %{published_time: _} -> "article"
+        %Profile{} -> "profile"
+        %{first_name: _} -> "profile"
+        %Book{} -> "book"
+        %{isbn: _} -> "book"
+      end
+    end)
+  end
+
+  # Access implementation
+  @behaviour Access
+
+  @impl Access
+  @doc false
+  def fetch(config, key), do: Map.fetch(config, key)
+
+  @impl Access
+  @doc false
+  def get_and_update(config, key, fun) do
+    Map.get_and_update(config, key, fun)
+  end
+
+  @impl Access
+  @doc false
+  def pop(config, key) do
+    case fetch(config, key) do
+      {:ok, val} ->
+        {val, %{config | key: nil}}
+
+      :error ->
+        {nil, config}
+    end
   end
 end

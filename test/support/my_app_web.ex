@@ -13,7 +13,6 @@ defmodule MyAppWeb.SEO do
       SEO.OpenGraph.build(
         description: "A blog about development",
         site_name: "David Bernheisel's Blog",
-        type: :website,
         locale: "en_US"
       ),
     twitter:
