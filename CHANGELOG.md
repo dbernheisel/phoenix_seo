@@ -1,6 +1,6 @@
 # Changelog
 
-## unreleased
+## 0.1.6
 
 - Add SEO.Config @behaviour and implement it during `use SEO`.
 - SEO config is now a struct instead of a map

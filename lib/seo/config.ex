@@ -1,5 +1,5 @@
 defmodule SEO.Config do
-  @moduledoc false
+  @moduledoc "Configuration for SEO. This is implemented for you when you `use SEO`"
   defstruct [
     :json_library,
     site: %{},
@@ -13,6 +13,7 @@ defmodule SEO.Config do
   @callback config() :: map()
   @callback config(atom) :: map()
 
+  @doc false
   def validate!(config) do
     poison = if Code.ensure_loaded?(Poison), do: Poison
     jason = if Code.ensure_loaded?(Jason), do: Jason
@@ -26,6 +27,7 @@ defmodule SEO.Config do
     |> Map.put(:json_library, config[:json_library] || json_library)
   end
 
+  @doc false
   def domains, do: %__MODULE__{} |> Map.keys() |> List.delete(:json_library)
 
   defp validate_json!(json_library, seo_json) do
@@ -69,14 +71,17 @@ defmodule SEO.Config do
   @behaviour Access
 
   @impl Access
+  @doc false
   def fetch(config, key), do: Map.fetch(config, key)
 
   @impl Access
+  @doc false
   def get_and_update(config, key, fun) do
     Map.get_and_update(config, key, fun)
   end
 
   @impl Access
+  @doc false
   def pop(config, key) do
     case fetch(config, key) do
       {:ok, val} ->
