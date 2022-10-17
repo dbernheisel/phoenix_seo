@@ -1,5 +1,10 @@
 # Changelog
 
+## unreleased
+
+- Add SEO.Config @behaviour and implement it during `use SEO`.
+- SEO config is now a struct instead of a map
+
 ## 0.1.5 (October 16, 2022)
 
 - Allow for config to be a module that implements `config/0` and `config/1`

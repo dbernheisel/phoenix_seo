@@ -1,5 +1,17 @@
 defmodule SEO.Config do
   @moduledoc false
+  defstruct [
+    :json_library,
+    site: %{},
+    facebook: %{},
+    twitter: %{},
+    unfurl: %{},
+    open_graph: %{},
+    breadcrumb: %{}
+  ]
+
+  @callback config() :: map()
+  @callback config(atom) :: map()
 
   def validate!(config) do
     poison = if Code.ensure_loaded?(Poison), do: Poison
@@ -9,10 +21,12 @@ defmodule SEO.Config do
     json_library = seo_json || phoenix_json || jason || poison
     validate_json!(json_library, seo_json)
 
-    config
-    |> Enum.into(%{})
-    |> Map.put_new(:json_library, json_library)
+    __MODULE__
+    |> struct(config)
+    |> Map.put(:json_library, config[:json_library] || json_library)
   end
+
+  def domains, do: %__MODULE__{} |> Map.keys() |> List.delete(:json_library)
 
   defp validate_json!(json_library, seo_json) do
     cond do
@@ -48,6 +62,28 @@ defmodule SEO.Config do
         configured for Phoenix, then it will try to try to use Jason or Poison if
         available.
         """
+    end
+  end
+
+  # Access implementation
+  @behaviour Access
+
+  @impl Access
+  def fetch(config, key), do: Map.fetch(config, key)
+
+  @impl Access
+  def get_and_update(config, key, fun) do
+    Map.get_and_update(config, key, fun)
+  end
+
+  @impl Access
+  def pop(config, key) do
+    case fetch(config, key) do
+      {:ok, val} ->
+        {val, %{config | key: nil}}
+
+      :error ->
+        {nil, config}
     end
   end
 end

@@ -91,7 +91,7 @@ defimpl SEO.OpenGraph.Build, for: MyApp.Article do
       type: :article,
       type_detail:
         SEO.OpenGraph.Article.build(
-          published_time: article.published_at |> DateTime.to_date() |> Date.to_iso8601(),
+          published_time: article.published_at,
           author: article.author,
           section: "Tech"
         ),
@@ -203,7 +203,6 @@ end
   <SEO.juice
     conn={@conn}
     config={MyAppWeb.SEO.config()}
-    item={SEO.item(@conn)}
     page_title={assigns[:page_title]}
   />
 </head>
@@ -232,7 +231,7 @@ Alternatively, you may selectively render components. For example:
 
 ## FAQ
 
-Question: **What do I do for non-show routes, like for index routes?**
+**Question: What do I do for non-show routes, like for index routes?**
 
 Answer:
 
@@ -267,3 +266,32 @@ defimpl SEO.OpenGraph.Build, for: MyAppWeb.PokeonController do
   end
 end
 ```
+
+**Question: Can I globally configure a JSON library?**
+
+Answer: Sure. Without configuration, SEO will choose the JSON library configured
+for Phoenix. If that's not configured and Jason is available, SEO will use Jason.
+If Jason is not available, but Poison is, then Poison will be used. In any case,
+you can specify the JSON library for SEO in your mix config:
+
+```elixir
+import Config
+config :seo_phoenix, json_library: Jason
+```
+
+This will be picked up when you `use SEO` so the config will have json_library
+available for the components to use later.
+
+**Question: What's the difference between `SEO.OpenGraph.Build.build` and `SEO.OpenGraph.build`?**
+
+Answer: Elixir protocols are core to how this library works. Using OpenGraph as
+an example, protocols are defined in SEO domains such as `SEO.OpenGraph.Build`
+(big B) which are dispatched by Elixir to your implementation for the given struct. This
+is how polymorphism can work for Elixir! Whereas the function `SEO.OpenGraph.build`
+(little b) is building the `SEO.OpenGraph` struct based on the defaults for your
+domain and the result of your implementation. Again, shorter, `Build` (big b) is
+the protocol, and `build` (little b) is merging your implementation's result with
+defaults. Technically, your implementation doesn't have to return an
+`SEO.OpenGraph` struct, but it's very handy since documentation is present on the
+build function so your editor can quickly show you what is available. Knowing is
+half the battle!

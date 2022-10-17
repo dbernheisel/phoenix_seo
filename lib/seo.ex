@@ -6,7 +6,7 @@ defmodule SEO do
              |> Enum.fetch!(1)
 
   @doc """
-  Setup your defaults. Domains are mapped this way:
+  Setup your defaults. Domains are mapped:
 
   - `:site` -> `SEO.Site`
   - `:open_graph` -> `SEO.OpenGraph`
@@ -31,6 +31,7 @@ defmodule SEO do
   @doc false
   def define_config(opts) do
     quote location: :keep, bind_quoted: [opts: opts] do
+      @behaviour SEO.Config
       @seo_options SEO.Config.validate!(opts)
 
       @doc """
@@ -39,9 +40,11 @@ defmodule SEO do
       config/0 will return all SEO config
       config/1 with SEO domain atom will return that domain's config
       """
+      @impl SEO.Config
       def config, do: @seo_options
 
-      def config(domain), do: config()[domain] || []
+      @impl SEO.Config
+      def config(domain), do: config()[domain] || %{}
     end
   end
 
@@ -57,7 +60,6 @@ defmodule SEO do
     <SEO.juice
       conn={@conn}
       config={MyAppWeb.SEO.config()}
-      item={SEO.item(assigns)}
       page_title={assigns[:page_title]}
     />
   </head>
@@ -85,29 +87,35 @@ defmodule SEO do
   ```
   """
 
-  attr(:item, :any, required: true, doc: "Item to render that implements SEO protocols")
-
   attr(:conn, Plug.Conn,
     required: true,
-    doc: "Plug.Conn for the request. Used for domain configs that are functions"
+    doc:
+      "`Plug.Conn` for the request. Used for domain configs that are functions and to fetch the item."
+  )
+
+  attr(:item, :any,
+    default: nil,
+    doc: "Item to render that implements SEO protocols. Defaults to `SEO.item(@conn)`"
   )
 
   attr(:page_title, :string, default: nil, doc: "Page Title. Overrides item's title if supplied")
 
   attr(:config, :any,
     default: nil,
-    doc: "Configuration for your SEO module or another module that implements config/0
-    and config/1."
+    doc: "Configuration for your SEO module or another module that implements `SEO.Config`"
   )
 
   attr(:json_library, :atom,
     default: nil,
-    doc: "JSON library to use when rendering JSON. `config[:json_library]` will
-    be used if not supplied."
+    doc:
+      "JSON library to use when rendering JSON. `config[:json_library]` will be used if not supplied."
   )
 
   def juice(assigns) do
-    assigns = assign_configs(assigns, assigns[:config], assigns[:conn])
+    assigns =
+      assigns
+      |> assign_new(:item, fn -> SEO.item(assigns[:conn]) end)
+      |> assign_configs(assigns[:config], assigns[:conn])
 
     ~H"""
     <SEO.Site.meta config={@site_config} item={SEO.Site.Build.build(@item, @conn)} page_title={@page_title} />
@@ -136,7 +144,7 @@ defmodule SEO do
     |> assign_configs(conn)
   end
 
-  @domains ~w[json_library site unfurl open_graph twitter facebook breadcrumb]a
+  @domains SEO.Config.domains()
   defp assign_configs(assigns, conn) do
     Enum.reduce(@domains, assigns, fn domain, assigns ->
       assign_new(assigns, :"#{domain}_config", fn ->
@@ -147,8 +155,8 @@ defmodule SEO do
 
   defp get_domain_config(config, domain, conn) do
     case config[domain] do
-      nil -> []
-      domain_config when is_function(domain_config) -> domain_config.(conn) || []
+      nil -> %{}
+      domain_config when is_function(domain_config) -> domain_config.(conn) || %{}
       domain_config -> domain_config
     end
   end

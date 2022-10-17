@@ -20,10 +20,6 @@ defmodule SEO.Utils do
     end
   end
 
-  def format_date(%Date{} = date), do: Date.to_iso8601(date)
-  def format_date(%NaiveDateTime{} = ndt), do: NaiveDateTime.to_iso8601(ndt)
-  def format_date(%DateTime{} = dt), do: DateTime.to_iso8601(dt)
-
   ## TODO
   # - Tokenizer that turns HTML into sentences. eg: https://github.com/wardbradt/HTMLST
 
@@ -36,13 +32,12 @@ defmodule SEO.Utils do
     |> String.trim()
   end
 
-  def squash_newlines(text) do
-    String.replace(text, "\n", " ")
-  end
+  def squash_newlines(text), do: String.replace(text, "\n", " ")
 
   def to_iso8601(%NaiveDateTime{} = ndt), do: NaiveDateTime.to_iso8601(ndt)
   def to_iso8601(%DateTime{} = dt), do: DateTime.to_iso8601(dt)
   def to_iso8601(%Date{} = d), do: Date.to_iso8601(d)
+  def to_iso8601(iso8601_string) when is_binary(iso8601_string), do: iso8601_string
 
   def merge_defaults(_mod, nil, nil), do: nil
   def merge_defaults(mod, attrs, nil), do: struct(mod, to_map(attrs))
