@@ -92,7 +92,7 @@ defmodule SEO.OpenGraph do
     may also be required. Default is `:website`.
   - `:image` - An image URL or `SEO.OpenGraph.Image` that represents your item within the graph.
   - `:url` - The canonical URL of your item that will be used as its permanent ID in the graph, e.g.,
-    "https://www.imdb.com/title/tt0117500/". Ultimately, this is where the programs will scrape for metadata.
+    https://www.imdb.com/title/tt0117500/. Ultimately, this is where the programs will scrape for metadata.
     For example, if you use a url of a YouTube video page, the scraper will use the OpenGraph tags found on
     that video page and not the currently-visited site.
 
