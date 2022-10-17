@@ -9,7 +9,7 @@ mix test
 
 sed -i "" "s/$previous_version/$release_version/" README.md
 sed -i "" "s/$previous_version/$release_version/" mix.exs
-sed -i "" "s/unreleased/$release_version/" CHANGELOG.md
+sed -i "" "s/unreleased/$release_version ($(date +%F))/" CHANGELOG.md
 git add mix.exs
 git add README.md
 git add CHANGELOG.md
