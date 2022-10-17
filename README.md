@@ -260,7 +260,7 @@ defmodule MyAppWeb.PokemonController do
 
 end
 
-defimpl SEO.OpenGraph.Build, for: MyAppWeb.PokeonController do
+defimpl SEO.OpenGraph.Build, for: MyAppWeb.PokemonController do
   def build(index, conn) do
     SEO.OpenGraph.build(title: index.title, ...)
   end
