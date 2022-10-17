@@ -10,8 +10,6 @@
 
 <!-- MDOC !-->
 
-**WORK IN PROGRESS, DO NOT USE**
-
 ```
 /ˈin(t)ərˌnet jo͞os/
 noun: internet juice
