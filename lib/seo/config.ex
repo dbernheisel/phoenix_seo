@@ -27,7 +27,6 @@ defmodule SEO.Config do
     |> Map.put(:json_library, config[:json_library] || json_library)
   end
 
-  @doc false
   def domains, do: %__MODULE__{} |> Map.keys() |> List.delete(:json_library)
 
   defp validate_json!(json_library, seo_json) do
@@ -85,7 +84,7 @@ defmodule SEO.Config do
   def pop(config, key) do
     case fetch(config, key) do
       {:ok, val} ->
-        {val, %{config | key: nil}}
+        {val, Map.put(config, key, nil)}
 
       :error ->
         {nil, config}

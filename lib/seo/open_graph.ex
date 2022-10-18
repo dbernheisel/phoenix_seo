@@ -127,8 +127,7 @@ defmodule SEO.OpenGraph do
     <%= if @item do %>
     <%= if @item.title do %>
     <meta property="og:title" content={@item.title} />
-    <% end %>
-    <%= if @item.description do %>
+    <% end %><%= if @item.description do %>
     <meta property="og:description" content={@item.description |> Utils.squash_newlines() |> Utils.truncate()} />
     <% end %>
     <meta property="og:type" content={@type} />

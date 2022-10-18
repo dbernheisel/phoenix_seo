@@ -24,6 +24,13 @@ defmodule SEO do
   ]
   ```
   """
+
+  @typedoc "Attributes describing an item"
+  @type attrs :: struct() | map() | Keyword.t() | nil
+
+  @typedoc "Fallback attributes describing an item and configuration"
+  @type config :: struct() | map() | Keyword.t() | nil
+
   defmacro __using__(opts) do
     SEO.define_config(opts)
   end
@@ -72,17 +79,17 @@ defmodule SEO do
     <%# With your SEO module's configuration %>
     <SEO.OpenGraph.meta
       config={MyAppWeb.SEO.config(:open_graph)}
-      item={SEO.OpenGraph.Build.build(SEO.item(assigns))}
+      item={SEO.OpenGraph.Build.build(SEO.item(@conn))}
     />
 
     <%# Or with runtime configuration %>
     <SEO.Twitter.meta
       config={%{site_name: "Foo Fighters"}}
-      item={SEO.Twitter.Build.build(SEO.item(assigns))}
+      item={SEO.Twitter.Build.build(SEO.item(@conn))}
     />
 
     <%# Or without configuration is fine too %>
-    <SEO.Unfurl.meta item={SEO.Unfurl.Build.build(SEO.item(assigns))} />
+    <SEO.Unfurl.meta item={SEO.Unfurl.Build.build(SEO.item(@conn))} />
   </head>
   ```
   """
@@ -95,7 +102,8 @@ defmodule SEO do
 
   attr(:item, :any,
     default: nil,
-    doc: "Item to render that implements SEO protocols. Defaults to `SEO.item(@conn)`"
+    doc:
+      "Item to render that implements SEO protocols. `SEO.item(@conn)` will be used if not supplied."
   )
 
   attr(:page_title, :string, default: nil, doc: "Page Title. Overrides item's title if supplied")
@@ -131,7 +139,7 @@ defmodule SEO do
     config =
       case to_string(mod) do
         "Elixir." <> _ -> mod.config()
-        "" -> []
+        "" -> %{}
       end
 
     assign_configs(assigns, config, conn)
@@ -176,17 +184,12 @@ defmodule SEO do
     Phoenix.Component.assign(socket, @key, item)
   end
 
-  def key, do: @key
-
   @doc "Fetch the SEO item from the Plug.Conn or LiveView Socket"
   @spec item(Plug.Conn.t() | Phoenix.LiveView.Socket.t()) :: any()
   def item(conn_or_socket)
-  def item(%Plug.Conn{} = conn), do: conn.private[@key] || conn.assigns[@key] || []
-  def item(%Phoenix.LiveView.Socket{} = socket), do: socket.assigns[@key] || []
+  def item(%Plug.Conn{} = conn), do: conn.private[@key] || conn.assigns[@key] || %{}
+  def item(%Phoenix.LiveView.Socket{} = socket), do: socket.assigns[@key] || %{}
 
-  @typedoc "Attributes describing an item"
-  @type attrs :: struct() | map() | Keyword.t() | nil
-
-  @typedoc "Fallback attributes describing an item and configuration"
-  @type config :: struct() | map() | Keyword.t() | nil
+  @doc "The key used in the conn or socket to find the item"
+  def key, do: @key
 end

@@ -4,9 +4,13 @@ defmodule SEO.Site do
 
   ### Example:
 
-  Mask Icon: ![Mask Icon Example](./assets/masked-icon-example.jpg)
+  Mask Icon:
 
-  Theme Color: ![Theme Color Example](./assets/theme-color-example.png)
+  ![Mask Icon Example](./assets/masked-icon-example.jpg)
+
+  Theme Color:
+
+  ![Theme Color Example](./assets/theme-color-example.png)
 
   ### Resources
 
@@ -15,6 +19,8 @@ defmodule SEO.Site do
   - https://developers.google.com/search/docs/crawling-indexing/consolidate-duplicate-urls
   - https://developers.google.com/search/docs/crawling-indexing/robots-meta-tag
   - https://developers.google.com/search/docs/crawling-indexing/special-tags
+  - https://developers.google.com/search/docs/appearance/snippet (description)
+  - https://developers.google.com/search/docs/appearance/site-names (title)
   - https://developers.google.com/search/docs/appearance/title-link
   - https://realfavicongenerator.net/
   - https://developer.apple.com/library/archive/documentation/AppleApplications/Reference/SafariWebContent/pinnedTabs/pinnedTabs.html
@@ -127,17 +133,14 @@ defmodule SEO.Site do
     - `"max-video-preview:[number]"` Max number of seconds of a video preview. The number may be:
       - `0` show a static image instead
       - `-1` allow any preview length
-
   - `:windows_tile_color` - The color of the tile behind your icon when rendered on the Microsoft Windows start menu.
     Accepts a CSS color value, such as a hex or name.
-
   - `:theme_color` - The chrome of the browser may use the theme color. Accepts a CSS color value. It creates a nice
-    effect if this is set to the same color as the page's background.
-
+    effect if this is set to the same color as the page's background. In Safari, this is used when the tab bar style is
+    compact. Some colors may be ignored by the browser (such as those that conflict with the chrome).
   - `:mask_icon_url` - URL of the mask SVG icon. Accepts an `%URI{}` or a string. This is used by Safari when the page
     is pinned to a tab. The SVG file must use 100% black for all vectors with a transparent background, a single layer,
     and the viewBox attribute must be set to `"0 0 16 16"`.
-
   - `:mask_icon_color` - Safari will use the `:mask_icon_url` as the icon when pinned, and you may colorize the icon
     with a CSS color value.
   """
