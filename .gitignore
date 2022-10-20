@@ -20,8 +20,7 @@ erl_crash.dump
 *.ez
 
 # Ignore package tarball (built via "mix hex.build").
-seo-*.tar
+phoenix_seo*.tar
 
 # Temporary files, for example, from tests.
 /tmp/
-phoenix_seo*.tar
