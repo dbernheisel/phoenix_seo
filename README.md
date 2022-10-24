@@ -8,6 +8,9 @@
 
 ![logo](./priv/logo.png)
 
+You're reading the main branch's readme. Please visit
+[hexdocs](https://hexdocs.pm/phoenix_seo) for the latest published documentation.
+
 <!-- MDOC !-->
 
 ```
