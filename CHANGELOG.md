@@ -1,6 +1,6 @@
 # Changelog
 
-## unreleased
+## 0.1.7 (2022-12-08)
 
 - BREAKING: simplify OpenGraph fields `:type` and `:type_detail` into one
   `:detail`. The appropriate struct or values in `:detail` will infer to the type.
