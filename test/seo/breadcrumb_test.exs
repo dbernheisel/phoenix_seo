@@ -4,6 +4,20 @@ defmodule SEO.BreadcrumbTest do
   alias SEO.Breadcrumb
 
   describe "meta" do
+    test "renders" do
+      config = %{}
+
+      items = [
+        %{name: "Posts", item: "https://example.com"},
+        %{name: "My Post", item: "https://example.com/page/1"}
+      ]
+
+      result = render_component(&Breadcrumb.meta/1, build_assigns(items, config))
+
+      assert result ==
+               "<script type=\"application/ld+json\">\n  {\"@context\":\"https://schema.org\",\"@type\":\"BreadcrumbList\",\"itemListElement\":[{\"@type\":\"ListItem\",\"item\":\"https://example.com\",\"name\":\"Posts\",\"position\":1},{\"@type\":\"ListItem\",\"item\":\"https://example.com/page/1\",\"name\":\"My Post\",\"position\":2}]}\n</script>"
+    end
+
     test "doesn't render when list is empty or nil" do
       config = %{}
 
@@ -16,6 +30,14 @@ defmodule SEO.BreadcrumbTest do
       assert result == ""
 
       item = %{}
+      result = render_component(&Breadcrumb.meta/1, build_assigns(item, config))
+      assert result == ""
+
+      item = [%{}, %{}]
+      result = render_component(&Breadcrumb.meta/1, build_assigns(item, config))
+      assert result == ""
+
+      item = [[], []]
       result = render_component(&Breadcrumb.meta/1, build_assigns(item, config))
       assert result == ""
     end

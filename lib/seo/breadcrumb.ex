@@ -35,21 +35,19 @@ defmodule SEO.Breadcrumb do
   """
 
   use Phoenix.Component
-  alias SEO.Breadcrumb.List
+  alias SEO.Breadcrumb
 
-  attr(:item, SEO.Breadcrumb.List)
+  attr(:item, Breadcrumb.List)
   attr(:json_library, :atom, required: true)
   attr(:config, :any, default: nil)
 
   def meta(assigns) do
-    assigns = assign(assigns, :item, List.build(assigns[:item], assigns[:config]))
+    assigns = assign(assigns, :item, Breadcrumb.List.build(assigns[:item], assigns[:config]))
 
     ~H"""
-    <%= if @item do %>
-    <script type="application/ld+json">
-      <%= Phoenix.HTML.raw(@json_library.encode!(List.to_map(@item))) %>
+    <script :if={@item} type="application/ld+json">
+      <%= Phoenix.HTML.raw(@json_library.encode!(Breadcrumb.List.to_map(@item))) %>
     </script>
-    <% end %>
     """
   end
 end

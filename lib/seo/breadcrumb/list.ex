@@ -40,15 +40,15 @@ defmodule SEO.Breadcrumb.List do
   ```
   """
 
-  @spec build(SEO.attrs(), SEO.config()) :: t() | nil
+  @spec build(t() | list(map() | Keyword.t()) | nil, SEO.config()) :: t() | nil
   def build(attrs, _default \\ nil)
 
+  def build([], _default), do: nil
+
   def build(attrs, _default) when is_list(attrs) do
-    case attrs do
-      attrs when attrs == [] -> nil
-      attrs when attrs == %{} -> nil
-      nil -> nil
-      attrs -> %__MODULE__{itemListElement: format_items(attrs)}
+    case format_items(attrs) do
+      [] -> nil
+      items -> %__MODULE__{itemListElement: items}
     end
   end
 
@@ -62,8 +62,19 @@ defmodule SEO.Breadcrumb.List do
     |> Map.from_struct()
   end
 
+  defp reject_empty(items) do
+    Enum.reject(items, fn
+      %{} = map when map_size(map) == 0 -> true
+      [] -> true
+      _ -> false
+    end)
+  end
+
+  defp format_items([]), do: nil
+
   defp format_items(items) do
     items
+    |> reject_empty()
     |> Enum.with_index()
     |> Enum.map(fn {item, i} ->
       i = i + 1

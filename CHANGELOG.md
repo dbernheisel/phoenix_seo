@@ -3,7 +3,7 @@
 ## unreleased
 
 - BREAKING: simplify OpenGraph fields `:type` and `:type_detail` into one
-  `:detail`. The appropriate values in `:detail` will infer to the type.
+  `:detail`. The appropriate struct or values in `:detail` will infer to the type.
 
 ## 0.1.6 (2022-10-17)
 
