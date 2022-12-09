@@ -111,7 +111,6 @@ defimpl SEO.OpenGraph.Build, for: MyApp.Article do
     if exists? do
       SEO.OpenGraph.Image.build(
         url: Routes.static_url(conn, file),
-        secure_url: Routes.static_url(conn, file),
         alt: article.title
       )
     end

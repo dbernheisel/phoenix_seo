@@ -75,10 +75,8 @@ defmodule SEO.Breadcrumb.List do
   defp format_items(items) do
     items
     |> reject_empty()
-    |> Enum.with_index()
+    |> Enum.with_index(1)
     |> Enum.map(fn {item, i} ->
-      i = i + 1
-
       case item do
         %ListItem{position: pos} = list_item ->
           %{list_item | position: pos || i}
