@@ -67,6 +67,7 @@ defmodule SEO do
     <SEO.juice
       conn={@conn}
       config={MyAppWeb.SEO.config()}
+      item={SEO.item(@conn)}
       page_title={assigns[:page_title]}
     />
   </head>
