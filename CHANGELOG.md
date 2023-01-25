@@ -1,6 +1,6 @@
 # Changelog
 
-## unreleased
+## 0.1.8 (2023-01-25)
 
 - Fix behavior when no item is provided. Component was defaulting to nil for
   item when didn't let fallback to work. Thank you @hwatkins.
