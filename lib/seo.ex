@@ -101,7 +101,6 @@ defmodule SEO do
   )
 
   attr(:item, :any,
-    default: nil,
     doc:
       "Item to render that implements SEO protocols. `SEO.item(@conn)` will be used if not supplied."
   )

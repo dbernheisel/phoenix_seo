@@ -1,5 +1,10 @@
 # Changelog
 
+## unreleased
+
+- Fix behavior when no item is provided. Component was defaulting to nil for
+  item when didn't let fallback to work. Thank you @hwatkins.
+
 ## 0.1.7 (2022-12-08)
 
 - BREAKING: simplify OpenGraph fields `:type` and `:type_detail` into one

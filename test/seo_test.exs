@@ -13,6 +13,14 @@ defmodule SEOTest do
   end
 
   describe "juice" do
+    test "renders item from conn when item not provided directly" do
+      item = [title: "foo"]
+      conn = Plug.Conn.put_private(%Plug.Conn{}, SEO.key(), item)
+      result = render_component(&SEO.juice/1, conn: conn)
+
+      assert result =~ ~s|<title>foo</title>|
+    end
+
     test "renders everything from item" do
       item = %MyApp.Article{title: "Title", description: "Description"}
       result = render_component(&SEO.juice/1, build_assigns(item, json_library: Jason))
