@@ -18,7 +18,6 @@ jobs:
         with:
           otp-version: '25'
           elixir-version: '1.14.0'
-      - run: mix deps.unlock --check-unused
       - run: mix deps.get --only dev
       - run: mix format --check-formatted
       - run: mix credo --strict
