@@ -229,67 +229,65 @@ Alternatively, you may selectively render components. For example:
 
 ## FAQ
 
-**Question: What do I do for non-show routes, like for index routes?**
+> #### Question: What do I do for non-show routes, like for index routes? {: .info}
+>
+> You can pass maps or keyword lists for non-specific routes like index routes;
+> however, since it's not an implementation of a struct, it's generic and will be
+> passed to all SEO domains. In the case where an attribute is shared between
+> domains, such as a Twitter title and an Site title and an OpenGraph title, then
+> you won't be able to implement them differently. This is probably ok in most
+> cases.
+>
+> Even better, you can define a struct on your controller or LiveView and pass
+> that struct as the SEO item, then implement the struct per domain.
+>
+> For example:
+>
+> ```elixir
+> defmodule MyAppWeb.PokemonController do
+>   use MyAppWeb, :controller
+>
+>   defstruct [title: "Listing Pokemon"]
+>
+>   def index(conn, _params) do
+>     # ... your usual index logic
+>     SEO.assign(conn, %__MODULE__{})
+>   end
+>
+> end
+>
+> defimpl SEO.OpenGraph.Build, for: MyAppWeb.PokemonController do
+>   def build(index, conn) do
+>     SEO.OpenGraph.build(title: index.title, ...)
+>   end
+> end
+> ```
 
-Answer:
+> #### Question: Can I globally configure a JSON library? {: .info}
+>
+> Sure. Without configuration, SEO will choose the JSON library configured
+> for Phoenix. If that's not configured and Jason is available, SEO will use Jason.
+> If Jason is not available, but Poison is, then Poison will be used. In any case,
+> you can specify the JSON library for SEO in your mix config:
+>
+> ```elixir
+> import Config
+> config :seo_phoenix, json_library: Jason
+> ```
+>
+> This will be picked up when you `use SEO` so the config will have json_library
+> available for the components to use later.
 
-You can pass maps or keyword lists for non-specific routes like index routes;
-however, since it's not an implementation of a struct, it's generic and will be
-passed to all SEO domains. In the case where an attribute is shared between
-domains, such as a Twitter title and an Site title and an OpenGraph title, then
-you won't be able to implement them differently. This is probably ok in most
-cases.
-
-Even better, you can define a struct on your controller or LiveView and pass
-that struct as the SEO item, then implement the struct per domain.
-
-For example:
-
-```elixir
-defmodule MyAppWeb.PokemonController do
-  use MyAppWeb, :controller
-
-  defstruct [title: "Listing Pokemon"]
-
-  def index(conn, _params) do
-    # ... your usual index logic
-    SEO.assign(conn, %__MODULE__{})
-  end
-
-end
-
-defimpl SEO.OpenGraph.Build, for: MyAppWeb.PokemonController do
-  def build(index, conn) do
-    SEO.OpenGraph.build(title: index.title, ...)
-  end
-end
-```
-
-**Question: Can I globally configure a JSON library?**
-
-Answer: Sure. Without configuration, SEO will choose the JSON library configured
-for Phoenix. If that's not configured and Jason is available, SEO will use Jason.
-If Jason is not available, but Poison is, then Poison will be used. In any case,
-you can specify the JSON library for SEO in your mix config:
-
-```elixir
-import Config
-config :seo_phoenix, json_library: Jason
-```
-
-This will be picked up when you `use SEO` so the config will have json_library
-available for the components to use later.
-
-**Question: What's the difference between `SEO.OpenGraph.Build.build` and `SEO.OpenGraph.build`?**
-
-Answer: Elixir protocols are core to how this library works. Using OpenGraph as
-an example, protocols are defined in SEO domains such as `SEO.OpenGraph.Build`
-(big B) which are dispatched by Elixir to your implementation for the given struct. This
-is how polymorphism can work for Elixir! Whereas the function `SEO.OpenGraph.build`
-(little b) is building the `SEO.OpenGraph` struct based on the defaults for your
-domain and the result of your implementation. Again, shorter, `Build` (big b) is
-the protocol, and `build` (little b) is merging your implementation's result with
-defaults. Technically, your implementation doesn't have to return an
-`SEO.OpenGraph` struct, but it's very handy since documentation is present on the
-build function so your editor can quickly show you what is available. Knowing is
-half the battle!
+> #### Question: What's the difference between `SEO.OpenGraph.Build.build` and `SEO.OpenGraph.build`? {: .info}
+>
+> Elixir protocols are core to how this library works. Using OpenGraph as
+> an example, protocols are defined in SEO domains such as `SEO.OpenGraph.Build`
+> (big B) which are dispatched by Elixir to your implementation for the given struct. This
+> is how polymorphism can work for Elixir! Whereas the function `SEO.OpenGraph.build`
+> (little b) is building the `SEO.OpenGraph` struct based on the defaults for your
+> domain and the result of your implementation. Again, shorter, `Build` (big b) is
+> the protocol, and `build` (little b) is merging your implementation's result with
+> defaults. Technically, your implementation doesn't have to return an
+> `SEO.OpenGraph` struct, but it's very handy since documentation is present on the
+> build function so your editor can quickly show you what is available. Knowing is
+> half the battle!
