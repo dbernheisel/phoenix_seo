@@ -85,10 +85,10 @@ defmodule SEO.Site do
   folder such as `example.com/explicit/wow.jpg`. No value provided means the content is appropriate for everyone.
   - `:alternate_languages` -  If your site is multilingual, you can inform search engines. Supply a list of tuples of the
   lang_code and the URL for the page. For example:
-      [
-        {"en_US", Routes.article_url(@endpoint, article.id)},
-        {"ja_JP", Routes.article_jp_url(@endpoint, article.id)}
-      ]
+        [
+          {"en_US", Routes.article_url(@endpoint, article.id)},
+          {"ja_JP", Routes.article_jp_url(@endpoint, article.id)}
+        ]
   - `:google` - Google-specific metadata. It can be one of these values or a list of these values:
     - `"nositelinkssearch"`. When users search for your site, Google Search results sometimes display a search box
     specific to your site, along with other direct links to your site. This tag tells Google not to show the sitelinks
