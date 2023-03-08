@@ -272,7 +272,7 @@ Alternatively, you may selectively render components. For example:
 >
 > ```elixir
 > import Config
-> config :seo_phoenix, json_library: Jason
+> config :phoenix_seo, json_library: Jason
 > ```
 >
 > This will be picked up when you `use SEO` so the config will have json_library
