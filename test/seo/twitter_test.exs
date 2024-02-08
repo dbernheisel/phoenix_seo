@@ -10,7 +10,7 @@ defmodule SEO.TwitterTest do
     test "not rendered if no value is set by config and attrs" do
       result = render_component(&Twitter.meta/1, [])
 
-      assert not String.contains?(result, ~s(<meta name="twitter:card"))
+      assert not String.contains?(result, ~s|<meta name="twitter:card"|)
     end
 
     test "default is rendered if card is not provided by attrs" do
@@ -20,7 +20,7 @@ defmodule SEO.TwitterTest do
 
         result = render_component(&Twitter.meta/1, assigns)
 
-        assert String.contains?(result, ~s(<meta name="twitter:card" content="#{card}">))
+        assert String.contains?(result, ~s|<meta name="twitter:card" content="#{card}">|)
       end
     end
 
@@ -33,7 +33,7 @@ defmodule SEO.TwitterTest do
 
         result = render_component(&Twitter.meta/1, assigns)
 
-        assert String.contains?(result, ~s(<meta name="twitter:card" content="#{card}">))
+        assert String.contains?(result, ~s|<meta name="twitter:card" content="#{card}">|)
       end
     end
 
@@ -47,7 +47,7 @@ defmodule SEO.TwitterTest do
 
         result = render_component(&Twitter.meta/1, assigns)
 
-        assert String.contains?(result, ~s(<meta name="twitter:card" content="#{card}">))
+        assert String.contains?(result, ~s|<meta name="twitter:card" content="#{card}">|)
       end
     end
   end
