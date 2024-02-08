@@ -75,7 +75,11 @@ end
 
 defimpl SEO.Twitter.Build, for: MyApp.Article do
   def build(article, _conn) do
-    SEO.Twitter.build(description: article.description, title: article.title)
+    SEO.Twitter.build(
+      description: article.description,
+      title: article.title,
+      card: :summary
+    )
   end
 end
 
