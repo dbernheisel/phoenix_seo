@@ -38,7 +38,7 @@ defmodule SEO.Twitter do
     :app_id_googleplay,
     :app_url_googleplay,
     :app_country,
-    card: :summary
+    :card
   ]
 
   @type t :: %__MODULE__{
