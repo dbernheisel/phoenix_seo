@@ -8,59 +8,49 @@ defmodule SEO.TwitterTest do
 
   describe "card" do
     test "not rendered if no value is set by config and attrs" do
-      item = %{}
-      default = %{}
-
-      result = render_component(&Twitter.meta/1, build_assigns(item, default))
+      result = render_component(&Twitter.meta/1, [])
 
       assert not String.contains?(result, ~s(<meta name="twitter:card"))
     end
 
-    test "default is rendered if card is not provided in attrs" do
+    test "default is rendered if card is not provided by attrs" do
       for card <- @valid_card_values do
-        item = %{}
-        default = Twitter.build(card: card)
+        default = build_item(card: card)
+        assigns = [config: default]
 
-        result = render_component(&Twitter.meta/1, build_assigns(item, default))
+        result = render_component(&Twitter.meta/1, assigns)
 
         assert String.contains?(result, ~s(<meta name="twitter:card" content="#{card}">))
       end
     end
 
-    test "default is rendered if card in attrs is invalid" do
-      item = %{card: :invalid}
-
+    test "default is rendered if card in attrs is unspecified" do
       for card <- @valid_card_values do
-        default = Twitter.build(card: card)
+        default = build_item(card: card)
+        item = build_item(%{})
 
-        result = render_component(&Twitter.meta/1, build_assigns(item, default))
+        assigns = [config: default, item: item]
+
+        result = render_component(&Twitter.meta/1, assigns)
 
         assert String.contains?(result, ~s(<meta name="twitter:card" content="#{card}">))
       end
     end
 
-    test "not rendered if card in attrs is invalid" do
-      item = %{card: :invalid}
-      default = %{}
-
-      result = render_component(&Twitter.meta/1, build_assigns(item, default))
-
-      assert not String.contains?(result, ~s(<meta name="twitter:card"))
-    end
-
-    test "attrs is rendered if valid" do
-      default = Twitter.build(card: :summary_large_image)
+    test "attrs value is rendered" do
+      default = build_item(card: :summary_large_image)
 
       for card <- @valid_card_values do
-        item = %{card: card}
+        item = build_item(%{card: card})
 
-        result = render_component(&Twitter.meta/1, build_assigns(item, default))
+        assigns = [config: default, item: item]
+
+        result = render_component(&Twitter.meta/1, assigns)
 
         assert String.contains?(result, ~s(<meta name="twitter:card" content="#{card}">))
       end
     end
   end
 
-  defp build_assigns(item, default),
-    do: [item: Twitter.Build.build(item, %Plug.Conn{}), config: default]
+  defp build_item(item), do: Twitter.Build.build(item, %Plug.Conn{})
 end
