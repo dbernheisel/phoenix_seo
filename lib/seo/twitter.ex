@@ -38,7 +38,7 @@ defmodule SEO.Twitter do
     :app_id_googleplay,
     :app_url_googleplay,
     :app_country,
-    card: :summary
+    :card
   ]
 
   @type t :: %__MODULE__{
@@ -132,8 +132,9 @@ defmodule SEO.Twitter do
 
     ~H"""
     <%= if @item do %>
+    <%= if @item.card do %>
     <meta name="twitter:card" content={@item.card} />
-    <%= if @item.title do %>
+    <% end %><%= if @item.title do %>
     <meta name="twitter:title" content={@item.title} />
     <% end %><%= if @item.description do %>
     <meta name="twitter:description" content={@item.description} />
