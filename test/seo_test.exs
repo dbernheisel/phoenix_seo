@@ -1,6 +1,7 @@
 defmodule SEOTest do
   use ExUnit.Case, async: true
   import Phoenix.LiveViewTest
+  import SEO.Test.Helpers
 
   defmodule TestConfig do
     def config do
@@ -16,57 +17,78 @@ defmodule SEOTest do
     test "renders item from conn when item not provided directly" do
       item = [title: "foo"]
       conn = Plug.Conn.put_private(%Plug.Conn{}, SEO.key(), item)
-      result = render_component(&SEO.juice/1, conn: conn)
 
-      assert result =~ ~s|<title>foo</title>|
+      result = render_component(&SEO.juice/1, conn: conn)
+      {:ok, html} = Floki.parse_fragment(result)
+
+      assert title(html, "foo")
     end
 
     test "renders everything from item" do
       item = %MyApp.Article{title: "Title", description: "Description"}
+
       result = render_component(&SEO.juice/1, build_assigns(item, json_library: Jason))
+      {:ok, html} = Floki.parse_fragment(result)
 
       # assert an attribute for each domain
       # site
-      assert result =~ ~s|<meta name="description" content="Description">|
+      assert title(html, "Title")
+      assert meta_content(html, "name='description'", item.description)
       # opengraph
-      assert result =~ ~s|<meta property="og:type" content="article">|
+      assert meta_content(html, "property='og:type'", "article")
       # twitter
-      assert result =~ ~s|<meta name="twitter:card" content="summary">|
+      assert meta_content(html, "name='twitter:card'", "summary")
       # unfurl
-      assert result =~ ~s|<meta name="twitter:label2" content="Reading Time">|
+      assert meta_content(html, "name='twitter:label2'", "Reading Time")
       # facebook
-      assert result =~ ~s|<meta name="fb:app_id" content="123">|
-      # breadcrumb
-      assert result =~
-               ~s|{"@type":"ListItem","item":"https://example.com/articles","name":"Articles","position":1}|
+      assert meta_content(html, "name='fb:app_id'", "123")
 
-      assert result =~
-               ~s|{"@type":"ListItem","item":"https://example.com/articles/my_id","name":"Title","position":2}|
+      # breadcrumb
+      ld = linking_data(html)
+      assert ld["@type"] == "BreadcrumbList"
+
+      assert ld["itemListElement"] == [
+               %{
+                 "@type" => "ListItem",
+                 "item" => "https://example.com/articles",
+                 "name" => "Articles",
+                 "position" => 1
+               },
+               %{
+                 "@type" => "ListItem",
+                 "item" => "https://example.com/articles/my_id",
+                 "name" => "Title",
+                 "position" => 2
+               }
+             ]
     end
 
     test "renders almost nothing when struct not implemented" do
       item = %MyApp.NotImplemented{id: "No"}
       result = render_component(&SEO.juice/1, build_assigns(item))
+      {:ok, html} = Floki.parse_fragment(result)
 
       # assert an attribute for each domain
       # site
-      assert result =~ ~s|<title></title>|
+      assert title(html, "")
       # opengraph default
-      assert result =~ ~s|<meta property="og:type" content="website">|
+      assert meta_content(html, "property='og:type'", "website")
     end
 
     test "renders from map" do
       item = %{title: "Title"}
       result = render_component(&SEO.juice/1, build_assigns(item))
+      {:ok, html} = Floki.parse_fragment(result)
 
-      assert result =~ ~s|<title>Title</title>|
+      assert title(html, "Title")
     end
 
     test "renders from list" do
       item = [title: "Title"]
       result = render_component(&SEO.juice/1, build_assigns(item))
+      {:ok, html} = Floki.parse_fragment(result)
 
-      assert result =~ ~s|<title>Title</title>|
+      assert title(html, "Title")
     end
 
     test "renders with a function config" do
@@ -77,16 +99,22 @@ defmodule SEOTest do
       ]
 
       item = [title: "Title"]
-      result = render_component(&SEO.juice/1, build_assigns(item, config))
 
-      assert result =~ ~s|<meta name="description" content="functional programming is fun">|
+      result = render_component(&SEO.juice/1, build_assigns(item, config))
+      {:ok, html} = Floki.parse_fragment(result)
+
+      assert title(html, "Title")
+      assert meta_content(html, "name='description'", "functional programming is fun")
     end
 
     test "renders with a module config" do
       item = [title: "Title"]
-      result = render_component(&SEO.juice/1, build_assigns(item, SEOTest.TestConfig))
 
-      assert result =~ ~s|<meta name="description" content="TestConfig Description">|
+      result = render_component(&SEO.juice/1, build_assigns(item, SEOTest.TestConfig))
+      {:ok, html} = Floki.parse_fragment(result)
+
+      assert title(html, "Title")
+      assert meta_content(html, "name='description'", "TestConfig Description")
     end
   end
 

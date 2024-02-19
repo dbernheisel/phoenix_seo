@@ -1,6 +1,7 @@
 defmodule SEO.BreadcrumbTest do
   use ExUnit.Case, async: true
   import Phoenix.LiveViewTest
+  import SEO.Test.Helpers
   alias SEO.Breadcrumb
 
   describe "meta" do
@@ -13,9 +14,25 @@ defmodule SEO.BreadcrumbTest do
       ]
 
       result = render_component(&Breadcrumb.meta/1, build_assigns(items, config))
+      {:ok, html} = Floki.parse_fragment(result)
 
-      assert result ==
-               "<script type=\"application/ld+json\">\n  {\"@context\":\"https://schema.org\",\"@type\":\"BreadcrumbList\",\"itemListElement\":[{\"@type\":\"ListItem\",\"item\":\"https://example.com\",\"name\":\"Posts\",\"position\":1},{\"@type\":\"ListItem\",\"item\":\"https://example.com/page/1\",\"name\":\"My Post\",\"position\":2}]}\n</script>"
+      ld = linking_data(html)
+      assert ld["@type"] == "BreadcrumbList"
+
+      assert ld["itemListElement"] == [
+               %{
+                 "@type" => "ListItem",
+                 "item" => "https://example.com",
+                 "name" => "Posts",
+                 "position" => 1
+               },
+               %{
+                 "@type" => "ListItem",
+                 "item" => "https://example.com/page/1",
+                 "name" => "My Post",
+                 "position" => 2
+               }
+             ]
     end
 
     test "doesn't render when list is empty or nil" do

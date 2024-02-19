@@ -110,6 +110,7 @@ defmodule SEO.MixProject do
       {:dialyxir, "~> 1.0", only: [:dev, :test], runtime: false},
       {:ex_doc, "~> 0.27", only: :dev, runtime: false},
       {:jason, "~> 1.0", only: [:dev, :test]},
+      {:floki, "~> 0.35", only: [:dev, :test]},
       {:makeup_eex, "~> 0.1", only: :dev, runtime: false}
     ]
   end
