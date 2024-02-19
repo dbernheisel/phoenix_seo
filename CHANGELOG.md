@@ -2,7 +2,7 @@
 
 ## 0.1.9 (2024-02-19)
 
-- Fix twitter card. An empty value would always render `summary`.
+- Fix twitter card. An empty value would always render `summary`. Thank you @Flo0807.
 
 ## 0.1.8 (2023-01-25)
 
