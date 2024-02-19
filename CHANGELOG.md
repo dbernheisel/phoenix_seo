@@ -1,6 +1,6 @@
 # Changelog
 
-## unreleased
+## 0.1.9 (2024-02-19)
 
 - Fix twitter card. An empty value would always render `summary`.
 
