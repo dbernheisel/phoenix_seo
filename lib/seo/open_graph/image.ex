@@ -70,7 +70,7 @@ defmodule SEO.OpenGraph.Image do
     end
   end
 
-  attr(:content, :any, default: nil, doc: "Either an `SEO.OpenGraph.Image`, a string, or a URI")
+  attr :content, :any, default: nil, doc: "Either an `SEO.OpenGraph.Image`, a string, or a URI"
 
   def meta(assigns) do
     case assigns[:content] do

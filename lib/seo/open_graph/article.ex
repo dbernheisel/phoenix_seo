@@ -50,7 +50,7 @@ defmodule SEO.OpenGraph.Article do
   use Phoenix.Component
   alias SEO.Utils
 
-  attr(:content, __MODULE__, default: nil)
+  attr :content, __MODULE__, default: nil
 
   def meta(assigns) do
     assigns = assign(assigns, :content, build(assigns[:content], assigns[:config]))

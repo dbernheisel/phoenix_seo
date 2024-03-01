@@ -152,9 +152,9 @@ defmodule SEO.Site do
     Utils.merge_defaults(__MODULE__, attrs, default)
   end
 
-  attr(:item, :any, default: nil)
-  attr(:page_title, :string, default: nil)
-  attr(:config, :any, default: nil)
+  attr :item, :any, default: nil
+  attr :page_title, :string, default: nil
+  attr :config, :any, default: nil
 
   def meta(assigns) do
     assigns = assign(assigns, :item, build(assigns[:item], assigns[:config]))

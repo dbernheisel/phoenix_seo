@@ -124,8 +124,8 @@ defmodule SEO.Twitter do
 
   use Phoenix.Component
 
-  attr(:item, SEO.Twitter, default: nil)
-  attr(:config, :any, default: nil)
+  attr :item, SEO.Twitter, default: nil
+  attr :config, :any, default: nil
 
   def meta(assigns) do
     assigns = assign(assigns, :item, build(assigns[:item], assigns[:config]))

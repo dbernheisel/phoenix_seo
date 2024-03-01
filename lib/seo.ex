@@ -94,29 +94,25 @@ defmodule SEO do
   ```
   """
 
-  attr(:conn, Plug.Conn,
+  attr :conn, Plug.Conn,
     required: true,
     doc:
       "`Plug.Conn` for the request. Used for domain configs that are functions and to fetch the item."
-  )
 
-  attr(:item, :any,
+  attr :item, :any,
     doc:
       "Item to render that implements SEO protocols. `SEO.item(@conn)` will be used if not supplied."
-  )
 
-  attr(:page_title, :string, default: nil, doc: "Page Title. Overrides item's title if supplied")
+  attr :page_title, :string, default: nil, doc: "Page Title. Overrides item's title if supplied"
 
-  attr(:config, :any,
+  attr :config, :any,
     default: nil,
     doc: "Configuration for your SEO module or another module that implements `SEO.Config`"
-  )
 
-  attr(:json_library, :atom,
+  attr :json_library, :atom,
     default: nil,
     doc:
       "JSON library to use when rendering JSON. `config[:json_library]` will be used if not supplied."
-  )
 
   def juice(assigns) do
     assigns =

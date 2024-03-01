@@ -27,8 +27,8 @@ defmodule SEO.Facebook do
 
   use Phoenix.Component
 
-  attr(:item, __MODULE__, default: nil)
-  attr(:config, :any, default: nil)
+  attr :item, __MODULE__, default: nil
+  attr :config, :any, default: nil
 
   def meta(assigns) do
     assigns = assign(assigns, :item, build(assigns[:item], assigns[:config]))

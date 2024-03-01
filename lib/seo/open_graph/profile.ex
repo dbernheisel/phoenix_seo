@@ -38,8 +38,8 @@ defmodule SEO.OpenGraph.Profile do
     SEO.Utils.merge_defaults(__MODULE__, attrs, default)
   end
 
-  attr(:content, :any, default: nil)
-  attr(:property, :string, default: "profile")
+  attr :content, :any, default: nil
+  attr :property, :string, default: "profile"
 
   def meta(assigns) do
     case assigns[:content] do

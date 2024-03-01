@@ -114,8 +114,8 @@ defmodule SEO.OpenGraph do
     Utils.merge_defaults(__MODULE__, attrs, default)
   end
 
-  attr(:item, __MODULE__, default: nil)
-  attr(:config, :any, default: nil)
+  attr :item, __MODULE__, default: nil
+  attr :config, :any, default: nil
 
   def meta(assigns) do
     assigns =

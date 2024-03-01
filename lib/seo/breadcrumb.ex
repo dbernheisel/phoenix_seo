@@ -37,9 +37,9 @@ defmodule SEO.Breadcrumb do
   use Phoenix.Component
   alias SEO.Breadcrumb
 
-  attr(:item, Breadcrumb.List)
-  attr(:json_library, :atom, required: true)
-  attr(:config, :any, default: nil)
+  attr :item, Breadcrumb.List
+  attr :json_library, :atom, required: true
+  attr :config, :any, default: nil
 
   def meta(assigns) do
     assigns = assign(assigns, :item, Breadcrumb.List.build(assigns[:item], assigns[:config]))

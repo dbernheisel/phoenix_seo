@@ -3,8 +3,8 @@ defmodule SEO.Utils do
 
   use Phoenix.Component
 
-  attr(:property, :string, required: true)
-  attr(:content, :any, required: true, doc: "Either a string representing a URI, or a URI")
+  attr :property, :string, required: true
+  attr :content, :any, required: true, doc: "Either a string representing a URI, or a URI"
 
   def url(assigns) do
     case assigns[:content] do

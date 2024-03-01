@@ -41,7 +41,7 @@ defmodule SEO.OpenGraph.Book do
     Utils.merge_defaults(__MODULE__, attrs, default)
   end
 
-  attr(:content, __MODULE__, default: nil)
+  attr :content, __MODULE__, default: nil
 
   def meta(assigns) do
     ~H"""
