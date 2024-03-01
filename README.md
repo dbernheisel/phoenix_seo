@@ -39,11 +39,12 @@ end
 
 ```elixir
 defmodule MyAppWeb.SEO do
-  alias MyAppWeb.Router.Helpers, as: Routes
+  use MyAppWeb, :verified_routes
 
   use SEO, [
     json_library: Jason,
     # a function reference will be called with a conn during render
+    # arity 1 will be passed the conn, arity 0 is also supported.
     site: &__MODULE__.site_config/1,
     open_graph: SEO.OpenGraph.build(
       description: "A blog about development",
@@ -60,6 +61,8 @@ defmodule MyAppWeb.SEO do
     )
   ]
 
+  # Or arity 0 is also supported, which can be great if you're using
+  # Phoenix verified routes and don't need the conn to generate paths.
   def site_config(conn) do
     SEO.Site.build(
       default_title: "Default Title",
@@ -68,8 +71,8 @@ defmodule MyAppWeb.SEO do
       theme_color: "#663399",
       windows_tile_color: "#663399",
       mask_icon_color: "#663399",
-      mask_icon_url: Routes.static_path(conn, "/images/safari-pinned-tab.svg"),
-      manifest_url: Routes.robot_path(conn, :site_webmanifest)
+      mask_icon_url: static_url(conn, "/images/safari-pinned-tab.svg"),
+      manifest_url: url(conn, ~p"/site.webmanifest")
     )
   end
 end
@@ -84,7 +87,7 @@ defmodule MyApp.Article do
 end
 
 defimpl SEO.OpenGraph.Build, for: MyApp.Article do
-  alias MyAppWeb.Router.Helpers, as: Routes
+  use MyAppWeb, :verified_routes
 
   def build(article, conn) do
     SEO.OpenGraph.build(
@@ -104,13 +107,13 @@ defimpl SEO.OpenGraph.Build, for: MyApp.Article do
     file = "/images/article/#{article.id}.png"
 
     exists? =
-      [Application.app_dir(:my_app), "/priv/static", file]
+      [:code.priv_dir(:my_app), "static", file]
       |> Path.join()
       |> File.exists?()
 
     if exists? do
       SEO.OpenGraph.Image.build(
-        url: Routes.static_url(conn, file),
+        url: static_url(conn, file),
         alt: article.title
       )
     end
@@ -118,11 +121,13 @@ defimpl SEO.OpenGraph.Build, for: MyApp.Article do
 end
 
 defimpl SEO.Site.Build, for: MyApp.Article do
-  alias MyAppWeb.Router.Helpers, as: Routes
+  use MyAppWeb, :verified_routes
 
   def build(article, conn) do
+    # Because of `Phoenix.Param`, structs will assume the key of `:id` when
+    # interpolating the struct into the verified route.
     SEO.Site.build(
-      url: Routes.article_url(conn, :show, article.id),
+      url: url(conn, ~p"/articles/#{article}"),
       title: article.title,
       description: article.description
     )
@@ -147,12 +152,14 @@ defimpl SEO.Unfurl.Build, for: MyApp.Article do
 end
 
 defimpl SEO.Breadcrumb.Build, for: MyApp.Article do
-  alias MyAppWeb.Router.Helpers, as: Routes
+  use MyAppWeb, :verified_routes
 
   def build(article, conn) do
+    # Because of `Phoenix.Param`, structs will assume the key of `:id` when
+    # interpolating the struct into the verified route.
     SEO.Breadcrumb.List.build([
-      %{name: "Articles", item: Routes.article_url(conn, :index)},
-      %{name: article.title, item: Routes.article_url(conn, :show, article.id)}
+      %{name: "Articles", item: url(conn, ~p"/articles")},
+      %{name: article.title, item: url(conn, ~p"/articles/#{article}")}
     ])
   end
 end
