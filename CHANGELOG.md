@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.10 (2024-07-21)
+
+- Relax Phoenix Live View requirement. Thank you @srcrip
+
 ## 0.1.9 (2024-02-19)
 
 - Fix twitter card. An empty value would always render `summary`. Thank you @Flo0807.
