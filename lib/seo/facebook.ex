@@ -4,7 +4,7 @@ defmodule SEO.Facebook do
   are contained in `SEO.OpenGraph`, however there remains one Facebook-specific attribute: the `:app_id`.
 
   Resources:
-  - https://developers.facebook.com/docs/sharing/webmaster
+  - https://developers.facebook.com/docs/sharing/webmasters/
   """
 
   defstruct [:app_id]
@@ -15,7 +15,7 @@ defmodule SEO.Facebook do
 
   @doc """
   In order to use Facebook Insights you must add the `:app_id` to your page. Insights lets you view analytics for traffic
-  to your site from Facebook. Find the app ID in your Facebook App Dashboard.
+  to your site from Facebook. Find the app ID in your [Facebook App Dashboard](https://developers.facebook.com/apps/redirect/dashboard).
   """
 
   @spec build(SEO.attrs(), SEO.config()) :: t() | nil
