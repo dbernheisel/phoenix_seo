@@ -139,7 +139,7 @@ defmodule SEO.OpenGraph do
     <meta property="og:determiner" content={"#{@item.determiner}"} />
     <% end %><%= if @item.locale do %>
     <meta property="og:locale" content={@item.locale} />
-    <% end %><%= if locales = List.wrap(@item.locale_alternate) != [] do %>
+    <% end %><%= if (locales = List.wrap(@item.locale_alternate)) != [] do %>
     <meta :for={locale <- locales} property="og:locale:alternate" content={locale} />
     <% end %><%= if @type == "book" do %>
     <Book.meta content={@item.detail} />
