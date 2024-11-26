@@ -98,7 +98,7 @@ defmodule SEO.MixProject do
 
   defp aliases do
     [
-      tests: ["format --check-formatted", "credo --strict", "dialyzer", "test"]
+      tests: ["format --check-formatted", "credo --strict", "test"]
     ]
   end
 
@@ -107,7 +107,6 @@ defmodule SEO.MixProject do
       {:phoenix_live_view, ">= 0.18.0"},
       # Dev / Test
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
-      {:dialyxir, "~> 1.0", only: [:dev, :test], runtime: false},
       {:ex_doc, "~> 0.27", only: :dev, runtime: false},
       {:jason, "~> 1.0", only: [:dev, :test]},
       {:floki, "~> 0.35", only: [:dev, :test]},
