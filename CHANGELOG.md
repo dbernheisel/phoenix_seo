@@ -1,5 +1,9 @@
 # Changelog
 
+## unreleased
+
+- Bugfix: Correct `locale_alternate` handling. Thank you @Hermanverschooten
+
 ## 0.1.10 (2024-07-21)
 
 - Relax Phoenix Live View requirement. Thank you @srcrip
