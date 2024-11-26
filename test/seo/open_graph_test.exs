@@ -19,6 +19,8 @@ defmodule SEO.OpenGraphTest do
       assert meta_content(html, "property='og:type'", "article")
       assert meta_content(html, "property='og:site_name'", "David Bernheisel's Blog")
       assert meta_content(html, "property='og:locale'", "en_US")
+      assert meta_content(html, "property='og:locale:alternate'", "en_UK")
+      assert meta_content(html, "property='og:locale:alternate'", "ja_JP")
       assert meta_content(html, "property='article:author'", "Foo Fighters")
       assert meta_content(html, "property='article:published_time'", "2022-10-13")
       assert meta_content(html, "property='article:section'", "Tech")

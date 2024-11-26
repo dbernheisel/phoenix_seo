@@ -13,7 +13,8 @@ defmodule MyAppWeb.SEO do
       SEO.OpenGraph.build(
         description: "A blog about development",
         site_name: "David Bernheisel's Blog",
-        locale: "en_US"
+        locale: "en_US",
+        locale_alternate: ["en_UK", "ja_JP"]
       ),
     twitter:
       SEO.Twitter.build(
