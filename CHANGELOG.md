@@ -1,6 +1,6 @@
 # Changelog
 
-## unreleased
+## 0.1.11 (2024-11-25)
 
 - Bugfix: Correct `locale_alternate` handling. Thank you @Hermanverschooten
 
