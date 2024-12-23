@@ -16,8 +16,8 @@ jobs:
       - uses: actions/checkout@v2
       - uses: erlef/setup-beam@v1
         with:
-          otp-version: '25'
-          elixir-version: '1.14.0'
+          otp-version: '27'
+          elixir-version: '1.18'
       - run: mix deps.get --only dev
       - run: mix format --check-formatted
       - run: mix credo --strict
@@ -32,8 +32,8 @@ jobs:
       - uses: actions/checkout@v2
       - uses: erlef/setup-beam@v1
         with:
-          otp-version: '25'
-          elixir-version: '1.14.0'
+          otp-version: '27'
+          elixir-version: '1.18'
       - run: rm mix.lock
       - run: mix deps.get --only test
       - run: mix compile --force --warnings-as-errors
