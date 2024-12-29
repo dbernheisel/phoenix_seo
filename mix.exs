@@ -111,7 +111,7 @@ defmodule SEO.MixProject do
     [
       {:phoenix_live_view, ">= 0.18.0"},
       # Dev / Test
-      {:blend, "~> 0.4.1", only: :dev},
+      {:blend, "~> 0.4.1", only: [:dev, :test]},
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
       {:ex_doc, "~> 0.27", only: :dev, runtime: false},
       {:jason, "~> 1.0", only: [:dev, :test]},
