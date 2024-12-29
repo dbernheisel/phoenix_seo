@@ -38,3 +38,6 @@ jobs:
       - run: mix deps.get --only test
       - run: mix compile --force --warnings-as-errors
       - run: mix test --warnings-as-errors
+      - run: BLEND=phoenix_live_view_v0_18 mix test --warnings-as-errors
+      - run: BLEND=phoenix_live_view_v0_19 mix test --warnings-as-errors
+      - run: BLEND=phoenix_live_view_v0_20 mix test --warnings-as-errors
