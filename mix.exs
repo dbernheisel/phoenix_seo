@@ -1,3 +1,7 @@
+if File.exists?("blend/premix.exs") do
+  Code.compile_file("blend/premix.exs")
+end
+
 defmodule SEO.MixProject do
   use Mix.Project
   @version "0.1.11"
@@ -20,6 +24,7 @@ defmodule SEO.MixProject do
       description:
         "Framework for Phoenix applications to optimize your site for search engines and displaying rich results when your URLs are shared across the internet."
     ]
+    |> Keyword.merge(maybe_lockfile_option())
   end
 
   # Run "mix help compile.app" to learn about applications.
@@ -106,11 +111,20 @@ defmodule SEO.MixProject do
     [
       {:phoenix_live_view, ">= 0.18.0"},
       # Dev / Test
+      {:blend, "~> 0.4.1", only: [:dev, :test]},
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
       {:ex_doc, "~> 0.27", only: :dev, runtime: false},
       {:jason, "~> 1.0", only: [:dev, :test]},
       {:floki, "~> 0.35", only: [:dev, :test]},
       {:makeup_eex, "~> 0.1", only: :dev, runtime: false}
     ]
+  end
+
+  defp maybe_lockfile_option do
+    case System.get_env("MIX_LOCKFILE") do
+      nil -> []
+      "" -> []
+      lockfile -> [lockfile: lockfile]
+    end
   end
 end

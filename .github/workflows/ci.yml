@@ -38,3 +38,23 @@ jobs:
       - run: mix deps.get --only test
       - run: mix compile --force --warnings-as-errors
       - run: mix test --warnings-as-errors
+
+  test_different_versions:
+    runs-on: ubuntu-latest
+    name: Tests on different versions
+    env:
+      MIX_ENV: test
+      CI: "true"
+    steps:
+      - uses: actions/checkout@v2
+      - uses: erlef/setup-beam@v1
+        with:
+          otp-version: '27'
+          elixir-version: '1.18'
+      - run: rm mix.lock
+      - run: mix deps.get --only test
+      - run: mix compile --force --warnings-as-errors
+      - run: mix blend.get
+      - run: BLEND=phoenix_live_view_v0_18 mix test
+      - run: BLEND=phoenix_live_view_v0_19 mix test
+      - run: BLEND=phoenix_live_view_v0_20 mix test
