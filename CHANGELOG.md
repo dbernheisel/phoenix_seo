@@ -1,5 +1,10 @@
 # Changelog
 
+## unreleased
+
+- CI: Add Blend to test older Phoenix LiveView versions. Thank you @Flo0807
+- Docs: Update ex_doc
+
 ## 0.1.11 (2024-11-25)
 
 - Bugfix: Correct `locale_alternate` handling. Thank you @Hermanverschooten
