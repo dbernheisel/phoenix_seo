@@ -60,7 +60,7 @@ defmodule SEO.MixProject do
   defp docs do
     [
       main: "SEO",
-      assets: "assets",
+      assets: %{"assets" => "assets"},
       logo: "priv/logomark-small.png",
       source_ref: @version,
       groups_for_modules: groups_for_modules(),
@@ -116,7 +116,7 @@ defmodule SEO.MixProject do
       {:ex_doc, "~> 0.27", only: :dev, runtime: false},
       {:jason, "~> 1.0", only: [:dev, :test]},
       {:floki, "~> 0.35", only: [:dev, :test]},
-      {:makeup_eex, "~> 0.1", only: :dev, runtime: false}
+      {:makeup_eex, "~> 1.0", only: :dev, runtime: false}
     ]
   end
 
