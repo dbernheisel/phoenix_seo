@@ -47,6 +47,9 @@ defmodule SEO.Test.Helpers do
       [{"script", _, json}] ->
         Jason.decode!(json)
 
+      scripts when is_list(scripts) and length(scripts) > 0 ->
+        Enum.map(scripts, fn {"script", _, json} -> Jason.decode!(json) end)
+
       _ ->
         false
     end

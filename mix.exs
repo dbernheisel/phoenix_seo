@@ -72,6 +72,7 @@ defmodule SEO.MixProject do
     [
       Domains: [
         SEO.Breadcrumb,
+        SEO.JsonLD,
         SEO.OpenGraph,
         SEO.Site,
         SEO.Twitter,
@@ -90,8 +91,17 @@ defmodule SEO.MixProject do
         SEO.Breadcrumb.List,
         SEO.Breadcrumb.ListItem
       ],
+      "JSON-LD": [
+        SEO.JsonLD.Article,
+        SEO.JsonLD.Event,
+        SEO.JsonLD.FAQ,
+        SEO.JsonLD.LocalBusiness,
+        SEO.JsonLD.Organization,
+        SEO.JsonLD.Product
+      ],
       Protocol: [
         SEO.Breadcrumb.Build,
+        SEO.JsonLD.Build,
         SEO.OpenGraph.Build,
         SEO.Site.Build,
         SEO.Twitter.Build,
