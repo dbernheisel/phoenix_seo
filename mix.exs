@@ -121,6 +121,7 @@ defmodule SEO.MixProject do
       {:ex_doc, "~> 0.27", only: :dev, runtime: false},
       {:jason, "~> 1.0", only: [:dev, :test]},
       {:floki, "~> 0.35", only: [:dev, :test]},
+      {:mdex, "~> 0.12", only: [:dev, :test]},
       {:makeup_eex, "~> 1.0", only: :dev, runtime: false}
     ]
   end
