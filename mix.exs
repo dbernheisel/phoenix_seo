@@ -90,6 +90,10 @@ defmodule SEO.MixProject do
         SEO.Breadcrumb.List,
         SEO.Breadcrumb.ListItem
       ],
+      LLMs: [
+        SEO.LLMs,
+        SEO.LLMs.Provider
+      ],
       Protocol: [
         SEO.Breadcrumb.Build,
         SEO.OpenGraph.Build,
