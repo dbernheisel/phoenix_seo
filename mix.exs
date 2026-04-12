@@ -97,7 +97,6 @@ defmodule SEO.MixProject do
       ],
       Protocol: [
         SEO.Breadcrumb.Build,
-        SEO.LLMs.Build,
         SEO.OpenGraph.Build,
         SEO.Site.Build,
         SEO.Twitter.Build,

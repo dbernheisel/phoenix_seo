@@ -197,27 +197,28 @@ defmodule SEO.LLMsTest do
     end
   end
 
-  describe "Build protocol" do
-    test "builds entry from MyApp.Article" do
+  describe "behaviour-based ArticleMD" do
+    test "entry/1 returns an Entry for an article" do
       article = %MyApp.Article{id: "test", title: "Test Post", description: "A test post"}
-      entry = SEO.LLMs.Build.build(article, %Plug.Conn{})
+      entry = MyAppWeb.ArticleMD.entry(article)
 
       assert %SEO.LLMs.Entry{
                section: "Articles",
                title: "Test Post",
                url: "https://example.com/articles/test",
-               description: "A test post",
-               content: "# Test Post\n\nA test post"
+               description: "A test post"
              } = entry
     end
 
-    test "Any fallback returns nil" do
-      entry = SEO.LLMs.Build.build(%MyApp.NotImplemented{id: "nope"}, %Plug.Conn{})
-      assert entry == nil
+    test "show/1 renders markdown content" do
+      article = %MyApp.Article{id: "test", title: "Test Post", description: "A test post"}
+      content = MyAppWeb.ArticleMD.show(%{article: article})
+
+      assert content == "# Test Post\n\nA test post"
     end
   end
 
-  describe "protocol-driven provider integration" do
+  describe "behaviour-driven provider integration" do
     defmodule ArticleProvider do
       @behaviour SEO.LLMs.Provider
 
@@ -228,7 +229,7 @@ defmodule SEO.LLMsTest do
           %MyApp.Article{id: "second", title: "Second Post", description: "The second post"}
         ]
 
-        entries = Enum.map(articles, &SEO.LLMs.Build.build(&1, nil))
+        entries = Enum.map(articles, &MyAppWeb.ArticleMD.entry/1)
         dynamic = SEO.LLMs.Entry.group_by_section(entries)
 
         static = [
@@ -239,7 +240,7 @@ defmodule SEO.LLMsTest do
       end
     end
 
-    test "full flow: protocol → provider → plug renders index" do
+    test "full flow: behaviour → provider → plug renders index" do
       opts =
         SEO.LLMs.init(
           title: "My Blog",
@@ -259,34 +260,12 @@ defmodule SEO.LLMsTest do
       assert conn.resp_body =~ "## Docs"
       assert conn.resp_body =~ "[Getting Started](https://example.com/docs/start.md): Setup guide"
 
-      # Dynamic protocol-derived section
+      # Dynamic behaviour-derived section
       assert conn.resp_body =~ "## Articles"
       assert conn.resp_body =~ "[First Post](https://example.com/articles/first): The first post"
 
       assert conn.resp_body =~
                "[Second Post](https://example.com/articles/second): The second post"
-    end
-  end
-
-  describe "render_content/2" do
-    test "renders string content from Build protocol" do
-      article = %MyApp.Article{id: "test", title: "Test Post", description: "A test post"}
-
-      conn =
-        conn(:get, "/articles/test")
-        |> SEO.LLMs.render_content(article)
-
-      assert conn.status == 200
-      assert {"content-type", "text/markdown; charset=utf-8"} in conn.resp_headers
-      assert conn.resp_body == "# Test Post\n\nA test post"
-    end
-
-    test "returns 406 when item has no Build implementation" do
-      conn =
-        conn(:get, "/not-found")
-        |> SEO.LLMs.render_content(%MyApp.NotImplemented{id: "nope"})
-
-      assert conn.status == 406
     end
   end
 

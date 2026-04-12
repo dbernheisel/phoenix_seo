@@ -31,7 +31,54 @@ defmodule SEO.LLMs do
   - `:sections` — Static list of `{section_name, entries}` tuples.
   - `:provider` — Module implementing `SEO.LLMs.Provider` for dynamic sections.
   - `:config` — Your `use SEO` module or config map, used to derive title/description.
+
+  ## Markdown view modules
+
+  Phoenix resolves view modules by format: `ArticleHTML` for HTML, `ArticleJSON`
+  for JSON, and `ArticleMD` for markdown. Your `FooMD` modules can implement the
+  `SEO.LLMs` behaviour to provide entries for the llms.txt index:
+
+      defmodule MyAppWeb.ArticleMD do
+        @behaviour SEO.LLMs
+
+        # Phoenix view function — called by render(conn, :show, article: article)
+        def show(%{article: article}) do
+          \"""
+          # \#{article.title}
+
+          \#{article.body}
+          \"""
+        end
+
+        # llms.txt entry — called by your Provider
+        @impl SEO.LLMs
+        def entry(article) do
+          SEO.LLMs.Entry.build(
+            section: "Articles",
+            title: article.title,
+            url: "/articles/\#{article.slug}",
+            description: article.summary
+          )
+        end
+      end
+
+  Then register the format in your controller:
+
+      use Phoenix.Controller, formats: [:html, :json, :md]
+
+  And add `"md"` to your router pipeline:
+
+      plug :accepts, ["html", "md"]
   """
+
+  @doc """
+  Callback for markdown view modules (`FooMD`) to provide llms.txt entries.
+
+  Receives a resource and returns an `SEO.LLMs.Entry`, a list of entries, or `nil`.
+  Used by `SEO.LLMs.Provider` implementations to build the llms.txt index from
+  your view modules.
+  """
+  @callback entry(term()) :: SEO.LLMs.Entry.t() | [SEO.LLMs.Entry.t()] | nil
 
   @doc """
   Render the llms.txt markdown string from a map of options.
@@ -82,50 +129,6 @@ defmodule SEO.LLMs do
 
   defp render_entry({name, url}), do: "- [#{name}](#{url})"
   defp render_entry({name, url, desc}), do: "- [#{name}](#{url}): #{desc}"
-
-  @doc """
-  Render an item's markdown content for a controller response.
-
-  Uses the `SEO.LLMs.Build` protocol to get the entry's `:content` field
-  and sends it as a `text/markdown` response. If the item doesn't implement
-  the protocol or has no content, sends a 406 Not Acceptable response.
-
-  The `:content` field can be a string or a zero-arity function (for lazy loading).
-
-  ## Example
-
-  In your controller, add `"md"` to your pipeline's accepts list and handle the format:
-
-      pipeline :browser do
-        plug :accepts, ["html", "md"]
-      end
-
-      def show(conn, %{"id" => id}) do
-        article = Blog.get_article!(id)
-
-        case Phoenix.Controller.get_format(conn) do
-          "md" -> SEO.LLMs.render_content(conn, article)
-          _html -> render(conn, :show, article: article)
-        end
-      end
-  """
-  @spec render_content(Plug.Conn.t(), term()) :: Plug.Conn.t()
-  def render_content(conn, item) do
-    case SEO.LLMs.Build.build(item, conn) do
-      %SEO.LLMs.Entry{content: content} when is_function(content, 0) ->
-        conn
-        |> Plug.Conn.put_resp_content_type("text/markdown")
-        |> Plug.Conn.send_resp(200, content.())
-
-      %SEO.LLMs.Entry{content: content} when is_binary(content) ->
-        conn
-        |> Plug.Conn.put_resp_content_type("text/markdown")
-        |> Plug.Conn.send_resp(200, content)
-
-      _ ->
-        Plug.Conn.send_resp(conn, 406, "")
-    end
-  end
 
   @behaviour Plug
 
