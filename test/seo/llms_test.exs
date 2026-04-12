@@ -99,4 +99,38 @@ defmodule SEO.LLMsTest do
       assert result == "# My App\n\n> A tool"
     end
   end
+
+  describe "plug with static sections" do
+    test "serves llms.txt with text/markdown content type" do
+      opts =
+        SEO.LLMs.init(
+          title: "Test App",
+          description: "A test application",
+          sections: [
+            {"Docs", [{"Guide", "https://example.com/guide.md"}]}
+          ]
+        )
+
+      conn =
+        conn(:get, "/llms.txt")
+        |> SEO.LLMs.call(opts)
+
+      assert conn.status == 200
+      assert {"content-type", "text/markdown; charset=utf-8"} in conn.resp_headers
+      assert conn.resp_body =~ "# Test App"
+      assert conn.resp_body =~ "> A test application"
+      assert conn.resp_body =~ "[Guide](https://example.com/guide.md)"
+    end
+
+    test "serves llms.txt at root path" do
+      opts = SEO.LLMs.init(title: "App", sections: [])
+
+      conn =
+        conn(:get, "/")
+        |> SEO.LLMs.call(opts)
+
+      assert conn.status == 200
+      assert conn.resp_body =~ "# App"
+    end
+  end
 end

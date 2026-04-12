@@ -82,4 +82,67 @@ defmodule SEO.LLMs do
 
   defp render_entry({name, url}), do: "- [#{name}](#{url})"
   defp render_entry({name, url, desc}), do: "- [#{name}](#{url}): #{desc}"
+
+  @behaviour Plug
+
+  @impl Plug
+  def init(opts) do
+    opts = Map.new(opts)
+
+    config = resolve_config(opts[:config])
+
+    %{
+      title: opts[:title] || get_in(config, [:open_graph, :site_name]),
+      description: opts[:description] || get_in(config, [:site, :description]),
+      body: opts[:body],
+      sections: opts[:sections],
+      provider: opts[:provider]
+    }
+  end
+
+  @impl Plug
+  def call(conn, opts) do
+    sections = resolve_sections(opts)
+
+    body =
+      render(%{
+        title: opts.title,
+        description: opts.description,
+        body: opts.body,
+        sections: sections
+      })
+
+    conn
+    |> Plug.Conn.put_resp_content_type("text/markdown")
+    |> Plug.Conn.send_resp(200, body)
+  end
+
+  defp resolve_sections(%{provider: provider}) when is_atom(provider) and not is_nil(provider) do
+    provider.sections()
+  end
+
+  defp resolve_sections(%{sections: sections}) when is_list(sections), do: sections
+  defp resolve_sections(_), do: []
+
+  defp resolve_config(nil), do: %{}
+
+  defp resolve_config(mod) when is_atom(mod) do
+    if Code.ensure_loaded?(mod) and function_exported?(mod, :config, 0) do
+      config = mod.config()
+
+      %{
+        open_graph: to_map(config[:open_graph]),
+        site: to_map(config[:site])
+      }
+    else
+      %{}
+    end
+  end
+
+  defp resolve_config(_), do: %{}
+
+  defp to_map(nil), do: %{}
+  defp to_map(x) when is_struct(x), do: Map.from_struct(x)
+  defp to_map(x) when is_list(x), do: Map.new(x)
+  defp to_map(x) when is_map(x), do: x
 end
