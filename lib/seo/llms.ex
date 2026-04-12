@@ -6,51 +6,122 @@ defmodule SEO.LLMs do
   summary, and categorized links to key pages — structured progressively so
   LLMs can stop reading early and still have useful context.
 
-  ## As a Plug
+  ## Quick start
 
-      # In your router
-      forward "/llms.txt", SEO.LLMs,
-        config: MyAppWeb.SEO,
-        sections: [
-          {"Docs", [
-            {"API Reference", "/docs/api.md", "Full REST API docs"}
-          ]}
-        ]
+  1. Add `"md"` to your router pipeline and forward `/llms.txt`:
 
-  ## With a provider module
+          pipeline :browser do
+            plug :accepts, ["html", "md"]
+          end
 
-      forward "/llms.txt", SEO.LLMs,
-        config: MyAppWeb.SEO,
-        provider: MyAppWeb.LLMsProvider
+          forward "/llms.txt", SEO.LLMs,
+            config: MyAppWeb.SEO,
+            provider: MyAppWeb.LLMsProvider
 
-  ## Options
+  2. Create markdown view modules (`FooMD`) that implement this behaviour:
 
-  - `:title` — H1 heading. Falls back to `open_graph.site_name` from config.
-  - `:description` — Blockquote summary. Falls back to `site.description` from config.
-  - `:body` — Optional prose between the summary and sections.
-  - `:sections` — Static list of `{section_name, entries}` tuples.
-  - `:provider` — Module implementing `SEO.LLMs.Provider` for dynamic sections.
-  - `:config` — Your `use SEO` module or config map, used to derive title/description.
+          defmodule MyAppWeb.ArticleMD do
+            @behaviour SEO.LLMs
 
-  ## Markdown view modules
+            def show(%{article: article}) do
+              \"""
+              # \#{article.title}
+
+              \#{article.body}
+              \"""
+            end
+
+            @impl SEO.LLMs
+            def entry(article) do
+              SEO.LLMs.Entry.build(
+                section: "Articles",
+                title: article.title,
+                url: "/articles/\#{article.slug}",
+                description: article.summary
+              )
+            end
+          end
+
+  3. Register the markdown view in your controllers:
+
+          defmodule MyAppWeb.ArticleController do
+            use MyAppWeb, :controller
+
+            plug :put_view, html: MyAppWeb.ArticleHTML, md: MyAppWeb.ArticleMD
+
+            def show(conn, %{"slug" => slug}) do
+              article = Blog.get_article_by_slug!(slug)
+              render(conn, :show, article: article)
+              # html → ArticleHTML.show/1
+              # md   → ArticleMD.show/1
+            end
+          end
+
+  4. Create a provider that assembles the llms.txt index:
+
+          defmodule MyAppWeb.LLMsProvider do
+            @behaviour SEO.LLMs.Provider
+
+            @impl true
+            def sections do
+              articles = MyApp.Blog.list_published()
+
+              entries = Enum.map(articles, &MyAppWeb.ArticleMD.entry/1)
+              dynamic = SEO.LLMs.Entry.group_by_section(entries)
+
+              static = [
+                {"Docs", [
+                  {"About", "/about", "What this site covers"}
+                ]}
+              ]
+
+              static ++ dynamic
+            end
+          end
+
+  ## How it works
 
   Phoenix resolves view modules by format: `ArticleHTML` for HTML, `ArticleJSON`
-  for JSON, and `ArticleMD` for markdown. Your `FooMD` modules can implement the
-  `SEO.LLMs` behaviour to provide entries for the llms.txt index:
+  for JSON, `ArticleMD` for markdown. A single `render(conn, :show, article: article)`
+  call dispatches to the right view based on content negotiation.
+
+  Your `FooMD` modules serve double duty:
+
+  - **Phoenix view functions** (`show/1`, `index/1`, etc.) render full markdown
+    content when the `"md"` format is requested
+  - **The `entry/1` callback** provides metadata for the llms.txt index — section,
+    title, URL, and description
+
+  The provider collects entries from your MD modules and groups them into sections.
+  The Plug renders the final llms.txt file, pulling the site title and description
+  from your existing SEO config.
+
+  ## Using MDEx for markdown templates
+
+  [MDEx](https://hex.pm/packages/mdex) provides a `~MD` sigil that works well
+  as a markdown template engine for your `FooMD` view modules, similar to how
+  HEEx templates work for HTML views:
 
       defmodule MyAppWeb.ArticleMD do
         @behaviour SEO.LLMs
+        import MDEx.Sigil
 
-        # Phoenix view function — called by render(conn, :show, article: article)
-        def show(%{article: article}) do
-          \"""
-          # \#{article.title}
+        def show(assigns) do
+          ~MD\"""
+          # {@article.title}
 
-          \#{article.body}
-          \"""
+          > Published {@article.date}
+
+          {@article.body}
+
+          ## Related
+
+          <%= for tag <- @article.tags do %>
+          - \#{tag}
+          <% end %>
+          \"""MD
         end
 
-        # llms.txt entry — called by your Provider
         @impl SEO.LLMs
         def entry(article) do
           SEO.LLMs.Entry.build(
@@ -62,13 +133,34 @@ defmodule SEO.LLMs do
         end
       end
 
-  Then register the format in your controller:
+  The `~MD` sigil with the `MD` modifier outputs CommonMark markdown (not HTML).
+  It supports assigns (`{@var}`), expressions (`<%= ... %>`), and is processed
+  at compile time for performance. See `MDEx.Sigil` for details.
 
-      use Phoenix.Controller, formats: [:html, :json, :md]
+  ## Plug options
 
-  And add `"md"` to your router pipeline:
+  - `:title` — H1 heading. Falls back to `open_graph.site_name` from config.
+  - `:description` — Blockquote summary. Falls back to `site.description` from config.
+  - `:body` — Optional prose between the summary and sections.
+  - `:sections` — Static list of `{section_name, entries}` tuples.
+  - `:provider` — Module implementing `SEO.LLMs.Provider` for dynamic sections.
+  - `:config` — Your `use SEO` module or config map, used to derive title/description.
 
-      plug :accepts, ["html", "md"]
+  ## Static sections (without a provider)
+
+  For simple sites you can skip the provider and declare sections inline:
+
+      forward "/llms.txt", SEO.LLMs,
+        config: MyAppWeb.SEO,
+        sections: [
+          {"Docs", [
+            {"API Reference", "/docs/api", "Full REST API docs"},
+            {"Guides", "/docs/guides"}
+          ]},
+          {"Optional", [
+            {"Changelog", "/changelog"}
+          ]}
+        ]
   """
 
   @doc """
