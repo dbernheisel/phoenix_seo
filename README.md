@@ -234,6 +234,69 @@ Alternatively, you may selectively render components. For example:
 </head>
 ```
 
+## LLMs.txt
+
+Serve an `/llms.txt` file per the [llmstxt.org](https://llmstxt.org) spec so
+LLMs can discover and understand your site's content.
+
+```elixir
+# In your router
+forward "/llms.txt", SEO.LLMs,
+  config: MyAppWeb.SEO,
+  provider: MyAppWeb.LLMsProvider
+```
+
+Create markdown view modules (`FooMD`) — the markdown equivalent of `FooHTML` —
+that implement the `SEO.LLMs` behaviour:
+
+```elixir
+defmodule MyAppWeb.ArticleMD do
+  @behaviour SEO.LLMs
+  use MyAppWeb, :verified_routes
+
+  # Phoenix view function — called when format is "md"
+  def show(%{article: article}) do
+    """
+    # #{article.title}
+
+    #{article.body}
+    """
+  end
+
+  # llms.txt entry — called by your Provider
+  @impl SEO.LLMs
+  def entry(article) do
+    SEO.LLMs.Entry.build(
+      section: "Articles",
+      title: article.title,
+      url: ~p"/articles/#{article}",
+      description: article.summary
+    )
+  end
+end
+```
+
+Then register the `"md"` format in your pipeline and controller:
+
+```elixir
+pipeline :browser do
+  plug :accepts, ["html", "md"]
+end
+
+defmodule MyAppWeb.ArticleController do
+  use MyAppWeb, :controller
+  plug :put_view, html: MyAppWeb.ArticleHTML, md: MyAppWeb.ArticleMD
+
+  def show(conn, %{"slug" => slug}) do
+    article = Blog.get_article_by_slug!(slug)
+    render(conn, :show, article: article)
+  end
+end
+```
+
+See `SEO.LLMs` module docs for the full guide, including MDEx `~MD` sigil
+integration, nested sub-sections, and inline markdown content.
+
 ## FAQ
 
 > #### Question: What do I do for non-show routes, like for index routes? {: .info}
