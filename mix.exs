@@ -19,12 +19,15 @@ defmodule SEO.MixProject do
       docs: docs(),
       homepage_url: "https://hexdocs.pm/phoenix_seo",
       source_url: "https://github.com/dbernheisel/phoenix_seo",
-      preferred_cli_env: [tests: :test],
       package: package(),
       description:
         "Framework for Phoenix applications to optimize your site for search engines and displaying rich results when your URLs are shared across the internet."
     ]
     |> Keyword.merge(maybe_lockfile_option())
+  end
+
+  def cli do
+    [preferred_envs: [tests: :test]]
   end
 
   # Run "mix help compile.app" to learn about applications.
@@ -118,7 +121,7 @@ defmodule SEO.MixProject do
       # Dev / Test
       {:blend, "~> 0.4.1", only: [:dev, :test]},
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
-      {:ex_doc, "~> 0.27", only: :dev, runtime: false},
+      {:ex_doc, "~> 0.27", only: :dev, warn_if_outdated: true, runtime: false},
       {:jason, "~> 1.0", only: [:dev, :test]},
       {:floki, "~> 0.35", only: [:dev, :test]},
       {:mdex, "~> 0.12", only: [:dev, :test]},
