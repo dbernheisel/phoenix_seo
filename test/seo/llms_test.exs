@@ -196,4 +196,63 @@ defmodule SEO.LLMsTest do
       refute conn.resp_body =~ "David Bernheisel"
     end
   end
+
+  describe "Entry" do
+    test "build/1 creates entry from keyword list" do
+      entry =
+        SEO.LLMs.Entry.build(
+          section: "Docs",
+          title: "API",
+          url: "/api",
+          description: "API docs"
+        )
+
+      assert %SEO.LLMs.Entry{
+               section: "Docs",
+               title: "API",
+               url: "/api",
+               description: "API docs"
+             } = entry
+    end
+
+    test "build/2 merges with defaults" do
+      defaults = SEO.LLMs.Entry.build(section: "Docs")
+      entry = SEO.LLMs.Entry.build([title: "API", url: "/api"], defaults)
+
+      assert entry.section == "Docs"
+      assert entry.title == "API"
+    end
+
+    test "group_by_section/1 groups entries into section tuples" do
+      entries = [
+        SEO.LLMs.Entry.build(section: "Docs", title: "API", url: "/api"),
+        SEO.LLMs.Entry.build(
+          section: "Docs",
+          title: "Guide",
+          url: "/guide",
+          description: "Getting started"
+        ),
+        SEO.LLMs.Entry.build(section: "Optional", title: "FAQ", url: "/faq")
+      ]
+
+      sections = SEO.LLMs.Entry.group_by_section(entries)
+
+      assert {"Docs", docs} = List.keyfind(sections, "Docs", 0)
+      assert {"API", "/api"} in docs
+      assert {"Guide", "/guide", "Getting started"} in docs
+
+      assert {"Optional", optional} = List.keyfind(sections, "Optional", 0)
+      assert {"FAQ", "/faq"} in optional
+    end
+
+    test "group_by_section/1 filters out nils" do
+      entries = [
+        nil,
+        SEO.LLMs.Entry.build(section: "Docs", title: "API", url: "/api"),
+        nil
+      ]
+
+      assert [{"Docs", [{"API", "/api"}]}] = SEO.LLMs.Entry.group_by_section(entries)
+    end
+  end
 end
