@@ -102,3 +102,15 @@ defimpl SEO.Breadcrumb.Build, for: MyApp.Article do
     ])
   end
 end
+
+defimpl SEO.LLMs.Build, for: MyApp.Article do
+  def build(article, _conn) do
+    SEO.LLMs.Entry.build(
+      section: "Articles",
+      title: article.title,
+      url: "https://example.com/articles/#{article.id || "my_id"}",
+      description: article.description,
+      content: "# #{article.title}\n\n#{article.description}"
+    )
+  end
+end

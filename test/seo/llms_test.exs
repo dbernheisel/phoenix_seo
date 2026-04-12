@@ -197,6 +197,77 @@ defmodule SEO.LLMsTest do
     end
   end
 
+  describe "Build protocol" do
+    test "builds entry from MyApp.Article" do
+      article = %MyApp.Article{id: "test", title: "Test Post", description: "A test post"}
+      entry = SEO.LLMs.Build.build(article, %Plug.Conn{})
+
+      assert %SEO.LLMs.Entry{
+               section: "Articles",
+               title: "Test Post",
+               url: "https://example.com/articles/test",
+               description: "A test post",
+               content: "# Test Post\n\nA test post"
+             } = entry
+    end
+
+    test "Any fallback returns nil" do
+      entry = SEO.LLMs.Build.build(%MyApp.NotImplemented{id: "nope"}, %Plug.Conn{})
+      assert entry == nil
+    end
+  end
+
+  describe "protocol-driven provider integration" do
+    defmodule ArticleProvider do
+      @behaviour SEO.LLMs.Provider
+
+      @impl true
+      def sections do
+        articles = [
+          %MyApp.Article{id: "first", title: "First Post", description: "The first post"},
+          %MyApp.Article{id: "second", title: "Second Post", description: "The second post"}
+        ]
+
+        entries = Enum.map(articles, &SEO.LLMs.Build.build(&1, nil))
+        dynamic = SEO.LLMs.Entry.group_by_section(entries)
+
+        static = [
+          {"Docs", [{"Getting Started", "https://example.com/docs/start.md", "Setup guide"}]}
+        ]
+
+        static ++ dynamic
+      end
+    end
+
+    test "full flow: protocol → provider → plug renders index" do
+      opts =
+        SEO.LLMs.init(
+          title: "My Blog",
+          description: "A blog about Elixir",
+          provider: SEO.LLMsTest.ArticleProvider
+        )
+
+      conn =
+        conn(:get, "/llms.txt")
+        |> SEO.LLMs.call(opts)
+
+      assert conn.status == 200
+      assert conn.resp_body =~ "# My Blog"
+      assert conn.resp_body =~ "> A blog about Elixir"
+
+      # Static section
+      assert conn.resp_body =~ "## Docs"
+      assert conn.resp_body =~ "[Getting Started](https://example.com/docs/start.md): Setup guide"
+
+      # Dynamic protocol-derived section
+      assert conn.resp_body =~ "## Articles"
+      assert conn.resp_body =~ "[First Post](https://example.com/articles/first): The first post"
+
+      assert conn.resp_body =~
+               "[Second Post](https://example.com/articles/second): The second post"
+    end
+  end
+
   describe "Entry" do
     test "build/1 creates entry from keyword list" do
       entry =
