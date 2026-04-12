@@ -268,6 +268,28 @@ defmodule SEO.LLMsTest do
     end
   end
 
+  describe "render_content/2" do
+    test "renders string content from Build protocol" do
+      article = %MyApp.Article{id: "test", title: "Test Post", description: "A test post"}
+
+      conn =
+        conn(:get, "/articles/test")
+        |> SEO.LLMs.render_content(article)
+
+      assert conn.status == 200
+      assert {"content-type", "text/markdown; charset=utf-8"} in conn.resp_headers
+      assert conn.resp_body == "# Test Post\n\nA test post"
+    end
+
+    test "returns 406 when item has no Build implementation" do
+      conn =
+        conn(:get, "/not-found")
+        |> SEO.LLMs.render_content(%MyApp.NotImplemented{id: "nope"})
+
+      assert conn.status == 406
+    end
+  end
+
   describe "Entry" do
     test "build/1 creates entry from keyword list" do
       entry =

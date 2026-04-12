@@ -83,6 +83,50 @@ defmodule SEO.LLMs do
   defp render_entry({name, url}), do: "- [#{name}](#{url})"
   defp render_entry({name, url, desc}), do: "- [#{name}](#{url}): #{desc}"
 
+  @doc """
+  Render an item's markdown content for a controller response.
+
+  Uses the `SEO.LLMs.Build` protocol to get the entry's `:content` field
+  and sends it as a `text/markdown` response. If the item doesn't implement
+  the protocol or has no content, sends a 406 Not Acceptable response.
+
+  The `:content` field can be a string or a zero-arity function (for lazy loading).
+
+  ## Example
+
+  In your controller, add `"md"` to your pipeline's accepts list and handle the format:
+
+      pipeline :browser do
+        plug :accepts, ["html", "md"]
+      end
+
+      def show(conn, %{"id" => id}) do
+        article = Blog.get_article!(id)
+
+        case Phoenix.Controller.get_format(conn) do
+          "md" -> SEO.LLMs.render_content(conn, article)
+          _html -> render(conn, :show, article: article)
+        end
+      end
+  """
+  @spec render_content(Plug.Conn.t(), term()) :: Plug.Conn.t()
+  def render_content(conn, item) do
+    case SEO.LLMs.Build.build(item, conn) do
+      %SEO.LLMs.Entry{content: content} when is_function(content, 0) ->
+        conn
+        |> Plug.Conn.put_resp_content_type("text/markdown")
+        |> Plug.Conn.send_resp(200, content.())
+
+      %SEO.LLMs.Entry{content: content} when is_binary(content) ->
+        conn
+        |> Plug.Conn.put_resp_content_type("text/markdown")
+        |> Plug.Conn.send_resp(200, content)
+
+      _ ->
+        Plug.Conn.send_resp(conn, 406, "")
+    end
+  end
+
   @behaviour Plug
 
   @impl Plug
