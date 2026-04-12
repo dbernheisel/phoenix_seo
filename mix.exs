@@ -92,10 +92,12 @@ defmodule SEO.MixProject do
       ],
       LLMs: [
         SEO.LLMs,
+        SEO.LLMs.Entry,
         SEO.LLMs.Provider
       ],
       Protocol: [
         SEO.Breadcrumb.Build,
+        SEO.LLMs.Build,
         SEO.OpenGraph.Build,
         SEO.Site.Build,
         SEO.Twitter.Build,
