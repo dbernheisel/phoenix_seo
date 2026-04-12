@@ -133,4 +133,67 @@ defmodule SEO.LLMsTest do
       assert conn.resp_body =~ "# App"
     end
   end
+
+  describe "plug with provider" do
+    test "resolves sections from provider module" do
+      opts =
+        SEO.LLMs.init(
+          title: "Provider App",
+          provider: SEO.LLMsTest.StaticProvider
+        )
+
+      conn =
+        conn(:get, "/llms.txt")
+        |> SEO.LLMs.call(opts)
+
+      assert conn.status == 200
+      assert conn.resp_body =~ "# Provider App"
+      assert conn.resp_body =~ "## Docs"
+
+      assert conn.resp_body =~
+               "[API Reference](https://example.com/docs/api.md): Full REST API docs"
+
+      assert conn.resp_body =~ "## Optional"
+      assert conn.resp_body =~ "[Changelog](https://example.com/changelog.md)"
+    end
+  end
+
+  describe "plug with SEO config" do
+    test "derives title from open_graph.site_name and description from site.description" do
+      opts =
+        SEO.LLMs.init(
+          config: MyAppWeb.SEO,
+          sections: [
+            {"Posts", [{"Latest", "https://example.com/posts.md"}]}
+          ]
+        )
+
+      conn =
+        conn(:get, "/llms.txt")
+        |> SEO.LLMs.call(opts)
+
+      assert conn.status == 200
+      assert conn.resp_body =~ "# David Bernheisel's Blog"
+      assert conn.resp_body =~ "> A blog about development"
+      assert conn.resp_body =~ "[Latest](https://example.com/posts.md)"
+    end
+
+    test "explicit title/description override config values" do
+      opts =
+        SEO.LLMs.init(
+          config: MyAppWeb.SEO,
+          title: "Override Title",
+          description: "Override description",
+          sections: []
+        )
+
+      conn =
+        conn(:get, "/llms.txt")
+        |> SEO.LLMs.call(opts)
+
+      assert conn.resp_body =~ "# Override Title"
+      assert conn.resp_body =~ "> Override description"
+      refute conn.resp_body =~ "David Bernheisel"
+    end
+  end
 end
