@@ -23,6 +23,7 @@ end
 defmodule SampleApp.ArticleMD do
   @moduledoc false
   @behaviour SEO.LLMs
+  alias SEO.LLMs.Entry
 
   def show(%{article: article}) do
     """
@@ -42,7 +43,7 @@ defmodule SampleApp.ArticleMD do
 
   @impl SEO.LLMs
   def entry(article) do
-    SEO.LLMs.Entry.build(
+    Entry.build(
       section: "Articles",
       title: article.title,
       url: "/articles/#{article.id}",
@@ -54,6 +55,7 @@ end
 defmodule SampleApp.PageMD do
   @moduledoc false
   @behaviour SEO.LLMs
+  alias SEO.LLMs.Entry
   import MDEx.Sigil
 
   def show(%{page: :about} = _assigns) do
@@ -72,7 +74,7 @@ defmodule SampleApp.PageMD do
 
   @impl SEO.LLMs
   def entry(:about) do
-    SEO.LLMs.Entry.build(
+    Entry.build(
       section: "Docs",
       title: "About",
       url: "/about",
@@ -81,7 +83,7 @@ defmodule SampleApp.PageMD do
   end
 
   def entry(:subscribe) do
-    SEO.LLMs.Entry.build(
+    Entry.build(
       section: "Optional",
       title: "Subscribe",
       url: "/subscribe",
@@ -94,6 +96,8 @@ defmodule SampleApp.LLMsProvider do
   @moduledoc false
   @behaviour SEO.LLMs.Provider
 
+  alias SEO.LLMs.Entry
+
   @impl true
   def sections do
     static = [SampleApp.PageMD.entry(:about)]
@@ -105,6 +109,6 @@ defmodule SampleApp.LLMsProvider do
     optional = [SampleApp.PageMD.entry(:subscribe)]
 
     all = static ++ articles ++ optional
-    SEO.LLMs.Entry.group_by_section(all)
+    Entry.group_by_section(all)
   end
 end

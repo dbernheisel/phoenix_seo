@@ -22,6 +22,7 @@ defmodule SEO.LLMs do
 
           defmodule MyAppWeb.ArticleMD do
             @behaviour SEO.LLMs
+            use MyAppWeb, :verified_routes
 
             def show(%{article: article}) do
               \"""
@@ -36,7 +37,7 @@ defmodule SEO.LLMs do
               SEO.LLMs.Entry.build(
                 section: "Articles",
                 title: article.title,
-                url: "/articles/\#{article.slug}",
+                url: ~p"/articles/\#{article.slug}",
                 description: article.summary
               )
             end
@@ -61,17 +62,20 @@ defmodule SEO.LLMs do
 
           defmodule MyAppWeb.LLMsProvider do
             @behaviour SEO.LLMs.Provider
+            use MyAppWeb, :verified_routes
+
+            alias SEO.LLMs.Entry
 
             @impl true
             def sections do
               articles = MyApp.Blog.list_published()
 
               entries = Enum.map(articles, &MyAppWeb.ArticleMD.entry/1)
-              dynamic = SEO.LLMs.Entry.group_by_section(entries)
+              dynamic = Entry.group_by_section(entries)
 
               static = [
                 {"Docs", [
-                  {"About", "/about", "What this site covers"}
+                  {"About", ~p"/about", "What this site covers"}
                 ]}
               ]
 
@@ -122,6 +126,7 @@ defmodule SEO.LLMs do
 
       defmodule MyAppWeb.ArticleMD do
         @behaviour SEO.LLMs
+        use MyAppWeb, :verified_routes
         import MDEx.Sigil
 
         def show(assigns) do
@@ -145,7 +150,7 @@ defmodule SEO.LLMs do
           SEO.LLMs.Entry.build(
             section: "Articles",
             title: article.title,
-            url: "/articles/\#{article.slug}",
+            url: ~p"/articles/\#{article.slug}",
             description: article.summary
           )
         end
@@ -270,15 +275,13 @@ defmodule SEO.LLMs do
   defp render_entries(entries) do
     entries
     |> Enum.chunk_by(&link_entry?/1)
-    |> Enum.map(fn
-      chunk when is_list(chunk) ->
-        if link_entry?(hd(chunk)) do
-          Enum.map_join(chunk, "\n", &render_entry/1)
-        else
-          Enum.map_join(chunk, "\n\n", &render_entry/1)
-        end
+    |> Enum.map_join("\n\n", fn chunk ->
+      if link_entry?(hd(chunk)) do
+        Enum.map_join(chunk, "\n", &render_entry/1)
+      else
+        Enum.map_join(chunk, "\n\n", &render_entry/1)
+      end
     end)
-    |> Enum.join("\n\n")
   end
 
   defp link_entry?({_name, url}) when is_binary(url), do: true

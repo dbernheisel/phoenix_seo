@@ -2,6 +2,8 @@ defmodule SEO.LLMsTest do
   use ExUnit.Case, async: true
   use Plug.Test
 
+  alias SEO.LLMs.Entry
+
   defmodule StaticProvider do
     @behaviour SEO.LLMs.Provider
 
@@ -299,7 +301,7 @@ defmodule SEO.LLMsTest do
       article = %MyApp.Article{id: "test", title: "Test Post", description: "A test post"}
       entry = MyAppWeb.ArticleMD.entry(article)
 
-      assert %SEO.LLMs.Entry{
+      assert %Entry{
                section: "Articles",
                title: "Test Post",
                url: "https://example.com/articles/test",
@@ -327,7 +329,7 @@ defmodule SEO.LLMsTest do
         ]
 
         entries = Enum.map(articles, &MyAppWeb.ArticleMD.entry/1)
-        dynamic = SEO.LLMs.Entry.group_by_section(entries)
+        dynamic = Entry.group_by_section(entries)
 
         static = [
           {"Docs", [{"Getting Started", "https://example.com/docs/start.md", "Setup guide"}]}
@@ -369,14 +371,14 @@ defmodule SEO.LLMsTest do
   describe "Entry" do
     test "build/1 creates entry from keyword list" do
       entry =
-        SEO.LLMs.Entry.build(
+        Entry.build(
           section: "Docs",
           title: "API",
           url: "/api",
           description: "API docs"
         )
 
-      assert %SEO.LLMs.Entry{
+      assert %Entry{
                section: "Docs",
                title: "API",
                url: "/api",
@@ -385,8 +387,8 @@ defmodule SEO.LLMsTest do
     end
 
     test "build/2 merges with defaults" do
-      defaults = SEO.LLMs.Entry.build(section: "Docs")
-      entry = SEO.LLMs.Entry.build([title: "API", url: "/api"], defaults)
+      defaults = Entry.build(section: "Docs")
+      entry = Entry.build([title: "API", url: "/api"], defaults)
 
       assert entry.section == "Docs"
       assert entry.title == "API"
@@ -394,17 +396,17 @@ defmodule SEO.LLMsTest do
 
     test "group_by_section/1 groups entries into section tuples" do
       entries = [
-        SEO.LLMs.Entry.build(section: "Docs", title: "API", url: "/api"),
-        SEO.LLMs.Entry.build(
+        Entry.build(section: "Docs", title: "API", url: "/api"),
+        Entry.build(
           section: "Docs",
           title: "Guide",
           url: "/guide",
           description: "Getting started"
         ),
-        SEO.LLMs.Entry.build(section: "Optional", title: "FAQ", url: "/faq")
+        Entry.build(section: "Optional", title: "FAQ", url: "/faq")
       ]
 
-      sections = SEO.LLMs.Entry.group_by_section(entries)
+      sections = Entry.group_by_section(entries)
 
       assert {"Docs", docs} = List.keyfind(sections, "Docs", 0)
       assert {"API", "/api"} in docs
@@ -417,11 +419,11 @@ defmodule SEO.LLMsTest do
     test "group_by_section/1 filters out nils" do
       entries = [
         nil,
-        SEO.LLMs.Entry.build(section: "Docs", title: "API", url: "/api"),
+        Entry.build(section: "Docs", title: "API", url: "/api"),
         nil
       ]
 
-      assert [{"Docs", [{"API", "/api"}]}] = SEO.LLMs.Entry.group_by_section(entries)
+      assert [{"Docs", [{"API", "/api"}]}] = Entry.group_by_section(entries)
     end
   end
 end

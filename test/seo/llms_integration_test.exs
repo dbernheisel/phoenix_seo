@@ -2,6 +2,8 @@ defmodule SEO.LLMs.IntegrationTest do
   use ExUnit.Case, async: true
   use Plug.Test
 
+  alias SEO.LLMs.Entry
+
   # -- Sample App Modules --
 
   defmodule Blog do
@@ -44,7 +46,7 @@ defmodule SEO.LLMs.IntegrationTest do
 
     @impl SEO.LLMs
     def entry(article) do
-      SEO.LLMs.Entry.build(
+      Entry.build(
         section: "Articles",
         title: article.title,
         url: "/articles/#{article.id}",
@@ -74,7 +76,7 @@ defmodule SEO.LLMs.IntegrationTest do
 
     @impl SEO.LLMs
     def entry(:about) do
-      SEO.LLMs.Entry.build(
+      Entry.build(
         section: "Docs",
         title: "About",
         url: "/about",
@@ -83,7 +85,7 @@ defmodule SEO.LLMs.IntegrationTest do
     end
 
     def entry(:contributing) do
-      SEO.LLMs.Entry.build(
+      Entry.build(
         section: "Docs",
         title: "Contributing",
         url: "/contributing",
@@ -92,7 +94,7 @@ defmodule SEO.LLMs.IntegrationTest do
     end
 
     def entry(:subscribe) do
-      SEO.LLMs.Entry.build(
+      Entry.build(
         section: "Optional",
         title: "Subscribe",
         url: "/subscribe",
@@ -120,7 +122,7 @@ defmodule SEO.LLMs.IntegrationTest do
       optional = [SamplePageMD.entry(:subscribe)]
 
       all_entries = static_pages ++ articles ++ optional
-      SEO.LLMs.Entry.group_by_section(all_entries)
+      Entry.group_by_section(all_entries)
     end
   end
 
@@ -149,7 +151,7 @@ defmodule SEO.LLMs.IntegrationTest do
       article = Blog.get_article!("genserver-guide")
       entry = SampleArticleMD.entry(article)
 
-      assert %SEO.LLMs.Entry{
+      assert %Entry{
                section: "Articles",
                title: "Understanding GenServer",
                url: "/articles/genserver-guide",
@@ -344,7 +346,7 @@ defmodule SEO.LLMs.IntegrationTest do
         |> Enum.map(&SampleArticleMD.entry/1)
 
       all = page_entries ++ article_entries
-      sections = SEO.LLMs.Entry.group_by_section(all)
+      sections = Entry.group_by_section(all)
 
       section_names = Enum.map(sections, &elem(&1, 0))
       assert "Docs" in section_names

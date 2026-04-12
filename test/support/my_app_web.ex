@@ -49,6 +49,7 @@ end
 defmodule MyAppWeb.ArticleMD do
   @moduledoc false
   @behaviour SEO.LLMs
+  alias SEO.LLMs.Entry
 
   def show(%{article: article}) do
     "# #{article.title}\n\n#{article.description}"
@@ -56,7 +57,7 @@ defmodule MyAppWeb.ArticleMD do
 
   @impl SEO.LLMs
   def entry(%MyApp.Article{} = article) do
-    SEO.LLMs.Entry.build(
+    Entry.build(
       section: "Articles",
       title: article.title,
       url: "https://example.com/articles/#{article.id || "my_id"}",
