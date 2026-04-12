@@ -96,11 +96,29 @@ defmodule SEO.LLMs do
   The Plug renders the final llms.txt file, pulling the site title and description
   from your existing SEO config.
 
-  ## Using MDEx for markdown templates
+  ## Using MDEx with Phoenix
 
-  [MDEx](https://hex.pm/packages/mdex) provides a `~MD` sigil that works well
-  as a markdown template engine for your `FooMD` view modules, similar to how
-  HEEx templates work for HTML views:
+  [MDEx](https://hex.pm/packages/mdex) is a fast markdown library for Elixir that
+  pairs naturally with `FooMD` view modules. It provides a `~MD` sigil for markdown
+  templates — the markdown equivalent of HEEx's `~H` sigil for HTML.
+
+  | Format | View module | Template engine | Sigil |
+  |--------|------------|-----------------|-------|
+  | HTML | `FooHTML` | HEEx | `~H` |
+  | JSON | `FooJSON` | Plain maps | — |
+  | Markdown | `FooMD` | MDEx | `~MD` |
+
+  ### Setup
+
+  Add MDEx to your dependencies:
+
+      {:mdex, "~> 0.12"}
+
+  ### The `~MD` sigil
+
+  The `~MD` sigil with the `MD` modifier outputs CommonMark markdown (not HTML).
+  It supports assigns (`{@var}`) and expressions (`<%= ... %>`), and is processed
+  at compile time for performance:
 
       defmodule MyAppWeb.ArticleMD do
         @behaviour SEO.LLMs
@@ -133,9 +151,43 @@ defmodule SEO.LLMs do
         end
       end
 
-  The `~MD` sigil with the `MD` modifier outputs CommonMark markdown (not HTML).
-  It supports assigns (`{@var}`), expressions (`<%= ... %>`), and is processed
-  at compile time for performance. See `MDEx.Sigil` for details.
+  See `MDEx.Sigil` for the full list of modifiers and options.
+
+  ### When to use the sigil vs string interpolation
+
+  The `~MD` sigil processes templates at **compile time**, which makes it ideal for
+  views with structured, known layouts — like documentation pages or about pages.
+  For DB-backed content where the body is already markdown (like a blog post stored
+  as markdown), plain string interpolation is simpler:
+
+      # Compile-time template — good for structured pages
+      def show(assigns) do
+        ~MD\"""
+        # {@page.title}
+
+        {@page.body}
+        \"""MD
+      end
+
+      # Runtime interpolation — good for DB-backed markdown content
+      def show(%{article: article}) do
+        \"""
+        # \#{article.title}
+
+        \#{article.body}
+        \"""
+      end
+
+  ### Converting HTML content to markdown
+
+  If your content is stored as HTML and you need to serve it as markdown,
+  MDEx can parse and re-render it:
+
+      def show(%{article: article}) do
+        article.html_body
+        |> MDEx.parse_document!()
+        |> MDEx.to_markdown!()
+      end
 
   ## Plug options
 
