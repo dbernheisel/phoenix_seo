@@ -5,9 +5,11 @@ defmodule SEO.LLMs.Provider do
   Implement `sections/0` to return a list of sections, where each section
   is a tuple of `{section_name, entries}`.
 
-  Each entry is either:
-  - `{name, url}` — a link with no description
+  Each entry is one of:
+  - `{name, url}` — a link
   - `{name, url, description}` — a link with a description
+  - `{name, entries}` — a sub-section (rendered as H3) containing its own entries
+  - `"string"` — inline markdown content rendered as-is
 
   A section named `"Optional"` signals to LLMs that its content can be
   skipped when context is limited.
@@ -24,6 +26,15 @@ defmodule SEO.LLMs.Provider do
               {"API Reference", "/docs/api.md", "Full REST API docs"},
               {"Guides", "/docs/guides.md"}
             ]},
+            {"SDKs", [
+              {"TypeScript", [
+                {"Client SDK", "/sdk/ts", "TypeScript client"},
+                {"Server SDK", "/sdk/ts-server"}
+              ]},
+              {"Python", [
+                {"Client SDK", "/sdk/py"}
+              ]}
+            ]},
             {"Optional", [
               {"Changelog", "/changelog.md"}
             ]}
@@ -32,9 +43,11 @@ defmodule SEO.LLMs.Provider do
       end
   """
 
-  @type entry ::
+  @type link ::
           {name :: String.t(), url :: String.t()}
           | {name :: String.t(), url :: String.t(), description :: String.t()}
+  @type sub_section :: {name :: String.t(), list(entry())}
+  @type entry :: link() | sub_section() | String.t()
   @type section :: {name :: String.t(), list(entry())}
 
   @callback sections() :: list(section())

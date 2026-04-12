@@ -100,6 +100,103 @@ defmodule SEO.LLMsTest do
     end
   end
 
+  describe "render/1 with nested sub-sections" do
+    test "renders H3 sub-sections within H2 sections" do
+      opts = %{
+        title: "My App",
+        sections: [
+          {"SDKs",
+           [
+             {"TypeScript",
+              [
+                {"Client SDK", "/sdk/ts", "TypeScript client"},
+                {"Server SDK", "/sdk/ts-server"}
+              ]},
+             {"Python",
+              [
+                {"Client SDK", "/sdk/py", "Python client"}
+              ]}
+           ]}
+        ]
+      }
+
+      result = SEO.LLMs.render(opts)
+
+      assert result =~ "## SDKs"
+      assert result =~ "### TypeScript"
+      assert result =~ "- [Client SDK](/sdk/ts): TypeScript client"
+      assert result =~ "- [Server SDK](/sdk/ts-server)"
+      assert result =~ "### Python"
+      assert result =~ "- [Client SDK](/sdk/py): Python client"
+    end
+
+    test "renders inline markdown strings in sections" do
+      opts = %{
+        title: "My App",
+        sections: [
+          {"Overview",
+           [
+             "Turso is a SQLite-compatible database built for modern applications.",
+             {"Quick Start", "/docs/start", "Get running in 5 minutes"}
+           ]}
+        ]
+      }
+
+      result = SEO.LLMs.render(opts)
+
+      assert result =~ "## Overview"
+      assert result =~ "Turso is a SQLite-compatible database"
+      assert result =~ "- [Quick Start](/docs/start): Get running in 5 minutes"
+    end
+
+    test "renders mixed content: strings, links, and sub-sections" do
+      opts = %{
+        title: "Docs",
+        sections: [
+          {"Guide",
+           [
+             "This guide covers the basics of the platform.",
+             {"Getting Started", "/docs/start"},
+             {"Installation", "/docs/install", "How to install"},
+             {"Advanced",
+              [
+                {"Configuration", "/docs/config"},
+                {"Deployment", "/docs/deploy"}
+              ]}
+           ]}
+        ]
+      }
+
+      result = SEO.LLMs.render(opts)
+
+      assert result =~ "## Guide"
+      assert result =~ "This guide covers the basics"
+      assert result =~ "- [Getting Started](/docs/start)"
+      assert result =~ "- [Installation](/docs/install): How to install"
+      assert result =~ "### Advanced"
+      assert result =~ "- [Configuration](/docs/config)"
+      assert result =~ "- [Deployment](/docs/deploy)"
+    end
+
+    test "consecutive links are separated by single newlines" do
+      opts = %{
+        title: "App",
+        sections: [
+          {"Docs",
+           [
+             {"One", "/one"},
+             {"Two", "/two"},
+             {"Three", "/three"}
+           ]}
+        ]
+      }
+
+      result = SEO.LLMs.render(opts)
+
+      assert result =~ "- [One](/one)\n- [Two](/two)\n- [Three](/three)"
+    end
+  end
+
   describe "plug with static sections" do
     test "serves llms.txt with text/markdown content type" do
       opts =

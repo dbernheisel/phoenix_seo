@@ -262,17 +262,37 @@ defmodule SEO.LLMs do
 
   defp render_sections(sections) do
     Enum.map(sections, fn {name, entries} ->
-      links =
-        entries
-        |> Enum.map(&render_entry/1)
-        |> Enum.join("\n")
-
-      "## #{name}\n\n#{links}"
+      content = render_entries(entries)
+      "## #{name}\n\n#{content}"
     end)
   end
 
-  defp render_entry({name, url}), do: "- [#{name}](#{url})"
-  defp render_entry({name, url, desc}), do: "- [#{name}](#{url}): #{desc}"
+  defp render_entries(entries) do
+    entries
+    |> Enum.chunk_by(&link_entry?/1)
+    |> Enum.map(fn
+      chunk when is_list(chunk) ->
+        if link_entry?(hd(chunk)) do
+          Enum.map_join(chunk, "\n", &render_entry/1)
+        else
+          Enum.map_join(chunk, "\n\n", &render_entry/1)
+        end
+    end)
+    |> Enum.join("\n\n")
+  end
+
+  defp link_entry?({_name, url}) when is_binary(url), do: true
+  defp link_entry?({_name, url, _desc}) when is_binary(url), do: true
+  defp link_entry?(_), do: false
+
+  defp render_entry({name, url}) when is_binary(url), do: "- [#{name}](#{url})"
+  defp render_entry({name, url, desc}) when is_binary(url), do: "- [#{name}](#{url}): #{desc}"
+  defp render_entry(text) when is_binary(text), do: text
+
+  defp render_entry({name, entries}) when is_list(entries) do
+    content = render_entries(entries)
+    "### #{name}\n\n#{content}"
+  end
 
   @behaviour Plug
 
