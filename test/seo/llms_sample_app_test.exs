@@ -31,7 +31,7 @@ defmodule SEO.LLMs.SampleAppTest do
       assert conn.resp_body =~ "Written by Staff"
     end
 
-    test "GET /about with md format renders markdown from PageMD using MDEx sigil" do
+    test "GET /about with md format renders markdown from PageMD" do
       conn =
         build_conn()
         |> put_req_header("accept", "text/markdown")

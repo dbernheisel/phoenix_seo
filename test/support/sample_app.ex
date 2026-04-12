@@ -56,10 +56,9 @@ defmodule SampleApp.PageMD do
   @moduledoc false
   @behaviour SEO.LLMs
   alias SEO.LLMs.Entry
-  import MDEx.Sigil
 
-  def show(%{page: :about} = _assigns) do
-    ~MD"""
+  def show(%{page: :about}) do
+    """
     # About This Site
 
     A weekly newsletter about Elixir, Phoenix, and OTP.
@@ -69,7 +68,7 @@ defmodule SampleApp.PageMD do
     - Language features
     - Phoenix and LiveView
     - OTP design
-    """MD
+    """
   end
 
   @impl SEO.LLMs
