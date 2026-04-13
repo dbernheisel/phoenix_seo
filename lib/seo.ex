@@ -156,7 +156,8 @@ defmodule SEO do
     end)
   end
 
-  defp get_domain_config(config, domain, conn) do
+  @doc false
+  def get_domain_config(config, domain, conn) do
     case config[domain] do
       nil -> %{}
       domain_config when is_function(domain_config, 1) -> domain_config.(conn) || %{}

@@ -300,30 +300,19 @@ defmodule SEO.LLMs do
   @behaviour Plug
 
   @impl Plug
-  def init(opts) do
-    opts = Map.new(opts)
-
-    config = resolve_config(opts[:config])
-
-    %{
-      title: opts[:title] || get_in(config, [:open_graph, :site_name]),
-      description: opts[:description] || get_in(config, [:site, :description]),
-      body: opts[:body],
-      sections: opts[:sections],
-      provider: opts[:provider]
-    }
-  end
+  def init(opts), do: Map.new(opts)
 
   @impl Plug
   def call(conn, opts) do
-    sections = resolve_sections(opts)
+    open_graph = domain_config(opts[:config], :open_graph, conn)
+    site = domain_config(opts[:config], :site, conn)
 
     body =
       render(%{
-        title: opts.title,
-        description: opts.description,
-        body: opts.body,
-        sections: sections
+        title: opts[:title] || Map.get(open_graph, :site_name) || Map.get(site, :title),
+        description: opts[:description] || Map.get(site, :description),
+        body: opts[:body],
+        sections: resolve_sections(opts)
       })
 
     conn
@@ -338,25 +327,15 @@ defmodule SEO.LLMs do
   defp resolve_sections(%{sections: sections}) when is_list(sections), do: sections
   defp resolve_sections(_), do: []
 
-  defp resolve_config(nil), do: %{}
+  defp domain_config(nil, _domain, _conn), do: %{}
 
-  defp resolve_config(mod) when is_atom(mod) do
+  defp domain_config(mod, domain, conn) when is_atom(mod) do
     if Code.ensure_loaded?(mod) and function_exported?(mod, :config, 0) do
-      config = mod.config()
-
-      %{
-        open_graph: to_map(config[:open_graph]),
-        site: to_map(config[:site])
-      }
+      SEO.get_domain_config(mod.config(), domain, conn)
     else
       %{}
     end
   end
 
-  defp resolve_config(_), do: %{}
-
-  defp to_map(nil), do: %{}
-  defp to_map(x) when is_struct(x), do: Map.from_struct(x)
-  defp to_map(x) when is_list(x), do: Map.new(x)
-  defp to_map(x) when is_map(x), do: x
+  defp domain_config(_, _domain, _conn), do: %{}
 end

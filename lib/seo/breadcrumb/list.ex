@@ -70,8 +70,6 @@ defmodule SEO.Breadcrumb.List do
     end)
   end
 
-  defp format_items([]), do: nil
-
   defp format_items(items) do
     items
     |> reject_empty()
