@@ -333,6 +333,50 @@ integration, nested sub-sections, and inline markdown content.
 > end
 > ```
 
+> #### Question: How do I serve markdown from a LiveView route? {: .info}
+>
+> LiveViews don't use the controller's `put_view` format dispatch, so you can't
+> register a markdown view the same way you would for a controller. Instead,
+> intercept the request in your router with a plug that checks the negotiated
+> format and short-circuits with the markdown body before the LiveView mounts.
+>
+> ```elixir
+> # In your router
+> pipeline :browser do
+>   plug :accepts, ["html", "md"]
+>   # ...
+>   plug :maybe_serve_lesson_markdown
+> end
+>
+> scope "/", MyAppWeb do
+>   pipe_through :browser
+>   live "/learn/:slug", LessonLive
+> end
+>
+> def maybe_serve_lesson_markdown(%Plug.Conn{path_info: ["learn", slug]} = conn, _opts) do
+>   with "md" <- Phoenix.Controller.get_format(conn) do
+>     lesson = MyApp.Lessons.get!(slug)
+>     body = MyAppWeb.LessonMD.show(%{lesson: lesson})
+>
+>     conn
+>     |> Plug.Conn.put_resp_content_type("text/markdown")
+>     |> Plug.Conn.send_resp(200, body)
+>     |> Plug.Conn.halt()
+>   else
+>     _ -> conn
+>   end
+> end
+>
+> def maybe_serve_lesson_markdown(conn, _opts), do: conn
+> ```
+>
+> The `with "md" <- ...` pattern passes the conn through unchanged when the
+> format is anything other than `"md"` (such as `"html"`), letting the LiveView
+> render normally. When the client requests markdown — via an `Accept:
+> text/markdown` header or `?_format=md` — the plug halts the pipeline and
+> returns the rendered markdown directly from your `LessonMD` module, which
+> is the same module you'd use with `SEO.LLMs` for `/llms.txt` entries.
+
 > #### Question: Can I globally configure a JSON library? {: .info}
 >
 > Sure. Without configuration, SEO will choose the JSON library configured
