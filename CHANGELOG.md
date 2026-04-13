@@ -1,7 +1,10 @@
 # Changelog
 
-## unreleased
+## 0.2.0 (2026-04-12)
 
+- Add support for `llms.txt` standard. This allows LLMs, when browsing your
+site, to get succinct information about progressively-revealed information with
+optional sections to optimize context windows. See `SEO.LLMs` for more info.
 - CI: Add Blend to test older Phoenix LiveView versions. Thank you @Flo0807
 - Docs: Update ex_doc
 
