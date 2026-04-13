@@ -58,3 +58,5 @@ jobs:
       - run: BLEND=phoenix_live_view_v0_18 mix test
       - run: BLEND=phoenix_live_view_v0_19 mix test
       - run: BLEND=phoenix_live_view_v0_20 mix test
+      - run: BLEND=phoenix_live_view_v1_0 mix test
+      - run: BLEND=phoenix_live_view_v1_1 mix test
