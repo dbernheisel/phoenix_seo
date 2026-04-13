@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.1 (2026-04-13)
+
+- Fixup llms.txt rendering with module/function configs.
+
 ## 0.2.0 (2026-04-12)
 
 - Add support for `llms.txt` standard. This allows LLMs, when browsing your
