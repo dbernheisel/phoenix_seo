@@ -45,3 +45,23 @@ defmodule MyApp.NotImplemented do
   @moduledoc false
   defstruct [:id]
 end
+
+defmodule MyAppWeb.ArticleMD do
+  @moduledoc false
+  @behaviour SEO.LLMs
+  alias SEO.LLMs.Entry
+
+  def show(%{article: article}) do
+    "# #{article.title}\n\n#{article.description}"
+  end
+
+  @impl SEO.LLMs
+  def entry(%MyApp.Article{} = article) do
+    Entry.build(
+      section: "Articles",
+      title: article.title,
+      url: "https://example.com/articles/#{article.id || "my_id"}",
+      description: article.description
+    )
+  end
+end

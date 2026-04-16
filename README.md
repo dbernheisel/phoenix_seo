@@ -28,7 +28,7 @@ have in search results, the more likely you are to have visitors.
 ```elixir
 def deps do
   [
-    {:phoenix_seo, "~> 0.1.11"}
+    {:phoenix_seo, "~> 0.2.1"}
   ]
 end
 ```
@@ -248,6 +248,69 @@ Alternatively, you may selectively render components. For example:
 </head>
 ```
 
+## LLMs.txt
+
+Serve an `/llms.txt` file per the [llmstxt.org](https://llmstxt.org) spec so
+LLMs can discover and understand your site's content.
+
+```elixir
+# In your router
+forward "/llms.txt", SEO.LLMs,
+  config: MyAppWeb.SEO,
+  provider: MyAppWeb.LLMsProvider
+```
+
+Create markdown view modules (`FooMD`) — the markdown equivalent of `FooHTML` —
+that implement the `SEO.LLMs` behaviour:
+
+```elixir
+defmodule MyAppWeb.ArticleMD do
+  @behaviour SEO.LLMs
+  use MyAppWeb, :verified_routes
+
+  # Phoenix view function — called when format is "md"
+  def show(%{article: article}) do
+    """
+    # #{article.title}
+
+    #{article.body}
+    """
+  end
+
+  # llms.txt entry — called by your Provider
+  @impl SEO.LLMs
+  def entry(article) do
+    SEO.LLMs.Entry.build(
+      section: "Articles",
+      title: article.title,
+      url: ~p"/articles/#{article}",
+      description: article.summary
+    )
+  end
+end
+```
+
+Then register the `"md"` format in your pipeline and controller:
+
+```elixir
+pipeline :browser do
+  plug :accepts, ["html", "md"]
+end
+
+defmodule MyAppWeb.ArticleController do
+  use MyAppWeb, :controller
+  plug :put_view, html: MyAppWeb.ArticleHTML, md: MyAppWeb.ArticleMD
+
+  def show(conn, %{"slug" => slug}) do
+    article = Blog.get_article_by_slug!(slug)
+    render(conn, :show, article: article)
+  end
+end
+```
+
+See `SEO.LLMs` module docs for the full guide, including MDEx `~MD` sigil
+integration, nested sub-sections, and inline markdown content.
+
 ## FAQ
 
 > #### Question: What do I do for non-show routes, like for index routes? {: .info}
@@ -283,6 +346,50 @@ Alternatively, you may selectively render components. For example:
 >   end
 > end
 > ```
+
+> #### Question: How do I serve markdown from a LiveView route? {: .info}
+>
+> LiveViews don't use the controller's `put_view` format dispatch, so you can't
+> register a markdown view the same way you would for a controller. Instead,
+> intercept the request in your router with a plug that checks the negotiated
+> format and short-circuits with the markdown body before the LiveView mounts.
+>
+> ```elixir
+> # In your router
+> pipeline :browser do
+>   plug :accepts, ["html", "md"]
+>   # ...
+>   plug :maybe_serve_lesson_markdown
+> end
+>
+> scope "/", MyAppWeb do
+>   pipe_through :browser
+>   live "/learn/:slug", LessonLive
+> end
+>
+> def maybe_serve_lesson_markdown(%Plug.Conn{path_info: ["learn", slug]} = conn, _opts) do
+>   with "md" <- Phoenix.Controller.get_format(conn) do
+>     lesson = MyApp.Lessons.get!(slug)
+>     body = MyAppWeb.LessonMD.show(%{lesson: lesson})
+>
+>     conn
+>     |> Plug.Conn.put_resp_content_type("text/markdown")
+>     |> Plug.Conn.send_resp(200, body)
+>     |> Plug.Conn.halt()
+>   else
+>     _ -> conn
+>   end
+> end
+>
+> def maybe_serve_lesson_markdown(conn, _opts), do: conn
+> ```
+>
+> The `with "md" <- ...` pattern passes the conn through unchanged when the
+> format is anything other than `"md"` (such as `"html"`), letting the LiveView
+> render normally. When the client requests markdown — via an `Accept:
+> text/markdown` header or `?_format=md` — the plug halts the pipeline and
+> returns the rendered markdown directly from your `LessonMD` module, which
+> is the same module you'd use with `SEO.LLMs` for `/llms.txt` entries.
 
 > #### Question: Can I globally configure a JSON library? {: .info}
 >
