@@ -163,6 +163,20 @@ defimpl SEO.Breadcrumb.Build, for: MyApp.Article do
     ])
   end
 end
+
+defimpl SEO.JsonLD.Build, for: MyApp.Article do
+  use MyAppWeb, :verified_routes
+
+  def build(article, conn) do
+    SEO.JsonLD.Article.build(
+      headline: article.title,
+      description: article.description,
+      datePublished: article.published_at,
+      author: %{"@type" => "Person", "name" => article.author},
+      mainEntityOfPage: url(conn, ~p"/articles/#{article}")
+    )
+  end
+end
 ```
 
 3. Assign the item to your conns and/or sockets

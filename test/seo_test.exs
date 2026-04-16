@@ -43,11 +43,12 @@ defmodule SEOTest do
       # facebook
       assert meta_content(html, "name='fb:app_id'", "123")
 
-      # breadcrumb
-      ld = linking_data(html)
-      assert ld["@type"] == "BreadcrumbList"
+      # breadcrumb + json_ld
+      [breadcrumb_ld, json_ld] = linking_data(html)
 
-      assert ld["itemListElement"] == [
+      assert breadcrumb_ld["@type"] == "BreadcrumbList"
+
+      assert breadcrumb_ld["itemListElement"] == [
                %{
                  "@type" => "ListItem",
                  "item" => "https://example.com/articles",
@@ -61,6 +62,9 @@ defmodule SEOTest do
                  "position" => 2
                }
              ]
+
+      assert json_ld["@type"] == "Article"
+      assert json_ld["headline"] == "Title"
     end
 
     test "renders almost nothing when struct not implemented" do
