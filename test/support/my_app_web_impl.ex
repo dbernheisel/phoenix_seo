@@ -103,9 +103,9 @@ defimpl SEO.Breadcrumb.Build, for: MyApp.Article do
   end
 end
 
-defimpl SEO.JsonLD.Build, for: MyApp.Article do
+defimpl SEO.JSONLD.Build, for: MyApp.Article do
   def build(article, _conn) do
-    SEO.JsonLD.Article.build(
+    SEO.JSONLD.Article.build(
       headline: article.title,
       description: article.description,
       datePublished: "2022-10-13"

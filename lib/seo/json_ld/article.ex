@@ -1,10 +1,10 @@
-defmodule SEO.JsonLD.Article do
+defmodule SEO.JSONLD.Article do
   @moduledoc """
   Helper for building a Schema.org [Article](https://schema.org/Article) JSON-LD structure.
 
   ## Example
 
-      SEO.JsonLD.Article.build(
+      SEO.JSONLD.Article.build(
         headline: "My Post",
         description: "A post about things",
         datePublished: ~D[2024-01-15],

@@ -1,4 +1,4 @@
-defmodule SEO.JsonLD do
+defmodule SEO.JSONLD do
   @moduledoc """
   Renders JSON-LD structured data as `<script type="application/ld+json">` tags.
 
@@ -8,19 +8,19 @@ defmodule SEO.JsonLD do
 
   You can pass any map (or list of maps) with `@context` and `@type` keys:
 
-      <SEO.JsonLD.meta
+      <SEO.JSONLD.meta
         item={%{"@context" => "https://schema.org", "@type" => "Organization", "name" => "Acme"}}
         json_library={Jason}
       />
 
   Or use one of the helper modules for common Schema.org types:
 
-  - `SEO.JsonLD.Article`
-  - `SEO.JsonLD.Organization`
-  - `SEO.JsonLD.FAQ`
-  - `SEO.JsonLD.Product`
-  - `SEO.JsonLD.LocalBusiness`
-  - `SEO.JsonLD.Event`
+  - `SEO.JSONLD.Article`
+  - `SEO.JSONLD.Organization`
+  - `SEO.JSONLD.FAQ`
+  - `SEO.JSONLD.Product`
+  - `SEO.JSONLD.LocalBusiness`
+  - `SEO.JSONLD.Event`
 
   ### Resources
 

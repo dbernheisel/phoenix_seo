@@ -1,10 +1,10 @@
-defmodule SEO.JsonLD.LocalBusiness do
+defmodule SEO.JSONLD.LocalBusiness do
   @moduledoc """
   Helper for building a Schema.org [LocalBusiness](https://schema.org/LocalBusiness) JSON-LD structure.
 
   ## Example
 
-      SEO.JsonLD.LocalBusiness.build(
+      SEO.JSONLD.LocalBusiness.build(
         name: "Joe's Pizza",
         address: %{"@type" => "PostalAddress", "streetAddress" => "123 Main St"},
         telephone: "+1-555-555-5555"

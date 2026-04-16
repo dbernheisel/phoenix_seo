@@ -1,10 +1,10 @@
-defmodule SEO.JsonLD.Event do
+defmodule SEO.JSONLD.Event do
   @moduledoc """
   Helper for building a Schema.org [Event](https://schema.org/Event) JSON-LD structure.
 
   ## Example
 
-      SEO.JsonLD.Event.build(
+      SEO.JSONLD.Event.build(
         name: "ElixirConf 2024",
         startDate: ~D[2024-08-28],
         location: %{"@type" => "Place", "name" => "Gaylord Rockies"}

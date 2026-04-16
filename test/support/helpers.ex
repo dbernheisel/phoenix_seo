@@ -8,14 +8,9 @@ defmodule SEO.Test.Helpers do
 
   def meta(html, selector, attr, contains) do
     case Floki.find(html, "meta[" <> selector <> "]") do
-      [] ->
-        false
-
-      nil ->
-        false
-
-      tags ->
-        attr_contains?(tags, attr, contains)
+      [] -> false
+      nil -> false
+      tags -> attr_contains?(tags, attr, contains)
     end
   end
 

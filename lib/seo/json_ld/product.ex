@@ -1,10 +1,10 @@
-defmodule SEO.JsonLD.Product do
+defmodule SEO.JSONLD.Product do
   @moduledoc """
   Helper for building a Schema.org [Product](https://schema.org/Product) JSON-LD structure.
 
   ## Example
 
-      SEO.JsonLD.Product.build(
+      SEO.JSONLD.Product.build(
         name: "Widget",
         description: "A great widget",
         offers: %{"@type" => "Offer", "price" => "19.99", "priceCurrency" => "USD"}

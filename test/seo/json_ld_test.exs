@@ -1,8 +1,8 @@
-defmodule SEO.JsonLDTest do
+defmodule SEO.JSONLDTest do
   use ExUnit.Case, async: true
   import Phoenix.LiveViewTest
-  alias SEO.JsonLD
-  alias SEO.JsonLD.{Article, Event, FAQ, LocalBusiness, Organization, Product}
+  alias SEO.JSONLD
+  alias SEO.JSONLD.{Article, Event, FAQ, LocalBusiness, Organization, Product}
 
   describe "meta" do
     test "renders a single JSON-LD item" do
@@ -13,7 +13,7 @@ defmodule SEO.JsonLDTest do
         "url" => "https://acme.com"
       }
 
-      result = render_component(&JsonLD.meta/1, build_assigns(item))
+      result = render_component(&JSONLD.meta/1, build_assigns(item))
       {:ok, html} = Floki.parse_fragment(result)
       ld = linking_data(html)
 
@@ -28,7 +28,7 @@ defmodule SEO.JsonLDTest do
         %{"@context" => "https://schema.org", "@type" => "WebSite", "name" => "Acme Site"}
       ]
 
-      result = render_component(&JsonLD.meta/1, build_assigns(items))
+      result = render_component(&JSONLD.meta/1, build_assigns(items))
       {:ok, html} = Floki.parse_fragment(result)
       ld = linking_data(html)
 
@@ -39,17 +39,17 @@ defmodule SEO.JsonLDTest do
     end
 
     test "doesn't render when item is nil" do
-      result = render_component(&JsonLD.meta/1, build_assigns(nil))
+      result = render_component(&JSONLD.meta/1, build_assigns(nil))
       assert result == ""
     end
 
     test "doesn't render when item is empty list" do
-      result = render_component(&JsonLD.meta/1, build_assigns([]))
+      result = render_component(&JSONLD.meta/1, build_assigns([]))
       assert result == ""
     end
 
     test "doesn't render when item is empty map" do
-      result = render_component(&JsonLD.meta/1, build_assigns(%{}))
+      result = render_component(&JSONLD.meta/1, build_assigns(%{}))
       assert result == ""
     end
 
@@ -60,7 +60,7 @@ defmodule SEO.JsonLDTest do
         name: "Acme Corp"
       }
 
-      result = render_component(&JsonLD.meta/1, build_assigns(item))
+      result = render_component(&JSONLD.meta/1, build_assigns(item))
       {:ok, html} = Floki.parse_fragment(result)
       ld = linking_data(html)
 
@@ -76,7 +76,7 @@ defmodule SEO.JsonLDTest do
         "description" => nil
       }
 
-      result = render_component(&JsonLD.meta/1, build_assigns(item))
+      result = render_component(&JSONLD.meta/1, build_assigns(item))
       {:ok, html} = Floki.parse_fragment(result)
       ld = linking_data(html)
 
@@ -93,7 +93,7 @@ defmodule SEO.JsonLDTest do
           datePublished: ~D[2024-01-15]
         )
 
-      result = render_component(&JsonLD.meta/1, build_assigns(item))
+      result = render_component(&JSONLD.meta/1, build_assigns(item))
       {:ok, html} = Floki.parse_fragment(result)
       ld = linking_data(html)
 
@@ -116,7 +116,7 @@ defmodule SEO.JsonLDTest do
           image: "https://example.com/img.jpg"
         )
 
-      result = render_component(&JsonLD.meta/1, build_assigns(item))
+      result = render_component(&JSONLD.meta/1, build_assigns(item))
       {:ok, html} = Floki.parse_fragment(result)
       ld = linking_data(html)
 
@@ -137,7 +137,7 @@ defmodule SEO.JsonLDTest do
           sameAs: ["https://twitter.com/acme", "https://facebook.com/acme"]
         )
 
-      result = render_component(&JsonLD.meta/1, build_assigns(item))
+      result = render_component(&JSONLD.meta/1, build_assigns(item))
       {:ok, html} = Floki.parse_fragment(result)
       ld = linking_data(html)
 
@@ -158,7 +158,7 @@ defmodule SEO.JsonLDTest do
           %{question: "What is Phoenix?", answer: "A web framework for Elixir."}
         ])
 
-      result = render_component(&JsonLD.meta/1, build_assigns(item))
+      result = render_component(&JSONLD.meta/1, build_assigns(item))
       {:ok, html} = Floki.parse_fragment(result)
       ld = linking_data(html)
 
@@ -192,7 +192,7 @@ defmodule SEO.JsonLDTest do
           }
         )
 
-      result = render_component(&JsonLD.meta/1, build_assigns(item))
+      result = render_component(&JSONLD.meta/1, build_assigns(item))
       {:ok, html} = Floki.parse_fragment(result)
       ld = linking_data(html)
 
@@ -224,7 +224,7 @@ defmodule SEO.JsonLDTest do
           }
         )
 
-      result = render_component(&JsonLD.meta/1, build_assigns(item))
+      result = render_component(&JSONLD.meta/1, build_assigns(item))
       {:ok, html} = Floki.parse_fragment(result)
       ld = linking_data(html)
 
@@ -250,7 +250,7 @@ defmodule SEO.JsonLDTest do
           description: "The Elixir conference"
         )
 
-      result = render_component(&JsonLD.meta/1, build_assigns(item))
+      result = render_component(&JSONLD.meta/1, build_assigns(item))
       {:ok, html} = Floki.parse_fragment(result)
       ld = linking_data(html)
 

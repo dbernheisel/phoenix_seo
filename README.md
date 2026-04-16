@@ -164,11 +164,11 @@ defimpl SEO.Breadcrumb.Build, for: MyApp.Article do
   end
 end
 
-defimpl SEO.JsonLD.Build, for: MyApp.Article do
+defimpl SEO.JSONLD.Build, for: MyApp.Article do
   use MyAppWeb, :verified_routes
 
   def build(article, conn) do
-    SEO.JsonLD.Article.build(
+    SEO.JSONLD.Article.build(
       headline: article.title,
       description: article.description,
       datePublished: article.published_at,
@@ -277,13 +277,13 @@ defmodule MyAppWeb.ArticleMD do
     """
   end
 
-  # llms.txt entry — called by your Provider
+  # llms.txt entry — called by your Provider with the current conn
   @impl SEO.LLMs
-  def entry(article) do
+  def entry(article, conn) do
     SEO.LLMs.Entry.build(
       section: "Articles",
       title: article.title,
-      url: ~p"/articles/#{article}",
+      url: url(conn, ~p"/articles/#{article}"),
       description: article.summary
     )
   end

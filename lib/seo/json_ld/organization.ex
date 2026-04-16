@@ -1,10 +1,10 @@
-defmodule SEO.JsonLD.Organization do
+defmodule SEO.JSONLD.Organization do
   @moduledoc """
   Helper for building a Schema.org [Organization](https://schema.org/Organization) JSON-LD structure.
 
   ## Example
 
-      SEO.JsonLD.Organization.build(
+      SEO.JSONLD.Organization.build(
         name: "Acme Corp",
         url: "https://acme.com",
         logo: "https://acme.com/logo.png"
