@@ -46,7 +46,7 @@ defmodule SEO.LLMs.IntegrationTest do
     end
 
     @impl SEO.LLMs
-    def entry(article) do
+    def entry(article, _conn) do
       Entry.build(
         section: "Articles",
         title: article.title,
@@ -76,7 +76,7 @@ defmodule SEO.LLMs.IntegrationTest do
     end
 
     @impl SEO.LLMs
-    def entry(:about) do
+    def entry(:about, _conn) do
       Entry.build(
         section: "Docs",
         title: "About",
@@ -85,7 +85,7 @@ defmodule SEO.LLMs.IntegrationTest do
       )
     end
 
-    def entry(:contributing) do
+    def entry(:contributing, _conn) do
       Entry.build(
         section: "Docs",
         title: "Contributing",
@@ -94,7 +94,7 @@ defmodule SEO.LLMs.IntegrationTest do
       )
     end
 
-    def entry(:subscribe) do
+    def entry(:subscribe, _conn) do
       Entry.build(
         section: "Optional",
         title: "Subscribe",
@@ -110,17 +110,17 @@ defmodule SEO.LLMs.IntegrationTest do
     alias SEO.LLMs.IntegrationTest.{Blog, SampleArticleMD, SamplePageMD}
 
     @impl true
-    def sections do
+    def sections(conn) do
       static_pages = [
-        SamplePageMD.entry(:about),
-        SamplePageMD.entry(:contributing)
+        SamplePageMD.entry(:about, conn),
+        SamplePageMD.entry(:contributing, conn)
       ]
 
       articles =
         Blog.list_published()
-        |> Enum.map(&SampleArticleMD.entry/1)
+        |> Enum.map(&SampleArticleMD.entry(&1, conn))
 
-      optional = [SamplePageMD.entry(:subscribe)]
+      optional = [SamplePageMD.entry(:subscribe, conn)]
 
       all_entries = static_pages ++ articles ++ optional
       Entry.group_by_section(all_entries)
@@ -148,9 +148,9 @@ defmodule SEO.LLMs.IntegrationTest do
       assert content =~ "- [Phoenix PubSub Deep Dive](/articles/pubsub-deep-dive)"
     end
 
-    test "entry/1 returns an Entry struct" do
+    test "entry/2 returns an Entry struct" do
       article = Blog.get_article!("genserver-guide")
-      entry = SampleArticleMD.entry(article)
+      entry = SampleArticleMD.entry(article, %Plug.Conn{})
 
       assert %Entry{
                section: "Articles",
@@ -167,19 +167,19 @@ defmodule SEO.LLMs.IntegrationTest do
       assert SamplePageMD.show(%{page: :contributing}) =~ "# Contributing"
     end
 
-    test "entry/1 returns entries for different pages" do
-      about = SamplePageMD.entry(:about)
+    test "entry/2 returns entries for different pages" do
+      about = SamplePageMD.entry(:about, %Plug.Conn{})
       assert about.section == "Docs"
       assert about.title == "About"
 
-      subscribe = SamplePageMD.entry(:subscribe)
+      subscribe = SamplePageMD.entry(:subscribe, %Plug.Conn{})
       assert subscribe.section == "Optional"
     end
   end
 
   describe "Provider assembles sections from MD modules" do
-    test "sections/0 returns grouped sections in order" do
-      sections = SampleProvider.sections()
+    test "sections/1 returns grouped sections in order" do
+      sections = SampleProvider.sections(%Plug.Conn{})
 
       section_names = Enum.map(sections, &elem(&1, 0))
 
@@ -189,7 +189,7 @@ defmodule SEO.LLMs.IntegrationTest do
     end
 
     test "Docs section has static pages" do
-      sections = SampleProvider.sections()
+      sections = SampleProvider.sections(%Plug.Conn{})
       {_, docs} = List.keyfind(sections, "Docs", 0)
 
       assert {"About", "/about", "What this site covers"} in docs
@@ -197,7 +197,7 @@ defmodule SEO.LLMs.IntegrationTest do
     end
 
     test "Articles section has dynamic entries" do
-      sections = SampleProvider.sections()
+      sections = SampleProvider.sections(%Plug.Conn{})
       {_, articles} = List.keyfind(sections, "Articles", 0)
 
       assert {"Understanding GenServer", "/articles/genserver-guide",
@@ -208,7 +208,7 @@ defmodule SEO.LLMs.IntegrationTest do
     end
 
     test "Optional section has low-priority entries" do
-      sections = SampleProvider.sections()
+      sections = SampleProvider.sections(%Plug.Conn{})
       {_, optional} = List.keyfind(sections, "Optional", 0)
 
       assert {"Subscribe", "/subscribe", "Sign up for the newsletter"} in optional
@@ -307,7 +307,7 @@ defmodule SEO.LLMs.IntegrationTest do
       article = Blog.get_article!("pubsub-deep-dive")
 
       # For llms.txt index (via provider)
-      entry = SampleArticleMD.entry(article)
+      entry = SampleArticleMD.entry(article, %Plug.Conn{})
       assert entry.title == "Phoenix PubSub Deep Dive"
       assert entry.url == "/articles/pubsub-deep-dive"
 
@@ -336,15 +336,17 @@ defmodule SEO.LLMs.IntegrationTest do
 
   describe "multiple MD modules contributing to one provider" do
     test "entries from different modules grouped by section" do
+      conn = %Plug.Conn{}
+
       page_entries = [
-        SamplePageMD.entry(:about),
-        SamplePageMD.entry(:contributing),
-        SamplePageMD.entry(:subscribe)
+        SamplePageMD.entry(:about, conn),
+        SamplePageMD.entry(:contributing, conn),
+        SamplePageMD.entry(:subscribe, conn)
       ]
 
       article_entries =
         Blog.list_published()
-        |> Enum.map(&SampleArticleMD.entry/1)
+        |> Enum.map(&SampleArticleMD.entry(&1, conn))
 
       all = page_entries ++ article_entries
       sections = Entry.group_by_section(all)

@@ -33,11 +33,11 @@ defmodule SEO.LLMs do
             end
 
             @impl SEO.LLMs
-            def entry(article) do
+            def entry(article, conn) do
               SEO.LLMs.Entry.build(
                 section: "Articles",
                 title: article.title,
-                url: ~p"/articles/\#{article.slug}",
+                url: url(conn, ~p"/articles/\#{article.slug}"),
                 description: article.summary
               )
             end
@@ -67,15 +67,15 @@ defmodule SEO.LLMs do
             alias SEO.LLMs.Entry
 
             @impl true
-            def sections do
+            def sections(conn) do
               articles = MyApp.Blog.list_published()
 
-              entries = Enum.map(articles, &MyAppWeb.ArticleMD.entry/1)
+              entries = Enum.map(articles, &MyAppWeb.ArticleMD.entry(&1, conn))
               dynamic = Entry.group_by_section(entries)
 
               static = [
                 {"Docs", [
-                  {"About", ~p"/about", "What this site covers"}
+                  {"About", url(conn, ~p"/about"), "What this site covers"}
                 ]}
               ]
 
@@ -93,8 +93,8 @@ defmodule SEO.LLMs do
 
   - **Phoenix view functions** (`show/1`, `index/1`, etc.) render full markdown
     content when the `"md"` format is requested
-  - **The `entry/1` callback** provides metadata for the llms.txt index — section,
-    title, URL, and description
+  - **The `entry/2` callback** provides metadata for the llms.txt index — section,
+    title, URL, and description (receives the resource and the current `Plug.Conn`)
 
   The provider collects entries from your MD modules and groups them into sections.
   The Plug renders the final llms.txt file, pulling the site title and description
@@ -146,11 +146,11 @@ defmodule SEO.LLMs do
         end
 
         @impl SEO.LLMs
-        def entry(article) do
+        def entry(article, conn) do
           SEO.LLMs.Entry.build(
             section: "Articles",
             title: article.title,
-            url: ~p"/articles/\#{article.slug}",
+            url: url(conn, ~p"/articles/\#{article.slug}"),
             description: article.summary
           )
         end
@@ -223,11 +223,15 @@ defmodule SEO.LLMs do
   @doc """
   Callback for markdown view modules (`FooMD`) to provide llms.txt entries.
 
-  Receives a resource and returns an `SEO.LLMs.Entry`, a list of entries, or `nil`.
-  Used by `SEO.LLMs.Provider` implementations to build the llms.txt index from
-  your view modules.
+  Receives a resource and the current `Plug.Conn`, and returns an
+  `SEO.LLMs.Entry`, a list of entries, or `nil`. Used by `SEO.LLMs.Provider`
+  implementations to build the llms.txt index from your view modules.
+
+  The conn is provided so implementations can derive request-scoped data such
+  as the host, scheme, locale, or session — mirroring the `(item, conn)`
+  signature of the other `SEO.*.Build` protocols.
   """
-  @callback entry(term()) :: SEO.LLMs.Entry.t() | [SEO.LLMs.Entry.t()] | nil
+  @callback entry(term(), Plug.Conn.t()) :: SEO.LLMs.Entry.t() | [SEO.LLMs.Entry.t()] | nil
 
   @doc """
   Render the llms.txt markdown string from a map of options.
@@ -312,7 +316,7 @@ defmodule SEO.LLMs do
         title: opts[:title] || Map.get(open_graph, :site_name) || Map.get(site, :title),
         description: opts[:description] || Map.get(site, :description),
         body: opts[:body],
-        sections: resolve_sections(opts)
+        sections: resolve_sections(opts, conn)
       })
 
     conn
@@ -320,12 +324,13 @@ defmodule SEO.LLMs do
     |> Plug.Conn.send_resp(200, body)
   end
 
-  defp resolve_sections(%{provider: provider}) when is_atom(provider) and not is_nil(provider) do
-    provider.sections()
+  defp resolve_sections(%{provider: provider}, conn)
+       when is_atom(provider) and not is_nil(provider) do
+    provider.sections(conn)
   end
 
-  defp resolve_sections(%{sections: sections}) when is_list(sections), do: sections
-  defp resolve_sections(_), do: []
+  defp resolve_sections(%{sections: sections}, _conn) when is_list(sections), do: sections
+  defp resolve_sections(_, _conn), do: []
 
   defp domain_config(nil, _domain, _conn), do: %{}
 

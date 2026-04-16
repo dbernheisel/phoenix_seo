@@ -2,8 +2,9 @@ defmodule SEO.LLMs.Provider do
   @moduledoc """
   Behaviour for dynamically providing llms.txt sections.
 
-  Implement `sections/0` to return a list of sections, where each section
-  is a tuple of `{section_name, entries}`.
+  Implement `sections/1` to return a list of sections, where each section
+  is a tuple of `{section_name, entries}`. The current `Plug.Conn` is passed
+  in so implementations can build absolute URLs and call `entry/2` callbacks.
 
   Each entry is one of:
   - `{name, url}` — a link
@@ -20,7 +21,7 @@ defmodule SEO.LLMs.Provider do
         @behaviour SEO.LLMs.Provider
 
         @impl true
-        def sections do
+        def sections(_conn) do
           [
             {"Docs", [
               {"API Reference", "/docs/api.md", "Full REST API docs"},
@@ -50,5 +51,5 @@ defmodule SEO.LLMs.Provider do
   @type entry :: link() | sub_section() | String.t()
   @type section :: {name :: String.t(), list(entry())}
 
-  @callback sections() :: list(section())
+  @callback sections(Plug.Conn.t()) :: list(section())
 end
