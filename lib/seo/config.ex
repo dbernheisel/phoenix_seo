@@ -7,7 +7,6 @@ defmodule SEO.Config do
     twitter: %{},
     unfurl: %{},
     open_graph: %{},
-    breadcrumb: %{},
     json_ld: %{}
   ]
 

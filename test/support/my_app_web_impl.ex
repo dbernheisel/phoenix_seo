@@ -94,15 +94,6 @@ defimpl SEO.Unfurl.Build, for: MyApp.Article do
   end
 end
 
-defimpl SEO.Breadcrumb.Build, for: MyApp.Article do
-  def build(article, _conn) do
-    SEO.Breadcrumb.List.build([
-      %{name: "Articles", item: "https://example.com/articles"},
-      %{name: article.title, item: "https://example.com/articles/#{article.id || "my_id"}"}
-    ])
-  end
-end
-
 defimpl SEO.JSONLD.Build, for: MyApp.Article do
   def build(article, _conn) do
     SEO.JSONLD.Article.build(

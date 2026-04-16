@@ -82,6 +82,44 @@ defmodule SEO.JSONLDTest do
 
       refute Map.has_key?(ld, "description")
     end
+
+    test "merges config as defaults — item wins on conflict" do
+      item = %{"@context" => "https://schema.org", "@type" => "Article", "headline" => "Specific"}
+
+      config = %{
+        "inLanguage" => "en-US",
+        "headline" => "Default (should lose)",
+        "publisher" => %{"@type" => "Organization", "name" => "Acme"}
+      }
+
+      result =
+        render_component(&JSONLD.meta/1,
+          item: item,
+          config: config,
+          json_library: Jason
+        )
+
+      {:ok, html} = Floki.parse_fragment(result)
+      ld = linking_data(html)
+
+      assert ld["headline"] == "Specific"
+      assert ld["inLanguage"] == "en-US"
+      assert ld["publisher"]["name"] == "Acme"
+    end
+
+    test "merges config with atom keys (stringifies them)" do
+      item = %{"@context" => "https://schema.org", "@type" => "Article", "headline" => "Post"}
+      config = %{inLanguage: "en-US", publisher: %{"@type" => "Organization", "name" => "Acme"}}
+
+      result =
+        render_component(&JSONLD.meta/1, item: item, config: config, json_library: Jason)
+
+      {:ok, html} = Floki.parse_fragment(result)
+      ld = linking_data(html)
+
+      assert ld["inLanguage"] == "en-US"
+      assert ld["publisher"]["name"] == "Acme"
+    end
   end
 
   describe "Article helper" do
@@ -90,7 +128,7 @@ defmodule SEO.JSONLDTest do
         Article.build(
           headline: "My Great Post",
           description: "A post about things",
-          datePublished: ~D[2024-01-15]
+          date_published: ~D[2024-01-15]
         )
 
       result = render_component(&JSONLD.meta/1, build_assigns(item))
@@ -109,8 +147,8 @@ defmodule SEO.JSONLDTest do
         Article.build(
           headline: "My Post",
           description: "About things",
-          datePublished: ~D[2024-01-15],
-          dateModified: ~D[2024-02-01],
+          date_published: ~D[2024-01-15],
+          date_modified: ~D[2024-02-01],
           author: %{"@type" => "Person", "name" => "Jane"},
           publisher: %{"@type" => "Organization", "name" => "Acme"},
           image: "https://example.com/img.jpg"
@@ -125,6 +163,20 @@ defmodule SEO.JSONLDTest do
       assert ld["image"] == "https://example.com/img.jpg"
       assert ld["dateModified"] == "2024-02-01"
     end
+
+    test "accepts URI structs for url-valued fields" do
+      item =
+        Article.build(
+          headline: "URI test",
+          url: URI.parse("https://example.com/post")
+        )
+
+      result = render_component(&JSONLD.meta/1, build_assigns(item))
+      {:ok, html} = Floki.parse_fragment(result)
+      ld = linking_data(html)
+
+      assert ld["url"] == "https://example.com/post"
+    end
   end
 
   describe "Organization helper" do
@@ -134,7 +186,7 @@ defmodule SEO.JSONLDTest do
           name: "Acme Corp",
           url: "https://acme.com",
           logo: "https://acme.com/logo.png",
-          sameAs: ["https://twitter.com/acme", "https://facebook.com/acme"]
+          same_as: ["https://twitter.com/acme", "https://facebook.com/acme"]
         )
 
       result = render_component(&JSONLD.meta/1, build_assigns(item))
@@ -216,7 +268,7 @@ defmodule SEO.JSONLDTest do
             "postalCode" => "62701"
           },
           telephone: "+1-555-555-5555",
-          openingHoursSpecification: %{
+          opening_hours_specification: %{
             "@type" => "OpeningHoursSpecification",
             "dayOfWeek" => ["Monday", "Tuesday"],
             "opens" => "11:00",
@@ -240,8 +292,8 @@ defmodule SEO.JSONLDTest do
       item =
         Event.build(
           name: "ElixirConf 2024",
-          startDate: ~D[2024-08-28],
-          endDate: ~D[2024-08-30],
+          start_date: ~D[2024-08-28],
+          end_date: ~D[2024-08-30],
           location: %{
             "@type" => "Place",
             "name" => "Gaylord Rockies",
@@ -259,6 +311,38 @@ defmodule SEO.JSONLDTest do
       assert ld["startDate"] == "2024-08-28"
       assert ld["endDate"] == "2024-08-30"
       assert ld["location"]["name"] == "Gaylord Rockies"
+    end
+
+    test "converts enum atoms to schema.org URLs" do
+      item = Event.build(name: "Summit", event_status: :event_cancelled)
+
+      result = render_component(&JSONLD.meta/1, build_assigns(item))
+      {:ok, html} = Floki.parse_fragment(result)
+      ld = linking_data(html)
+
+      assert ld["eventStatus"] == "https://schema.org/EventCancelled"
+    end
+
+    test "raises for unknown enum atoms" do
+      assert_raise KeyError, fn ->
+        Event.build(event_status: :made_up_value)
+      end
+    end
+
+    test "rejects non-atom values for enum fields" do
+      assert_raise ArgumentError, fn ->
+        Event.build(event_status: "https://schema.org/EventCancelled")
+      end
+    end
+
+    test "accepts DateTime structs for date fields" do
+      item = Event.build(name: "Summit", start_date: ~U[2024-08-28 09:00:00Z])
+
+      result = render_component(&JSONLD.meta/1, build_assigns(item))
+      {:ok, html} = Floki.parse_fragment(result)
+      ld = linking_data(html)
+
+      assert ld["startDate"] == "2024-08-28T09:00:00Z"
     end
   end
 

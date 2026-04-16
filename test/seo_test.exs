@@ -43,25 +43,8 @@ defmodule SEOTest do
       # facebook
       assert meta_content(html, "name='fb:app_id'", "123")
 
-      # breadcrumb + json_ld
-      [breadcrumb_ld, json_ld] = linking_data(html)
-
-      assert breadcrumb_ld["@type"] == "BreadcrumbList"
-
-      assert breadcrumb_ld["itemListElement"] == [
-               %{
-                 "@type" => "ListItem",
-                 "item" => "https://example.com/articles",
-                 "name" => "Articles",
-                 "position" => 1
-               },
-               %{
-                 "@type" => "ListItem",
-                 "item" => "https://example.com/articles/my_id",
-                 "name" => "Title",
-                 "position" => 2
-               }
-             ]
+      # json_ld
+      json_ld = linking_data(html)
 
       assert json_ld["@type"] == "Article"
       assert json_ld["headline"] == "Title"

@@ -5,8 +5,6 @@ defmodule SEO.LLMs.IntegrationTest do
 
   alias SEO.LLMs.Entry
 
-  # -- Sample App Modules --
-
   defmodule Blog do
     @articles [
       %MyApp.Article{
@@ -126,8 +124,6 @@ defmodule SEO.LLMs.IntegrationTest do
       Entry.group_by_section(all_entries)
     end
   end
-
-  # -- Tests --
 
   describe "ArticleMD behaviour" do
     test "show/1 renders markdown for an article" do

@@ -13,7 +13,6 @@ defmodule SEO do
   - `:unfurl` -> `SEO.Unfurl`
   - `:facebook` -> `SEO.Facebook`
   - `:twitter` -> `SEO.Twitter`
-  - `:breadcrumb` -> `SEO.Breadcrumb`
   - `:json_ld` -> `SEO.JSONLD`
 
   For example:
@@ -127,7 +126,6 @@ defmodule SEO do
     <SEO.OpenGraph.meta config={@open_graph_config} item={SEO.OpenGraph.Build.build(@item, @conn)} />
     <SEO.Twitter.meta config={@twitter_config} item={SEO.Twitter.Build.build(@item, @conn)} />
     <SEO.Facebook.meta config={@facebook_config} item={SEO.Facebook.Build.build(@item, @conn)} />
-    <SEO.Breadcrumb.meta config={@breadcrumb_config} item={SEO.Breadcrumb.Build.build(@item, @conn)} json_library={@json_library} :if={@json_library} />
     <SEO.JSONLD.meta config={@json_ld_config} item={SEO.JSONLD.Build.build(@item, @conn)} json_library={@json_library} :if={@json_library} />
     """
   end
