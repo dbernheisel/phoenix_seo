@@ -131,6 +131,7 @@ defmodule SEO.MixProject do
       # Dev / Test
       {:blend, "~> 0.4.1", only: [:dev, :test]},
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
+      {:jump_credo_checks, "~> 0.1.0", only: [:dev, :test], runtime: false},
       {:ex_doc, "~> 0.27", only: :dev, warn_if_outdated: true, runtime: false},
       {:jason, "~> 1.0", only: [:dev, :test]},
       {:floki, "~> 0.35", only: [:dev, :test]},
