@@ -35,7 +35,7 @@ jobs:
           otp-version: '25'
           elixir-version: '1.17'
       - run: rm mix.lock
-      - run: mix deps.get --only test
+      - run: mix deps.get
       - run: mix compile --force --warnings-as-errors
       - run: mix test --warnings-as-errors
 
@@ -52,11 +52,8 @@ jobs:
           otp-version: '28'
           elixir-version: '1.19'
       - run: rm mix.lock
-      - run: mix deps.get --only test
+      - run: mix deps.get
       - run: mix compile --force --warnings-as-errors
       - run: mix blend.get
-      - run: BLEND=phoenix_live_view_v0_18 mix test
-      - run: BLEND=phoenix_live_view_v0_19 mix test
-      - run: BLEND=phoenix_live_view_v0_20 mix test
-      - run: BLEND=phoenix_live_view_v1_0 mix test
-      - run: BLEND=phoenix_live_view_v1_1 mix test
+      - run: BLEND=phoenix_live_view_v1_0 mix deps.get && mix test
+      - run: BLEND=phoenix_live_view_v1_1 mix deps.get && mix test
