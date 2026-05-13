@@ -1,18 +1,17 @@
 # Changelog
 
-## Unreleased
+## 0.3.0 (2026-04-16)
 
-- **Breaking change**: JSON-LD modules (`SEO.JSONLD.*`) are now generated at
-  compile time via a Mix compiler instead of being prebuilt in the package.
-  Register the compiler in your `mix.exs` (`compilers: [:seo_jsonld] ++
-  Mix.compilers()`) and pick which Schema.org types to materialize via
-  `config :phoenix_seo, json_ld_types: :all` to materialize the full
-  Schema.org vocabulary (default is `:google` — the ~24 rich-result
-  types plus their closure). Accepts either a single entry or a list.
-  See the README "Installation" section for details.
-- **Breaking change (breadcrumbs)**: `SEO.Breadcrumb.*` is removed and folded
-  into the JSON-LD namespace. Use `SEO.JSONLD.Breadcrumbs.build/1` in your
-  `SEO.JSONLD.Build` impls (returned alongside other entities as a list).
+- **breaking** Require Elixir >=1.17
+- **breaking** LLMs behaviours changed arity to thread the Plug.Conn through
+- **breaking** JSONLD support. See `SEO.JSONLD` modules. Thanks @Flo0807. Anyone using `SEO.Breadcrumb` will need to replace with `SEO.JSONLD.Breadcrumbs`
+- JSON-LD modules (`SEO.JSONLD.*`) are now generated at compile time via a
+  Mix compiler instead of being prebuilt in the package. Register the
+  compiler in your `mix.exs` (`compilers: [:seo_jsonld] ++ Mix.compilers()`)
+  and pick which Schema.org types to materialize via
+  `config :phoenix_seo, json_ld_types: :all` (default is `:google` — the
+  ~24 rich-result types plus their closure). Accepts a single entry or a
+  list. See the README "Installation" section for details.
 - The `:config` attr on `<SEO.JSONLD.meta />` is removed along with the
   site-wide `json_ld:` config slot. `"@context"` is now applied to the
   top-level node by `SEO.JSONLD.meta/1` only, so nested typed builders no
@@ -20,7 +19,6 @@
 - Convenience wrappers (`SEO.JSONLD.Breadcrumbs`, `SEO.JSONLD.FAQ`,
   `SEO.JSONLD.Actions`) are emitted only when their dependent modules are
   present in the compiled closure.
-
 ## 0.2.1 (2026-04-13)
 
 - Fixup llms.txt rendering with module/function configs.

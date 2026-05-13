@@ -1,3 +1,4 @@
+# credo:disable-for-this-file Credo.Check.Design.AliasUsage
 defmodule SEO.JSONLDGoogleTypesTest do
   @moduledoc """
   Exhaustive tests for the Schema.org types Google has rich-result guides

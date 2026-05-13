@@ -95,6 +95,11 @@ defimpl SEO.Unfurl.Build, for: MyApp.Article do
 end
 
 defimpl SEO.JSONLD.Build, for: MyApp.Article do
+  # `:elixir` runs before `:seo_jsonld` in this lib's own compile chain,
+  # so SEO.JSONLD.Article isn't loaded yet when this impl compiles. The
+  # module is guaranteed at runtime.
+  @compile {:no_warn_undefined, SEO.JSONLD.Article}
+
   def build(article, _conn) do
     SEO.JSONLD.Article.build(
       headline: article.title,

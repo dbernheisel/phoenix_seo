@@ -9,6 +9,8 @@ defmodule SEO.Utils do
 
   use Phoenix.Component
 
+  alias SEO.JSONLD.Actions
+
   attr :property, :string, required: true
   attr :content, :any, required: true, doc: "Either a string representing a URI, or a URI"
 
@@ -111,8 +113,8 @@ defmodule SEO.Utils do
   # subsequent `build_camelize_keys` pass leaves them alone.
   def build_expand_action_io(map) do
     map
-    |> expand_action_io(:inputs, &SEO.JSONLD.Actions.inputs/1)
-    |> expand_action_io(:outputs, &SEO.JSONLD.Actions.outputs/1)
+    |> expand_action_io(:inputs, &Actions.inputs/1)
+    |> expand_action_io(:outputs, &Actions.outputs/1)
   end
 
   defp expand_action_io(map, key, expander) do

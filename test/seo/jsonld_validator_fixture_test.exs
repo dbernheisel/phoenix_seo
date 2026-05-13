@@ -1,3 +1,4 @@
+# credo:disable-for-this-file Credo.Check.Design.AliasUsage
 defmodule SEO.JSONLDValidatorFixtureTest do
   @moduledoc """
   Builds one realistic JSON-LD payload per Google-recognized Schema.org type,

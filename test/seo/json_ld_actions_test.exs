@@ -1,3 +1,4 @@
+# credo:disable-for-this-file Credo.Check.Design.AliasUsage
 defmodule SEO.JSONLD.ActionsTest do
   use ExUnit.Case, async: true
   doctest SEO.JSONLD.Actions
