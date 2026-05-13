@@ -6,18 +6,19 @@ defprotocol SEO.JSONLD.Build do
   Implement `build/2` which receives your item and conn and returns a map, list of maps,
   or `nil`.
 
-  The map(s) should contain `"@context"` and `"@type"` keys, or you can use one of the
-  helper modules like `SEO.JSONLD.Article` to build them.
+  The map(s) should contain a `"@type"` key, or you can use one of the helper modules
+  like `SEO.JSONLD.Article` to build them. `"@context"` is added at render time by
+  `SEO.JSONLD.meta/1` on the top-level node(s).
 
   ## Example
 
       defimpl SEO.JSONLD.Build, for: MyApp.Article do
         def build(article, _conn) do
-          SEO.JSONLD.Article.build(
+          SEO.JSONLD.Article.build(%{
             headline: article.title,
             description: article.description,
-            datePublished: article.published_at
-          )
+            date_published: article.published_at
+          })
         end
       end
   """

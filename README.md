@@ -33,6 +33,50 @@ def deps do
 end
 ```
 
+Register the JSON-LD compiler in your `mix.exs` so `SEO.JSONLD.*` builder
+modules are generated at compile time:
+
+```elixir
+def project do
+  [
+    # ...
+    compilers: [:seo_jsonld] ++ Mix.compilers()
+  ]
+end
+```
+
+By default this emits the ~24 types Google has rich-result guides for,
+along with the supporting types those guides reference (`Question`,
+`Answer`, `ListItem`) and the closure of any types referenced through
+field ranges and inheritance — about 200 modules in total.
+
+If you need the full vocabulary (~820 typed builder modules) or a
+different slice, override the default via application config — a single
+entry or a list of entries:
+
+```elixir
+# config/config.exs
+config :phoenix_seo, json_ld_types: :all
+# or mix-and-match:
+config :phoenix_seo, json_ld_types: [:google, SEO.JSONLD.SearchAction]
+```
+
+Available entries:
+
+- `:google` — types Google has rich-result guides for plus their
+  supporting types. **Default if `:json_ld_types` is not configured.**
+- `:all` — every regular Schema.org class.
+- Category atoms: `:medical`, `:place`, `:travel`, `:shopping`,
+  `:creative_work`, `:action`, `:financial`, etc. See
+  `Mix.Tasks.Compile.SeoJsonld.Generator.groups/0` for the full list.
+- Module names like `SEO.JSONLD.Article`, or strings like `"Article"` /
+  `"schema:Article"`.
+
+Inheritance ancestors and referenced types are pulled into the emitted
+set automatically — so the typespecs and module links always resolve.
+Modules are written to your application's `_build` directory, not into
+the dep tree.
+
 ## Usage
 
 1. Define an SEO module for your web application and defaults
@@ -151,30 +195,26 @@ defimpl SEO.Unfurl.Build, for: MyApp.Article do
   end
 end
 
-defimpl SEO.Breadcrumb.Build, for: MyApp.Article do
-  use MyAppWeb, :verified_routes
-
-  def build(article, conn) do
-    # Because of `Phoenix.Param`, structs will assume the key of `:id` when
-    # interpolating the struct into the verified route.
-    SEO.Breadcrumb.List.build([
-      %{name: "Articles", item: url(conn, ~p"/articles")},
-      %{name: article.title, item: url(conn, ~p"/articles/#{article}")}
-    ])
-  end
-end
-
 defimpl SEO.JSONLD.Build, for: MyApp.Article do
   use MyAppWeb, :verified_routes
 
   def build(article, conn) do
-    SEO.JSONLD.Article.build(
-      headline: article.title,
-      description: article.description,
-      datePublished: article.published_at,
-      author: %{"@type" => "Person", "name" => article.author},
-      mainEntityOfPage: url(conn, ~p"/articles/#{article}")
-    )
+    # Because of `Phoenix.Param`, structs will assume the key of `:id` when
+    # interpolating the struct into the verified route. Emit multiple JSON-LD
+    # entities by returning a list — breadcrumbs sit alongside the article.
+    [
+      SEO.JSONLD.Article.build(%{
+        headline: article.title,
+        description: article.description,
+        date_published: article.published_at,
+        author: SEO.JSONLD.Person.build(%{name: article.author}),
+        main_entity_of_page: url(conn, ~p"/articles/#{article}")
+      }),
+      SEO.JSONLD.Breadcrumbs.build([
+        %{name: "Articles", item: url(conn, ~p"/articles")},
+        %{name: article.title, item: url(conn, ~p"/articles/#{article}")}
+      ])
+    ]
   end
 end
 ```

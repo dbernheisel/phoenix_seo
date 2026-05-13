@@ -19,7 +19,9 @@ defmodule SEO.JSONLDGoogleTypesTest do
   end
 
   defp assert_jsonld(result, type_name) do
-    assert result["@context"] == "https://schema.org"
+    # `@context` is intentionally absent from `build/1` output — it's added
+    # at render time by `SEO.JSONLD.meta/1` on the top-level node only.
+    refute Map.has_key?(result, "@context")
     assert type_name in List.wrap(result["@type"])
   end
 

@@ -22,23 +22,13 @@ defmodule SEO.JSONLD do
   - `SEO.JSONLD.LocalBusiness`
   - `SEO.JSONLD.Event`
 
-  ## Config defaults
+  These modules are generated at compile time by
+  `Mix.Tasks.Compile.SeoJsonld` — see that module's docs for how to
+  register the compiler and pick which Schema.org types to materialize.
 
-  Site-wide defaults configured via `use SEO, json_ld: %{...}` are merged
-  into each rendered JSON-LD payload as defaults — any key the item already
-  supplies wins. The config map uses the string keys the renderer produces,
-  so the cleanest way to author nested values is with one of the typed
-  helpers:
-
-      use SEO,
-        json_ld: %{
-          "inLanguage" => "en-US",
-          "publisher" => SEO.JSONLD.Organization.build(%{name: "Acme"})
-        }
-
-  Top-level atom keys are accepted and stringified; nested values are left
-  untouched, so build them with the typed helpers (or write raw
-  string-keyed maps) so they match the JSON-LD output shape.
+  `"@context"` is applied to the top-level node(s) at render time, so the
+  typed builders themselves omit it — nest them freely without producing
+  redundant contexts.
 
   ### Resources
 
@@ -52,13 +42,12 @@ defmodule SEO.JSONLD do
 
   attr :item, :any
   attr :json_library, :atom, required: true
-  attr :config, :any, default: nil
 
   def meta(assigns) do
     item =
       assigns[:item]
-      |> merge_config_defaults(assigns[:config])
       |> sanitize()
+      |> apply_context()
 
     assigns = assign(assigns, :item, item)
 
@@ -69,30 +58,13 @@ defmodule SEO.JSONLD do
     """
   end
 
-  # Shallow-merges `config` into `item` as defaults — each top-level key
-  # already on the item wins. `config` keys are coerced to strings so that a
-  # user who wrote `%{publisher: ...}` in SEO.Config still merges against the
-  # "publisher" key the generated modules emit. Nested values are opaque;
-  # author them with the typed helpers if they need to match the output
-  # shape.
-  defp merge_config_defaults(item, nil), do: item
-  defp merge_config_defaults(item, config) when config == %{}, do: item
+  @context "https://schema.org"
 
-  defp merge_config_defaults(items, config) when is_list(items) do
-    Enum.map(items, &merge_config_defaults(&1, config))
-  end
+  defp apply_context(nil), do: nil
+  defp apply_context(items) when is_list(items), do: Enum.map(items, &apply_context/1)
 
-  defp merge_config_defaults(item, config) when is_map(item) and is_map(config) do
-    Map.merge(stringify_keys(config), item)
-  end
-
-  defp merge_config_defaults(item, _config), do: item
-
-  defp stringify_keys(map) do
-    Map.new(map, fn
-      {k, v} when is_atom(k) -> {Atom.to_string(k), v}
-      {k, v} -> {k, v}
-    end)
+  defp apply_context(item) when is_map(item) do
+    Map.put_new(item, "@context", @context)
   end
 
   defp sanitize(nil), do: nil

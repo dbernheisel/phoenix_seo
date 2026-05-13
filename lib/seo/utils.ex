@@ -1,6 +1,12 @@
 defmodule SEO.Utils do
   @moduledoc false
 
+  # `SEO.JSONLD.Actions` is emitted by `:seo_jsonld` after `:elixir` runs
+  # in this library's own compile chain (and is always present in user
+  # apps, where compiler ordering is reversed). The directive suppresses
+  # the bootstrap-only warning; the module is guaranteed at runtime.
+  @compile {:no_warn_undefined, SEO.JSONLD.Actions}
+
   use Phoenix.Component
 
   attr :property, :string, required: true

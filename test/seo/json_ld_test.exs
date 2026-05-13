@@ -83,42 +83,44 @@ defmodule SEO.JSONLDTest do
       refute Map.has_key?(ld, "description")
     end
 
-    test "merges config as defaults — item wins on conflict" do
-      item = %{"@context" => "https://schema.org", "@type" => "Article", "headline" => "Specific"}
+    test "adds @context to a top-level item that doesn't already have one" do
+      item = %{"@type" => "Organization", "name" => "Acme"}
 
-      config = %{
-        "inLanguage" => "en-US",
-        "headline" => "Default (should lose)",
+      result = render_component(&JSONLD.meta/1, build_assigns(item))
+      {:ok, html} = Floki.parse_fragment(result)
+      ld = linking_data(html)
+
+      assert ld["@context"] == "https://schema.org"
+    end
+
+    test "leaves nested entities' @context untouched" do
+      # Nested Organization (the publisher) does NOT get @context — only the
+      # outermost node does. Mirrors how the typed builders compose.
+      item = %{
+        "@type" => "Article",
+        "headline" => "Hi",
         "publisher" => %{"@type" => "Organization", "name" => "Acme"}
       }
 
-      result =
-        render_component(&JSONLD.meta/1,
-          item: item,
-          config: config,
-          json_library: Jason
-        )
-
+      result = render_component(&JSONLD.meta/1, build_assigns(item))
       {:ok, html} = Floki.parse_fragment(result)
       ld = linking_data(html)
 
-      assert ld["headline"] == "Specific"
-      assert ld["inLanguage"] == "en-US"
-      assert ld["publisher"]["name"] == "Acme"
+      assert ld["@context"] == "https://schema.org"
+      refute Map.has_key?(ld["publisher"], "@context")
     end
 
-    test "merges config with atom keys (stringifies them)" do
-      item = %{"@context" => "https://schema.org", "@type" => "Article", "headline" => "Post"}
-      config = %{inLanguage: "en-US", publisher: %{"@type" => "Organization", "name" => "Acme"}}
+    test "adds @context to each item in a list of top-level entities" do
+      items = [
+        %{"@type" => "Organization", "name" => "Acme"},
+        %{"@type" => "WebSite", "name" => "Acme Site"}
+      ]
 
-      result =
-        render_component(&JSONLD.meta/1, item: item, config: config, json_library: Jason)
-
+      result = render_component(&JSONLD.meta/1, build_assigns(items))
       {:ok, html} = Floki.parse_fragment(result)
       ld = linking_data(html)
 
-      assert ld["inLanguage"] == "en-US"
-      assert ld["publisher"]["name"] == "Acme"
+      assert Enum.all?(ld, &(&1["@context"] == "https://schema.org"))
     end
   end
 
@@ -347,7 +349,7 @@ defmodule SEO.JSONLDTest do
   end
 
   defp build_assigns(item) do
-    [item: item, config: %{}, json_library: Jason]
+    [item: item, json_library: Jason]
   end
 
   defp linking_data(html) do

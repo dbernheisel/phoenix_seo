@@ -6,8 +6,7 @@ defmodule SEO.Config do
     facebook: %{},
     twitter: %{},
     unfurl: %{},
-    open_graph: %{},
-    json_ld: %{}
+    open_graph: %{}
   ]
 
   @callback config() :: map()
