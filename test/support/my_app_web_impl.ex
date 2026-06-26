@@ -94,18 +94,14 @@ defimpl SEO.Unfurl.Build, for: MyApp.Article do
   end
 end
 
-defimpl SEO.Breadcrumb.Build, for: MyApp.Article do
-  def build(article, _conn) do
-    SEO.Breadcrumb.List.build([
-      %{name: "Articles", item: "https://example.com/articles"},
-      %{name: article.title, item: "https://example.com/articles/#{article.id || "my_id"}"}
-    ])
-  end
-end
+defimpl SEO.JSONLD.Build, for: MyApp.Article do
+  # `:elixir` runs before `:seo_jsonld` in this lib's own compile chain,
+  # so SEO.JSONLD.Article isn't loaded yet when this impl compiles. The
+  # module is guaranteed at runtime.
+  @compile {:no_warn_undefined, SEO.JSONLD.Article}
 
-defimpl SEO.JsonLD.Build, for: MyApp.Article do
   def build(article, _conn) do
-    SEO.JsonLD.Article.build(
+    SEO.JSONLD.Article.build(
       headline: article.title,
       description: article.description,
       datePublished: "2022-10-13"

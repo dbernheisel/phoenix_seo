@@ -9,7 +9,7 @@ defmodule SEO.LLMsTest do
     @behaviour SEO.LLMs.Provider
 
     @impl true
-    def sections do
+    def sections(_conn) do
       [
         {"Docs",
          [
@@ -25,7 +25,7 @@ defmodule SEO.LLMsTest do
   end
 
   test "provider module returns sections" do
-    sections = StaticProvider.sections()
+    sections = StaticProvider.sections(%Plug.Conn{})
     assert [{"Docs", docs}, {"Optional", optional}] = sections
     assert [{"API Reference", _, "Full REST API docs"}, {"Guides", _}] = docs
     assert [{"Changelog", _}] = optional
@@ -298,9 +298,9 @@ defmodule SEO.LLMsTest do
   end
 
   describe "behaviour-based ArticleMD" do
-    test "entry/1 returns an Entry for an article" do
+    test "entry/2 returns an Entry for an article" do
       article = %MyApp.Article{id: "test", title: "Test Post", description: "A test post"}
-      entry = MyAppWeb.ArticleMD.entry(article)
+      entry = MyAppWeb.ArticleMD.entry(article, %Plug.Conn{})
 
       assert %Entry{
                section: "Articles",
@@ -323,13 +323,13 @@ defmodule SEO.LLMsTest do
       @behaviour SEO.LLMs.Provider
 
       @impl true
-      def sections do
+      def sections(conn) do
         articles = [
           %MyApp.Article{id: "first", title: "First Post", description: "The first post"},
           %MyApp.Article{id: "second", title: "Second Post", description: "The second post"}
         ]
 
-        entries = Enum.map(articles, &MyAppWeb.ArticleMD.entry/1)
+        entries = Enum.map(articles, &MyAppWeb.ArticleMD.entry(&1, conn))
         dynamic = Entry.group_by_section(entries)
 
         static = [

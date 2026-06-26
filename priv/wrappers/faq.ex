@@ -1,4 +1,4 @@
-defmodule SEO.JsonLD.FAQ do
+defmodule SEO.JSONLD.FAQ do
   @moduledoc """
   Helper for building a Schema.org [FAQPage](https://schema.org/FAQPage) JSON-LD structure.
 
@@ -6,7 +6,7 @@ defmodule SEO.JsonLD.FAQ do
 
   ## Example
 
-      SEO.JsonLD.FAQ.build([
+      SEO.JSONLD.FAQ.build([
         %{question: "What is Elixir?", answer: "A functional programming language."},
         %{question: "What is Phoenix?", answer: "A web framework for Elixir."}
       ])

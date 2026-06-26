@@ -1,4 +1,4 @@
-defprotocol SEO.JsonLD.Build do
+defprotocol SEO.JSONLD.Build do
   @fallback_to_any true
   @moduledoc """
   Derive or implement this protocol to build JSON-LD structured data for your schema.
@@ -6,18 +6,19 @@ defprotocol SEO.JsonLD.Build do
   Implement `build/2` which receives your item and conn and returns a map, list of maps,
   or `nil`.
 
-  The map(s) should contain `"@context"` and `"@type"` keys, or you can use one of the
-  helper modules like `SEO.JsonLD.Article` to build them.
+  The map(s) should contain a `"@type"` key, or you can use one of the helper modules
+  like `SEO.JSONLD.Article` to build them. `"@context"` is added at render time by
+  `SEO.JSONLD.meta/1` on the top-level node(s).
 
   ## Example
 
-      defimpl SEO.JsonLD.Build, for: MyApp.Article do
+      defimpl SEO.JSONLD.Build, for: MyApp.Article do
         def build(article, _conn) do
-          SEO.JsonLD.Article.build(
+          SEO.JSONLD.Article.build(%{
             headline: article.title,
             description: article.description,
-            datePublished: article.published_at
-          )
+            date_published: article.published_at
+          })
         end
       end
   """
@@ -26,6 +27,6 @@ defprotocol SEO.JsonLD.Build do
   def build(thing, conn)
 end
 
-defimpl SEO.JsonLD.Build, for: Any do
+defimpl SEO.JSONLD.Build, for: Any do
   def build(_item, _conn), do: nil
 end

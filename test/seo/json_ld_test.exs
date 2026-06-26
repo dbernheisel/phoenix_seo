@@ -1,8 +1,8 @@
-defmodule SEO.JsonLDTest do
+defmodule SEO.JSONLDTest do
   use ExUnit.Case, async: true
   import Phoenix.LiveViewTest
-  alias SEO.JsonLD
-  alias SEO.JsonLD.{Article, Event, FAQ, LocalBusiness, Organization, Product}
+  alias SEO.JSONLD
+  alias SEO.JSONLD.{Article, Event, FAQ, LocalBusiness, Organization, Product}
 
   describe "meta" do
     test "renders a single JSON-LD item" do
@@ -13,7 +13,7 @@ defmodule SEO.JsonLDTest do
         "url" => "https://acme.com"
       }
 
-      result = render_component(&JsonLD.meta/1, build_assigns(item))
+      result = render_component(&JSONLD.meta/1, build_assigns(item))
       {:ok, html} = Floki.parse_fragment(result)
       ld = linking_data(html)
 
@@ -28,7 +28,7 @@ defmodule SEO.JsonLDTest do
         %{"@context" => "https://schema.org", "@type" => "WebSite", "name" => "Acme Site"}
       ]
 
-      result = render_component(&JsonLD.meta/1, build_assigns(items))
+      result = render_component(&JSONLD.meta/1, build_assigns(items))
       {:ok, html} = Floki.parse_fragment(result)
       ld = linking_data(html)
 
@@ -39,17 +39,17 @@ defmodule SEO.JsonLDTest do
     end
 
     test "doesn't render when item is nil" do
-      result = render_component(&JsonLD.meta/1, build_assigns(nil))
+      result = render_component(&JSONLD.meta/1, build_assigns(nil))
       assert result == ""
     end
 
     test "doesn't render when item is empty list" do
-      result = render_component(&JsonLD.meta/1, build_assigns([]))
+      result = render_component(&JSONLD.meta/1, build_assigns([]))
       assert result == ""
     end
 
     test "doesn't render when item is empty map" do
-      result = render_component(&JsonLD.meta/1, build_assigns(%{}))
+      result = render_component(&JSONLD.meta/1, build_assigns(%{}))
       assert result == ""
     end
 
@@ -60,7 +60,7 @@ defmodule SEO.JsonLDTest do
         name: "Acme Corp"
       }
 
-      result = render_component(&JsonLD.meta/1, build_assigns(item))
+      result = render_component(&JSONLD.meta/1, build_assigns(item))
       {:ok, html} = Floki.parse_fragment(result)
       ld = linking_data(html)
 
@@ -76,11 +76,51 @@ defmodule SEO.JsonLDTest do
         "description" => nil
       }
 
-      result = render_component(&JsonLD.meta/1, build_assigns(item))
+      result = render_component(&JSONLD.meta/1, build_assigns(item))
       {:ok, html} = Floki.parse_fragment(result)
       ld = linking_data(html)
 
       refute Map.has_key?(ld, "description")
+    end
+
+    test "adds @context to a top-level item that doesn't already have one" do
+      item = %{"@type" => "Organization", "name" => "Acme"}
+
+      result = render_component(&JSONLD.meta/1, build_assigns(item))
+      {:ok, html} = Floki.parse_fragment(result)
+      ld = linking_data(html)
+
+      assert ld["@context"] == "https://schema.org"
+    end
+
+    test "leaves nested entities' @context untouched" do
+      # Nested Organization (the publisher) does NOT get @context — only the
+      # outermost node does. Mirrors how the typed builders compose.
+      item = %{
+        "@type" => "Article",
+        "headline" => "Hi",
+        "publisher" => %{"@type" => "Organization", "name" => "Acme"}
+      }
+
+      result = render_component(&JSONLD.meta/1, build_assigns(item))
+      {:ok, html} = Floki.parse_fragment(result)
+      ld = linking_data(html)
+
+      assert ld["@context"] == "https://schema.org"
+      refute Map.has_key?(ld["publisher"], "@context")
+    end
+
+    test "adds @context to each item in a list of top-level entities" do
+      items = [
+        %{"@type" => "Organization", "name" => "Acme"},
+        %{"@type" => "WebSite", "name" => "Acme Site"}
+      ]
+
+      result = render_component(&JSONLD.meta/1, build_assigns(items))
+      {:ok, html} = Floki.parse_fragment(result)
+      ld = linking_data(html)
+
+      assert Enum.all?(ld, &(&1["@context"] == "https://schema.org"))
     end
   end
 
@@ -90,10 +130,10 @@ defmodule SEO.JsonLDTest do
         Article.build(
           headline: "My Great Post",
           description: "A post about things",
-          datePublished: ~D[2024-01-15]
+          date_published: ~D[2024-01-15]
         )
 
-      result = render_component(&JsonLD.meta/1, build_assigns(item))
+      result = render_component(&JSONLD.meta/1, build_assigns(item))
       {:ok, html} = Floki.parse_fragment(result)
       ld = linking_data(html)
 
@@ -109,14 +149,14 @@ defmodule SEO.JsonLDTest do
         Article.build(
           headline: "My Post",
           description: "About things",
-          datePublished: ~D[2024-01-15],
-          dateModified: ~D[2024-02-01],
+          date_published: ~D[2024-01-15],
+          date_modified: ~D[2024-02-01],
           author: %{"@type" => "Person", "name" => "Jane"},
           publisher: %{"@type" => "Organization", "name" => "Acme"},
           image: "https://example.com/img.jpg"
         )
 
-      result = render_component(&JsonLD.meta/1, build_assigns(item))
+      result = render_component(&JSONLD.meta/1, build_assigns(item))
       {:ok, html} = Floki.parse_fragment(result)
       ld = linking_data(html)
 
@@ -124,6 +164,20 @@ defmodule SEO.JsonLDTest do
       assert ld["publisher"] == %{"@type" => "Organization", "name" => "Acme"}
       assert ld["image"] == "https://example.com/img.jpg"
       assert ld["dateModified"] == "2024-02-01"
+    end
+
+    test "accepts URI structs for url-valued fields" do
+      item =
+        Article.build(
+          headline: "URI test",
+          url: URI.parse("https://example.com/post")
+        )
+
+      result = render_component(&JSONLD.meta/1, build_assigns(item))
+      {:ok, html} = Floki.parse_fragment(result)
+      ld = linking_data(html)
+
+      assert ld["url"] == "https://example.com/post"
     end
   end
 
@@ -134,10 +188,10 @@ defmodule SEO.JsonLDTest do
           name: "Acme Corp",
           url: "https://acme.com",
           logo: "https://acme.com/logo.png",
-          sameAs: ["https://twitter.com/acme", "https://facebook.com/acme"]
+          same_as: ["https://twitter.com/acme", "https://facebook.com/acme"]
         )
 
-      result = render_component(&JsonLD.meta/1, build_assigns(item))
+      result = render_component(&JSONLD.meta/1, build_assigns(item))
       {:ok, html} = Floki.parse_fragment(result)
       ld = linking_data(html)
 
@@ -158,7 +212,7 @@ defmodule SEO.JsonLDTest do
           %{question: "What is Phoenix?", answer: "A web framework for Elixir."}
         ])
 
-      result = render_component(&JsonLD.meta/1, build_assigns(item))
+      result = render_component(&JSONLD.meta/1, build_assigns(item))
       {:ok, html} = Floki.parse_fragment(result)
       ld = linking_data(html)
 
@@ -192,7 +246,7 @@ defmodule SEO.JsonLDTest do
           }
         )
 
-      result = render_component(&JsonLD.meta/1, build_assigns(item))
+      result = render_component(&JSONLD.meta/1, build_assigns(item))
       {:ok, html} = Floki.parse_fragment(result)
       ld = linking_data(html)
 
@@ -216,7 +270,7 @@ defmodule SEO.JsonLDTest do
             "postalCode" => "62701"
           },
           telephone: "+1-555-555-5555",
-          openingHoursSpecification: %{
+          opening_hours_specification: %{
             "@type" => "OpeningHoursSpecification",
             "dayOfWeek" => ["Monday", "Tuesday"],
             "opens" => "11:00",
@@ -224,7 +278,7 @@ defmodule SEO.JsonLDTest do
           }
         )
 
-      result = render_component(&JsonLD.meta/1, build_assigns(item))
+      result = render_component(&JSONLD.meta/1, build_assigns(item))
       {:ok, html} = Floki.parse_fragment(result)
       ld = linking_data(html)
 
@@ -240,8 +294,8 @@ defmodule SEO.JsonLDTest do
       item =
         Event.build(
           name: "ElixirConf 2024",
-          startDate: ~D[2024-08-28],
-          endDate: ~D[2024-08-30],
+          start_date: ~D[2024-08-28],
+          end_date: ~D[2024-08-30],
           location: %{
             "@type" => "Place",
             "name" => "Gaylord Rockies",
@@ -250,7 +304,7 @@ defmodule SEO.JsonLDTest do
           description: "The Elixir conference"
         )
 
-      result = render_component(&JsonLD.meta/1, build_assigns(item))
+      result = render_component(&JSONLD.meta/1, build_assigns(item))
       {:ok, html} = Floki.parse_fragment(result)
       ld = linking_data(html)
 
@@ -260,10 +314,42 @@ defmodule SEO.JsonLDTest do
       assert ld["endDate"] == "2024-08-30"
       assert ld["location"]["name"] == "Gaylord Rockies"
     end
+
+    test "converts enum atoms to schema.org URLs" do
+      item = Event.build(name: "Summit", event_status: :event_cancelled)
+
+      result = render_component(&JSONLD.meta/1, build_assigns(item))
+      {:ok, html} = Floki.parse_fragment(result)
+      ld = linking_data(html)
+
+      assert ld["eventStatus"] == "https://schema.org/EventCancelled"
+    end
+
+    test "raises for unknown enum atoms" do
+      assert_raise KeyError, fn ->
+        Event.build(event_status: :made_up_value)
+      end
+    end
+
+    test "rejects non-atom values for enum fields" do
+      assert_raise ArgumentError, fn ->
+        Event.build(event_status: "https://schema.org/EventCancelled")
+      end
+    end
+
+    test "accepts DateTime structs for date fields" do
+      item = Event.build(name: "Summit", start_date: ~U[2024-08-28 09:00:00Z])
+
+      result = render_component(&JSONLD.meta/1, build_assigns(item))
+      {:ok, html} = Floki.parse_fragment(result)
+      ld = linking_data(html)
+
+      assert ld["startDate"] == "2024-08-28T09:00:00Z"
+    end
   end
 
   defp build_assigns(item) do
-    [item: item, config: %{}, json_library: Jason]
+    [item: item, json_library: Jason]
   end
 
   defp linking_data(html) do

@@ -95,9 +95,9 @@ defmodule SEO.LLMs.SampleAppTest do
   end
 
   describe "behaviour contract validation" do
-    test "ArticleMD implements entry/1 callback" do
+    test "ArticleMD implements entry/2 callback" do
       article = SampleApp.Blog.get_article_by_slug!("genserver-guide")
-      entry = SampleApp.ArticleMD.entry(article)
+      entry = SampleApp.ArticleMD.entry(article, %Plug.Conn{})
 
       assert %SEO.LLMs.Entry{} = entry
       assert entry.section == "Articles"
@@ -105,11 +105,11 @@ defmodule SEO.LLMs.SampleAppTest do
       assert entry.url == "/articles/genserver-guide"
     end
 
-    test "PageMD implements entry/1 callback for multiple resources" do
-      about = SampleApp.PageMD.entry(:about)
+    test "PageMD implements entry/2 callback for multiple resources" do
+      about = SampleApp.PageMD.entry(:about, %Plug.Conn{})
       assert %SEO.LLMs.Entry{section: "Docs", title: "About"} = about
 
-      subscribe = SampleApp.PageMD.entry(:subscribe)
+      subscribe = SampleApp.PageMD.entry(:subscribe, %Plug.Conn{})
       assert %SEO.LLMs.Entry{section: "Optional", title: "Subscribe"} = subscribe
     end
 
@@ -132,7 +132,7 @@ defmodule SEO.LLMs.SampleAppTest do
 
   describe "provider integration" do
     test "provider sections include all registered MD modules" do
-      sections = SampleApp.LLMsProvider.sections()
+      sections = SampleApp.LLMsProvider.sections(%Plug.Conn{})
       section_names = Enum.map(sections, &elem(&1, 0))
 
       assert "Docs" in section_names
@@ -141,7 +141,7 @@ defmodule SEO.LLMs.SampleAppTest do
     end
 
     test "entry metadata matches what appears in llms.txt" do
-      sections = SampleApp.LLMsProvider.sections()
+      sections = SampleApp.LLMsProvider.sections(%Plug.Conn{})
       {_, articles} = List.keyfind(sections, "Articles", 0)
 
       titles = Enum.map(articles, &elem(&1, 0))

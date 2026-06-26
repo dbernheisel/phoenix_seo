@@ -11,9 +11,10 @@ defmodule SEO.MixProject do
       app: :phoenix_seo,
       name: "SEO",
       version: @version,
-      elixir: ">= 1.14.0",
+      elixir: ">= 1.17.0",
       start_permanent: Mix.env() == :prod,
       elixirc_paths: elixirc_paths(Mix.env()),
+      compilers: Mix.compilers() ++ [:seo_jsonld],
       aliases: aliases(),
       deps: deps(),
       docs: docs(),
@@ -45,6 +46,9 @@ defmodule SEO.MixProject do
       name: "phoenix_seo",
       files: [
         "lib",
+        "priv/schemaorg.jsonld",
+        "priv/wrappers",
+        "priv/examples",
         "mix.exs",
         "CHANGELOG*",
         "README*",
@@ -74,8 +78,7 @@ defmodule SEO.MixProject do
   defp groups_for_modules do
     [
       Domains: [
-        SEO.Breadcrumb,
-        SEO.JsonLD,
+        SEO.JSONLD,
         SEO.OpenGraph,
         SEO.Site,
         SEO.Twitter,
@@ -90,33 +93,39 @@ defmodule SEO.MixProject do
         SEO.OpenGraph.Profile,
         SEO.OpenGraph.Video
       ],
-      Breadcrumbs: [
-        SEO.Breadcrumb.List,
-        SEO.Breadcrumb.ListItem
-      ],
-      "JSON-LD": [
-        SEO.JsonLD.Article,
-        SEO.JsonLD.Event,
-        SEO.JsonLD.FAQ,
-        SEO.JsonLD.LocalBusiness,
-        SEO.JsonLD.Organization,
-        SEO.JsonLD.Product
-      ],
       LLMs: [
         SEO.LLMs,
         SEO.LLMs.Entry,
         SEO.LLMs.Provider
       ],
       Protocol: [
-        SEO.Breadcrumb.Build,
-        SEO.JsonLD.Build,
+        SEO.JSONLD.Build,
         SEO.OpenGraph.Build,
         SEO.Site.Build,
         SEO.Twitter.Build,
         SEO.Facebook.Build,
         SEO.Unfurl.Build
-      ]
+      ],
+      "JSON-LD (Google rich results)": json_ld_google_modules(),
+      "JSON-LD (Schema.org)": [~r/^SEO\.JSONLD\..+/]
     ]
+  end
+
+  defp json_ld_google_modules do
+    ~w[
+      Article BreadcrumbList Course Dataset DiscussionForumPosting
+      EmployerAggregateRating Event FAQPage ImageObject JobPosting
+      LocalBusiness MathSolver Movie Organization Product ProfilePage
+      QAPage Quiz Recipe Review SoftwareApplication SpeakableSpecification
+      VacationRental VideoObject
+    ]
+    |> Enum.map(&Module.concat([SEO.JSONLD, &1]))
+    |> Enum.concat([
+      SEO.JSONLD.Actions,
+      SEO.JSONLD.Breadcrumbs,
+      SEO.JSONLD.FAQ
+    ])
+    |> Enum.sort()
   end
 
   defp aliases do
@@ -127,14 +136,15 @@ defmodule SEO.MixProject do
 
   defp deps do
     [
-      {:phoenix_live_view, ">= 0.18.0"},
+      {:phoenix_live_view, "~> 1.0"},
       # Dev / Test
-      {:blend, "~> 0.4.1", only: [:dev, :test]},
+      {:blend, "~> 0.4", only: [:dev, :test]},
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
+      {:jump_credo_checks, "~> 0.1.0", only: [:dev, :test], runtime: false},
       {:ex_doc, "~> 0.27", only: :dev, warn_if_outdated: true, runtime: false},
       {:jason, "~> 1.0", only: [:dev, :test]},
       {:floki, "~> 0.35", only: [:dev, :test]},
-      {:makeup_eex, "~> 1.0", only: :dev, runtime: false}
+      {:makeup_eex, "~> 2.0", only: :dev, runtime: false}
     ]
   end
 

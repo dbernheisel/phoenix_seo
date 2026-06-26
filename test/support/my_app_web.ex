@@ -56,7 +56,7 @@ defmodule MyAppWeb.ArticleMD do
   end
 
   @impl SEO.LLMs
-  def entry(%MyApp.Article{} = article) do
+  def entry(%MyApp.Article{} = article, _conn) do
     Entry.build(
       section: "Articles",
       title: article.title,

@@ -8,14 +8,9 @@ defmodule SEO.Test.Helpers do
 
   def meta(html, selector, attr, contains) do
     case Floki.find(html, "meta[" <> selector <> "]") do
-      [] ->
-        false
-
-      nil ->
-        false
-
-      tags ->
-        attr_contains?(tags, attr, contains)
+      [] -> false
+      nil -> false
+      tags -> attr_contains?(tags, attr, contains)
     end
   end
 
@@ -47,7 +42,7 @@ defmodule SEO.Test.Helpers do
       [{"script", _, json}] ->
         Jason.decode!(json)
 
-      scripts when is_list(scripts) and length(scripts) > 0 ->
+      scripts when is_list(scripts) and scripts != [] ->
         Enum.map(scripts, fn {"script", _, json} -> Jason.decode!(json) end)
 
       _ ->

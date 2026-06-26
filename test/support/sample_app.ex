@@ -42,7 +42,7 @@ defmodule SampleApp.ArticleMD do
   end
 
   @impl SEO.LLMs
-  def entry(article) do
+  def entry(article, _conn) do
     Entry.build(
       section: "Articles",
       title: article.title,
@@ -72,7 +72,7 @@ defmodule SampleApp.PageMD do
   end
 
   @impl SEO.LLMs
-  def entry(:about) do
+  def entry(:about, _conn) do
     Entry.build(
       section: "Docs",
       title: "About",
@@ -81,7 +81,7 @@ defmodule SampleApp.PageMD do
     )
   end
 
-  def entry(:subscribe) do
+  def entry(:subscribe, _conn) do
     Entry.build(
       section: "Optional",
       title: "Subscribe",
@@ -98,14 +98,14 @@ defmodule SampleApp.LLMsProvider do
   alias SEO.LLMs.Entry
 
   @impl true
-  def sections do
-    static = [SampleApp.PageMD.entry(:about)]
+  def sections(conn) do
+    static = [SampleApp.PageMD.entry(:about, conn)]
 
     articles =
       SampleApp.Blog.list_published()
-      |> Enum.map(&SampleApp.ArticleMD.entry/1)
+      |> Enum.map(&SampleApp.ArticleMD.entry(&1, conn))
 
-    optional = [SampleApp.PageMD.entry(:subscribe)]
+    optional = [SampleApp.PageMD.entry(:subscribe, conn)]
 
     all = static ++ articles ++ optional
     Entry.group_by_section(all)

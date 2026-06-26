@@ -1,4 +1,4 @@
-defmodule SEO.JsonLD do
+defmodule SEO.JSONLD do
   @moduledoc """
   Renders JSON-LD structured data as `<script type="application/ld+json">` tags.
 
@@ -8,19 +8,27 @@ defmodule SEO.JsonLD do
 
   You can pass any map (or list of maps) with `@context` and `@type` keys:
 
-      <SEO.JsonLD.meta
+      <SEO.JSONLD.meta
         item={%{"@context" => "https://schema.org", "@type" => "Organization", "name" => "Acme"}}
         json_library={Jason}
       />
 
   Or use one of the helper modules for common Schema.org types:
 
-  - `SEO.JsonLD.Article`
-  - `SEO.JsonLD.Organization`
-  - `SEO.JsonLD.FAQ`
-  - `SEO.JsonLD.Product`
-  - `SEO.JsonLD.LocalBusiness`
-  - `SEO.JsonLD.Event`
+  - `SEO.JSONLD.Article`
+  - `SEO.JSONLD.Organization`
+  - `SEO.JSONLD.FAQ`
+  - `SEO.JSONLD.Product`
+  - `SEO.JSONLD.LocalBusiness`
+  - `SEO.JSONLD.Event`
+
+  These modules are generated at compile time by
+  `Mix.Tasks.Compile.SeoJsonld` — see that module's docs for how to
+  register the compiler and pick which Schema.org types to materialize.
+
+  `"@context"` is applied to the top-level node(s) at render time, so the
+  typed builders themselves omit it — nest them freely without producing
+  redundant contexts.
 
   ### Resources
 
@@ -34,16 +42,29 @@ defmodule SEO.JsonLD do
 
   attr :item, :any
   attr :json_library, :atom, required: true
-  attr :config, :any, default: nil
 
   def meta(assigns) do
-    assigns = assign(assigns, :item, sanitize(assigns[:item]))
+    item =
+      assigns[:item]
+      |> sanitize()
+      |> apply_context()
+
+    assigns = assign(assigns, :item, item)
 
     ~H"""
     <script :if={@item} type="application/ld+json">
       <%= Phoenix.HTML.raw(@json_library.encode!(@item)) %>
     </script>
     """
+  end
+
+  @context "https://schema.org"
+
+  defp apply_context(nil), do: nil
+  defp apply_context(items) when is_list(items), do: Enum.map(items, &apply_context/1)
+
+  defp apply_context(item) when is_map(item) do
+    Map.put_new(item, "@context", @context)
   end
 
   defp sanitize(nil), do: nil
