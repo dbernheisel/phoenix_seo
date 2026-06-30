@@ -125,7 +125,6 @@ defmodule SEO.OpenGraph.Video do
     end
   end
 
-  defp format_ya_quality(nil), do: nil
   defp format_ya_quality(:low), do: "low"
   defp format_ya_quality(:medium), do: "medium"
   defp format_ya_quality(:hd), do: "HD"
