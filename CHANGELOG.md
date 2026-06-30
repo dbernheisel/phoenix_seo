@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.3.0 (2026-04-16)
+## 0.3.0 (2026-06-30)
 
 - **breaking** Require Elixir >=1.17
 - **breaking** LLMs behaviours changed arity to thread the Plug.Conn through
