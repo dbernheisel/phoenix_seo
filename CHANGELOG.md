@@ -1,6 +1,10 @@
 # Changelog
 
-## 0.3.0 (2026-06-30)
+## 0.3.0 (2026-07-17)
+
+- Fixup compiler mix task to work with umbrella projects. Thank you @ssbb
+
+## 0.3.0-rc.0 (2026-06-30)
 
 - **breaking** Require Elixir >=1.17
 - **breaking** LLMs behaviours changed arity to thread the Plug.Conn through

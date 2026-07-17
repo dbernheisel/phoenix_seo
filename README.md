@@ -28,7 +28,7 @@ have in search results, the more likely you are to have visitors.
 ```elixir
 def deps do
   [
-    {:phoenix_seo, "~> 0.3.0-rc.0"}
+    {:phoenix_seo, "~> 0.3.0"}
   ]
 end
 ```
