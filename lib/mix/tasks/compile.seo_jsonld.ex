@@ -39,6 +39,13 @@ defmodule Mix.Tasks.Compile.SeoJsonld do
   """
   use Mix.Task.Compiler
 
+  # Run per-app in the app's own project context. Without this, an umbrella
+  # `mix compile` dispatches this (non-recursive) compiler mid-recursion through
+  # `Mix.ProjectStack.on_recursing_root/1`, which switches the active project to
+  # the umbrella root — where `Mix.Project.app_path/0` raises ("umbrellas have no
+  # app"). Marking it recursive keeps it running in the child app that lists it.
+  @recursive true
+
   alias Mix.Tasks.Compile.SeoJsonld.Generator
 
   @manifest_version 2
