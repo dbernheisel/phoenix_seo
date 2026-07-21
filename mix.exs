@@ -31,8 +31,13 @@ defmodule SEO.MixProject do
     [preferred_envs: [tests: :test]]
   end
 
-  defp compilers(:test), do: Mix.compilers() ++ [:seo_jsonld]
-  defp compilers(_), do: Mix.compilers()
+  # `:seo_jsonld` materializes the SEO.JSONLD.* modules for THIS library's own
+  # ExDoc site (:dev) and tests (:test). Dependencies always compile in :prod,
+  # so gating it out of :prod is what keeps those generated modules from landing
+  # in consumers' builds — where they'd clash with a consumer that also runs the
+  # compiler. See config/config.exs for the `:all` vocabulary used here.
+  defp compilers(:prod), do: Mix.compilers()
+  defp compilers(_), do: Mix.compilers() ++ [:seo_jsonld]
 
   # Run "mix help compile.app" to learn about applications.
   def application do
