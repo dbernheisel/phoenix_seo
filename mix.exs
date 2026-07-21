@@ -14,7 +14,7 @@ defmodule SEO.MixProject do
       elixir: ">= 1.17.0",
       start_permanent: Mix.env() == :prod,
       elixirc_paths: elixirc_paths(Mix.env()),
-      compilers: Mix.compilers() ++ [:seo_jsonld],
+      compilers: compilers(Mix.env()),
       aliases: aliases(),
       deps: deps(),
       docs: docs(),
@@ -30,6 +30,14 @@ defmodule SEO.MixProject do
   def cli do
     [preferred_envs: [tests: :test]]
   end
+
+  # `:seo_jsonld` materializes the SEO.JSONLD.* modules for THIS library's own
+  # ExDoc site (:dev) and tests (:test). Dependencies always compile in :prod,
+  # so gating it out of :prod is what keeps those generated modules from landing
+  # in consumers' builds — where they'd clash with a consumer that also runs the
+  # compiler. See config/config.exs for the `:all` vocabulary used here.
+  defp compilers(:prod), do: Mix.compilers()
+  defp compilers(_), do: Mix.compilers() ++ [:seo_jsonld]
 
   # Run "mix help compile.app" to learn about applications.
   def application do
