@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.1 (2026-07-21)
+
+- Fixup phoenix_seo mix config to not run its own compiler, duplicating generated
+    modules from the user's configuration. Thank you @ssbb
+
 ## 0.3.0 (2026-07-17)
 
 - Fixup compiler mix task to work with umbrella projects. Thank you @ssbb
