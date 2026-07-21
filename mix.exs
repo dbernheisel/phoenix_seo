@@ -14,7 +14,7 @@ defmodule SEO.MixProject do
       elixir: ">= 1.17.0",
       start_permanent: Mix.env() == :prod,
       elixirc_paths: elixirc_paths(Mix.env()),
-      compilers: Mix.compilers() ++ [:seo_jsonld],
+      compilers: compilers(Mix.env()),
       aliases: aliases(),
       deps: deps(),
       docs: docs(),
@@ -30,6 +30,9 @@ defmodule SEO.MixProject do
   def cli do
     [preferred_envs: [tests: :test]]
   end
+
+  defp compilers(:test), do: Mix.compilers() ++ [:seo_jsonld]
+  defp compilers(_), do: Mix.compilers()
 
   # Run "mix help compile.app" to learn about applications.
   def application do
