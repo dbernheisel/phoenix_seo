@@ -5,6 +5,71 @@ defmodule SEO.JSONLDTest do
   alias SEO.JSONLD.{Article, Event, FAQ, LocalBusiness, Organization, Product}
 
   describe "meta" do
+    test "user content cannot break out of the JSON-LD script" do
+      for name <- [
+            "</script><script id=seo-injected>/* injected */</script>",
+            "</ScRiPt><img id=seo-injected src=x onerror=alert(1)>",
+            "</script\t><script id=seo-injected>/* injected */</script>",
+            "</script\n><script id=seo-injected>/* injected */</script>",
+            "</script/><script id=seo-injected>/* injected */</script>",
+            "<!--<script>"
+          ] do
+        item = %{
+          "@context" => "https://schema.org",
+          "@type" => "Organization",
+          "name" => name
+        }
+
+        result = render_component(&JSONLD.meta/1, build_assigns(item))
+        {:ok, html} = Floki.parse_fragment(result)
+
+        assert [{"script", [{"type", "application/ld+json"}], json}] = html
+        refute IO.iodata_to_binary(json) =~ "<"
+        assert linking_data(html) == item
+      end
+    end
+
+    test "preserves markup in nested values and keys across multiple items" do
+      items = [
+        %{
+          "@context" => "https://schema.org",
+          "@type" => "Article",
+          "publisher" => %{
+            "@type" => "Organization",
+            "</script><script id=seo-injected>" => "<!--<script>"
+          }
+        },
+        %{
+          "@context" => "https://schema.org",
+          "@type" => "Organization",
+          "name" => ~S|<b>Équipe & friends</b> "quoted" 'text' \u003C|,
+          "alternateName" => ["</script><img src=x onerror=alert(1)>", "<Team>"]
+        }
+      ]
+
+      result = render_component(&JSONLD.meta/1, build_assigns(items))
+      {:ok, html} = Floki.parse_fragment(result)
+
+      assert [{"script", [{"type", "application/ld+json"}], json}] = html
+      refute IO.iodata_to_binary(json) =~ "<"
+      assert linking_data(html) == items
+    end
+
+    test "supports a JSON library with only encode!/1 and existing escapes" do
+      item = %{
+        "@context" => "https://schema.org",
+        "@type" => "Organization",
+        "name" => "<!--<script></script><script id=seo-injected>"
+      }
+
+      result = render_component(&JSONLD.meta/1, item: item, json_library: __MODULE__)
+      {:ok, html} = Floki.parse_fragment(result)
+
+      assert [{"script", [{"type", "application/ld+json"}], json}] = html
+      refute IO.iodata_to_binary(json) =~ "<"
+      assert linking_data(html) == item
+    end
+
     test "renders a single JSON-LD item" do
       item = %{
         "@context" => "https://schema.org",
@@ -347,6 +412,8 @@ defmodule SEO.JSONLDTest do
       assert ld["startDate"] == "2024-08-28T09:00:00Z"
     end
   end
+
+  def encode!(item), do: Jason.encode!(item, escape: :html_safe)
 
   defp build_assigns(item) do
     [item: item, json_library: Jason]

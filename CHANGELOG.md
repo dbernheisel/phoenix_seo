@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Escape JSON-LD script contents to prevent user-controlled field values from
+  closing the script element and injecting HTML or executable scripts. The
+  configured JSON library and decoded field values are preserved.
+
 ## 0.3.1 (2026-07-21)
 
 - Fixup phoenix_seo mix config to not run its own compiler, duplicating generated

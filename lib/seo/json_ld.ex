@@ -30,6 +30,10 @@ defmodule SEO.JSONLD do
   typed builders themselves omit it — nest them freely without producing
   redundant contexts.
 
+  Encoded JSON is escaped for safe embedding in the HTML script element.
+  Field values can contain HTML markup without closing the script element;
+  their original values are preserved when the JSON is decoded.
+
   ### Resources
 
   - https://json-ld.org/
@@ -53,12 +57,18 @@ defmodule SEO.JSONLD do
 
     ~H"""
     <script :if={@item} type="application/ld+json">
-      <%= Phoenix.HTML.raw(@json_library.encode!(@item)) %>
+      <%= Phoenix.HTML.raw(encode_for_script(@item, @json_library)) %>
     </script>
     """
   end
 
   @context "https://schema.org"
+
+  defp encode_for_script(item, json_library) do
+    item
+    |> json_library.encode!()
+    |> String.replace("<", "\\u003C")
+  end
 
   defp apply_context(nil), do: nil
   defp apply_context(items) when is_list(items), do: Enum.map(items, &apply_context/1)
