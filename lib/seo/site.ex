@@ -164,7 +164,7 @@ defmodule SEO.Site do
     <.live_title prefix={@item.title_prefix} suffix={@item.title_suffix}><%= @page_title || @item.title || @item.default_title %></.live_title><%= if @item.canonical_url do %>
     <link rel="canonical" href={@item.canonical_url} />
     <% end %><%= if @item.alternate_languages && @item.alternate_languages != [] do %>
-    <link :for={{lang, url} <- @item.alternate_languages} rel="alternate" hreflag={lang} href={"#{url}"} />
+    <link :for={{lang, url} <- @item.alternate_languages} rel="alternate" hreflang={lang} href={"#{url}"} />
     <% end %><%= if @item.description do %>
     <meta name="description" content={@item.description |> Utils.squash_newlines() |> Utils.truncate()} />
     <% end %><%= if @item.rating do %>

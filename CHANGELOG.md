@@ -1,6 +1,10 @@
 # Changelog
 
-## Unreleased
+## 0.3.3 (2026-11-12)
+
+- Correct typo `hreflag` to `hreflang` :facepalm:
+
+## 0.3.2 (2026-10-13)
 
 - Escape JSON-LD script contents to prevent user-controlled field values from
   closing the script element and injecting HTML or executable scripts. The

@@ -27,8 +27,8 @@ defmodule SEO.SiteTest do
 
       assert result =~ ~s|<title data-prefix="Pre" data-suffix="Suf">PreDefaultSuf</title>|
       assert result =~ ~s|<link rel="canonical" href="https://example.com/canonical">|
-      assert result =~ ~s|<link rel="alternate" hreflag="en_US" href="https://en.example.com">|
-      assert result =~ ~s|<link rel="alternate" hreflag="ja_JP" href="https://jp.example.com">|
+      assert result =~ ~s|<link rel="alternate" hreflang="en_US" href="https://en.example.com">|
+      assert result =~ ~s|<link rel="alternate" hreflang="ja_JP" href="https://jp.example.com">|
       assert result =~ ~s|<meta name="description" content="default description">|
       assert result =~ ~s|<meta name="rating" content="Adult">|
       assert result =~ ~s|<meta name="robots" content="noindex, nofollow">|
